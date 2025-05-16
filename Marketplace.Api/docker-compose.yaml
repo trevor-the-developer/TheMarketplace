@@ -1,0 +1,26 @@
+﻿# To start the container run docker-compose up (-d switch for silent mode) in a terminal console.
+version: '3'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+    # Marketplace.Api is the main application
+    mssql:
+        container_name: marketplace-db
+        hostname: marketplace-db
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        environment:
+            ACCEPT_EULA: 'Y'
+            MSSQL_SA_PASSWORD: 'P@ssw0rd!'   # change this to your secure password
+            MSSQL_DATA_DIR: /var/opt/mssql/data
+            MSSQL_PID: 'developer'
+            MSSQL_TCP_PORT: 1433
+        ports:
+            - "1433:1433"
+        volumes:
+            - ./data:/var/opt/mssql/data
+            - ./log:/var/opt/mssql/log
+            - ./secrets:/var/opt/mssq/secrets
+             
