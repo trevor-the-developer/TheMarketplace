@@ -82,7 +82,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         public async Task<ConfirmEmailResponse> Handle(ConfirmEmailRequest command,
             UserManager<ApplicationUser> userManager, Logger<RegisterHandler> logger, MarketplaceDbContext dbContext)
         {
-            
+            return new ConfirmEmailResponse();
         }
 
         private static async Task<IdentityRole> CreateRoleAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger,
