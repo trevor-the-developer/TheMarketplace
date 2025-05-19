@@ -14,6 +14,8 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         private const string RegistrationSuccessfulForUser = "Registration successful for user";
         private const string RegistrationUnsuccessfulForUser = "Registration unsuccessful for user";
         private const string RegistrationFailed = "Registration failed";
+        private const string RegistrationStepTwoSuccessful = "Registration step two successful";
+        private const string RegistrationStepTwoFailed = "Registration step two failed";
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, UserManager<ApplicationUser> userManager,
@@ -80,9 +82,112 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
         [Transactional]
         public async Task<ConfirmEmailResponse> Handle(ConfirmEmailRequest command,
-            UserManager<ApplicationUser> userManager, Logger<RegisterHandler> logger, MarketplaceDbContext dbContext)
+            UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
         {
-            return new ConfirmEmailResponse();
+            ArgumentNullException.ThrowIfNull(command, nameof(command));
+            ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
+            ArgumentNullException.ThrowIfNull(command.Token, nameof(command.Token));
+
+            logger.LogInformation(ApiConstants.ConfirmEmail);
+
+            var user = await userManager.FindByIdAsync(command.UserId);
+            
+            if (user == null)
+            {
+                logger.LogError(AuthConstants.UserDoesntExist);
+                return new ConfirmEmailResponse
+                {
+                    ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status404NotFound.ToString(),
+                        StatusCode: StatusCodes.Status404NotFound,
+                        ErrorMessage: AuthConstants.UserDoesntExist,
+                        StackTrace: null)
+                };
+            }
+
+            var result = await userManager.ConfirmEmailAsync(user, command.Token);
+            
+            if (!result.Succeeded)
+            {
+                logger.LogError("Email confirmation failed for user {UserId}", command.UserId);
+                return new ConfirmEmailResponse
+                {
+                    ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                        StatusCode: StatusCodes.Status400BadRequest,
+                        ErrorMessage: "Email confirmation failed",
+                        StackTrace: null)
+                };
+            }
+
+            logger.LogInformation("Email confirmed for user {UserId}", command.UserId);
+            
+            return new ConfirmEmailResponse
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                ConfirmationCode = "EmailConfirmed"
+            };
+        }
+        
+        [Transactional]
+        public async Task<RegisterStepTwoResponse> Handle(RegisterStepTwoRequest command,
+            UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
+        {
+            ArgumentNullException.ThrowIfNull(command, nameof(command));
+            ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
+            ArgumentNullException.ThrowIfNull(command.Email, nameof(command.Email));
+            ArgumentNullException.ThrowIfNull(command.Token, nameof(command.Token));
+            
+            logger.LogInformation("Registration step two handler called for user {UserId}", command.UserId);
+            
+            var user = await userManager.FindByIdAsync(command.UserId);
+            
+            if (user == null)
+            {
+                logger.LogError(AuthConstants.UserDoesntExist);
+                return new RegisterStepTwoResponse
+                {
+                    RegistrationStepTwo = false,
+                    ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status404NotFound.ToString(),
+                        StatusCode: StatusCodes.Status404NotFound,
+                        ErrorMessage: AuthConstants.UserDoesntExist,
+                        StackTrace: null)
+                };
+            }
+            
+            // Verify the email confirmation token
+            var result = await userManager.ConfirmEmailAsync(user, command.Token);
+            
+            if (!result.Succeeded)
+            {
+                logger.LogError(RegistrationStepTwoFailed);
+                return new RegisterStepTwoResponse
+                {
+                    RegistrationStepTwo = false,
+                    ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                        StatusCode: StatusCodes.Status400BadRequest,
+                        ErrorMessage: "Email confirmation failed",
+                        StackTrace: null),
+                    Errors = result.Errors
+                };
+            }
+            
+            // Update user's email confirmation status
+            user.EmailConfirmed = true;
+            await userManager.UpdateAsync(user);
+            await dbContext.SaveChangesAsync();
+            
+            logger.LogInformation(RegistrationStepTwoSuccessful);
+            
+            return new RegisterStepTwoResponse
+            {
+                UserId = user.Id,
+                RegistrationStepTwo = true,
+                ConfirmationCode = "RegistrationComplete"
+            };
         }
 
         private static async Task<IdentityRole> CreateRoleAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger,
@@ -129,16 +234,15 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             try
             {
                 cnfEmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                
+                // Generate the confirmation email link
+                registrationResponse.ConfirmationEmailLink = urlHelper.Action("ConfirmEmail", "Authentication",
+                    new { userId = user.Id, token = cnfEmToken, email = user.Email }, "https");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 throw;
-            }
-            finally
-            {
-                registrationResponse.ConfirmationEmailLink = urlHelper.Action("ConfirmEmail", "Authentication",
-                    new { userId = user.Id, token = cnfEmToken }, "Scheme" );
             }
         }
 
