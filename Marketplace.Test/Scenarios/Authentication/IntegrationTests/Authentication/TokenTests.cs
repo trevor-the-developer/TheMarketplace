@@ -46,10 +46,10 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
         Assert.Null(result.ApiError);
     }
 
-    [Fact]
-    public async Task TokenRevokeRequest()
-    {
-    }
+    // [Fact]
+    // public async Task TokenRevokeRequest()
+    // {
+    // }
 
     [Fact]
     public async Task Bad_RefreshToken_RefreshRequest()

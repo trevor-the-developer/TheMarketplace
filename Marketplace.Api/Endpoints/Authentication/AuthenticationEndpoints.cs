@@ -4,6 +4,7 @@ using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Wolverine;
 
@@ -70,7 +71,7 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status500InternalServerError);
             
             // Email confirmation endpoint
-            routes.MapGet(ApiConstants.ApiSlashConfirmEmail, async (ConfirmEmailRequest command, IMessageBus bus) =>
+            routes.MapGet(ApiConstants.ApiSlashConfirmEmail, async ([AsParameters] ConfirmEmailRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<ConfirmEmailResponse>(command);
                 
@@ -98,7 +99,7 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status500InternalServerError);
             
             // Registration step two endpoint
-            routes.MapPost("/api/register/step-two", async (RegisterStepTwoRequest command, IMessageBus bus) =>
+            routes.MapPost(ApiConstants.ApiSlashRegisterStepTwo, async ([FromBody] RegisterStepTwoRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<RegisterStepTwoResponse>(command);
                 

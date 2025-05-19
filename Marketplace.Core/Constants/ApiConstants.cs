@@ -15,6 +15,7 @@ public static class ApiConstants
     // endpoints
     public const string ApiSlashLogin = "/api/login/";
     public const string ApiSlashRegister = "/api/register/";
+    public const string ApiSlashRegisterStepTwo = "/api/register/step-two";
     public const string ApiSlashConfirmEmail = "api/confirm_email/";
     public const string ApiRefresh = "/api/refresh/";
     public const string ApiSlashLogout = "/api/logout/";

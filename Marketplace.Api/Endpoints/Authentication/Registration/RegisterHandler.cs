@@ -57,11 +57,18 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             if (result.Succeeded)
             {
                 user.EmailConfirmed = false;
-                var cnfEmToken = string.Empty;
 
                 await AddUserToRoleAsync(userManager, logger, dbContext, user, role);
 
-                await GenerateEmailConfirmationTokenAsync(userManager, urlHelper, cnfEmToken, user, registrationResponse);
+                if (urlHelper != null)
+                {
+                    await GenerateEmailConfirmationTokenAsync(userManager, urlHelper, user, registrationResponse);
+                }
+                else
+                {
+                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    registrationResponse.ConfirmationEmailLink = $"/api/confirm_email?userId={user.Id}&token={token}&email={user.Email}";
+                }
             }
             else
             {
@@ -213,6 +220,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                 if (deleteUserResult.Succeeded)
                 {
                     logger.LogError(AuthConstants.ErrorCreatingRoleUser);
+                    logger.LogError(ex.Message);
                 }
                 else
                 {
@@ -229,11 +237,11 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         }
 
         private static async Task GenerateEmailConfirmationTokenAsync(UserManager<ApplicationUser> userManager, IUrlHelper urlHelper,
-            string cnfEmToken, ApplicationUser user, RegisterStepOneResponse registrationResponse)
+            ApplicationUser user, RegisterStepOneResponse registrationResponse)
         {
             try
             {
-                cnfEmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                var cnfEmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 
                 // Generate the confirmation email link
                 registrationResponse.ConfirmationEmailLink = urlHelper.Action("ConfirmEmail", "Authentication",
@@ -257,6 +265,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             catch (Exception ex)
             {
                 logger.LogInformation($"{RegistrationUnsuccessfulForUser} {user.UserName}");
+                logger.LogError(ex.Message);
                 await userManager.DeleteAsync(user);
             }
             finally
