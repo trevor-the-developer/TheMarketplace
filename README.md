@@ -1,48 +1,208 @@
-# Marketplace web app backend solution.
-## Technology & features:
-- .NET 8 Minimal API
-- [WolverineFx](https://github.com/JasperFx/wolverine)
-- Entity Framework Core 8
-- AutoMapper
-- Configuration Pattern
-- Serilog
-- [akeyless.io](https://akeyless.io)
-- Alba Integration Testing
-- xUnit Unit Testing
-- Docker
+# TheMarketplace - Community Trading Platform
 
-### Description:
-The Marketplace API provides CRUD operations for community based buy/sell/trade web application powered by Vue 3 for Triad employees only.
+## Overview
 
-#### Milestones
-**MVP 1** Basic listing, browsing, merchant operations (buy/sell/trade/swap), user login and basic profile management, 
-listing operations (create listing, add cards, create products etc and same for edit and delete where applicable).
+TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
 
-**MVP 2** Companion mobile application written in [flutter/dart](https://flutter.dev/) language cross platform mobile app development platform from Google.
-- Smart search
-- Newsletter subscription
+## Current Architecture
 
-**MVP 3** AI integration and analytics
-- Reporting
-- Dashboard(s)
-- Metric(s)
+### Core Components
+- **Listings**: Top-level collections that organise trading items
+- **Cards**: Visual containers within listings that group related products
+- **Products**: Individual items/services with detailed specifications
+- **Product Details**: Extended information including media and documents
+- **User Management**: JWT-based authentication with role-based access
 
-**MVP 4** Improvements & more community features
+### Technology Stack
+- **.NET 8** - Modern C# runtime with minimal API architecture
+- **[WolverineFx](https://github.com/JasperFx/wolverine)** - Message bus for CQRS pattern implementation
+- **Entity Framework Core 8** - Data access layer with Code First approach
+- **ASP.NET Core Identity** - User authentication and authorisation
+- **JWT Authentication** - Secure token-based authentication
+- **SQL Server 2022** - Primary database (containerised)
+- **AutoMapper** - Object-to-object mapping
+- **Swagger/OpenAPI** - API documentation and testing
+- **xUnit & Alba** - Unit and integration testing framework
+- **Docker & Docker Compose** - Containerisation for development
 
-### Source code:
-Navigate to each individual project README.md for more details and where required README.md files have been provided in folders/sub-folders to describe intent for a particular module or component etc.
+## Current Implementation Status
 
-### Docker
-There is a **docker-compose.yaml** file in this repo feel free to change the default password to your preference and use the command **docker compose up** (**-d** for silent mode) to start the container (make sure **Docker** for Windows is running).
-The **MSSQL 2022 server** instance is used by the Marketplace.Api data project where migrations are stored and execute against this database instance (ensure any running instances of SQL server have been shutdown first).
-To navigate to the server and use Sql Server Management Studio (SSMS) use the following server address: **127.0.0.1,1433** and set the authentication mode to SQL Server Authentication entering your password for the user **sa**.
-Ensure you are able to navigate to the **Databases** root folder with the sa account.
+### ✅ Completed Features
+- **Authentication System**
+  - User registration with email confirmation
+  - JWT token-based login/logout
+  - Token refresh and revocation
+  - Role-based authorisation
+  
+- **Core Data Models**
+  - Complete entity relationship mapping
+  - Base entity with audit fields
+  - User profiles and roles
+  - Media and document support
+  
+- **API Endpoints**
+  - Authentication endpoints (login, register, token management)
+  - Listing retrieval endpoints (all, by ID, user-specific)
+  - Card retrieval endpoints (all, by ID, filtered)
+  - Swagger documentation
+  
+- **Infrastructure**
+  - Docker containerisation for SQL Server
+  - EF Core migrations setup
+  - Comprehensive test structure
+  - CORS configuration
+  
+### 🚧 In Progress
+- Full CRUD operations for listings and cards
+- Product management endpoints
+- File upload and media handling
+- Search functionality
 
-You are now ready to use and develop against this database server it is recommened to create and manage your database through Visual Studio 2022's Package-Manager-Console (PMC) terminal see [EF Core Migrations guide](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli).
+## Getting Started
 
-### Entity Framework Core Migrations
-Run the following command in a **Package Manager Console** (PMC): ```Add-Migrations InitialCreate```
-This should create some files in the **Migrations** folder in the Data project.
-Run the following command in PMC again to create and **Configure** the database: ```Update-Database -Verbose```
-This seeds two **IdentityUser** based users into the Identity AspNet tables.
-- - - further steps to follow - - - 
+### Prerequisites
+- .NET 8 SDK
+- Docker Desktop
+- SQL Server Management Studio (optional)
+
+### Quick Start
+
+1. **Start the database**
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Run migrations**
+   ```bash
+   dotnet ef database update --project Marketplace.Data --startup-project Marketplace.Api
+   ```
+
+3. **Start the API**
+   ```bash
+   dotnet run --project Marketplace.Api
+   ```
+
+4. **Access Swagger UI**
+   - Navigate to: `https://localhost:5001/swagger`
+   - Database connection: `Server=127.0.0.1,1433;User=sa;Password=P@ssw0rd!`
+
+### Development Setup
+
+The solution follows a clean architecture pattern with four main projects:
+
+- **Marketplace.Api** - Web API layer with endpoints and configuration
+- **Marketplace.Core** - Business logic and shared utilities
+- **Marketplace.Data** - Data access layer with EF Core
+- **Marketplace.Test** - Comprehensive unit and integration tests
+
+## Future Roadmap
+
+### Phase 1: Core Marketplace Features (Q1 2024)
+- **Priority: High**
+- Complete CRUD operations for all entities
+- File upload and media management
+- Basic search and filtering
+- User profile management
+- Email notifications system
+- Performance optimisation
+
+### Phase 2: Enhanced User Experience (Q2 2024)
+- **Priority: High**
+- Advanced search with filters and sorting
+- Real-time notifications (SignalR)
+- Messaging system between users
+- Transaction history tracking
+- Wishlist/favorites functionality
+- Mobile-responsive web interface
+
+### Phase 3: Business Features (Q3 2024)
+- **Priority: Medium**
+- Payment integration (Stripe/PayPal)
+- Rating and review system
+- Escrow service for secure transactions
+- Admin dashboard for platform management
+- Reporting and analytics
+- API rate limiting and monitoring
+
+### Phase 4: Advanced Features (Q4 2024)
+- **Priority: Medium**
+- AI-powered product recommendations
+- Automated content moderation
+- Multi-language support
+- Mobile app (React Native/Flutter)
+- Advanced analytics dashboard
+- Integration with external marketplaces
+
+### Phase 5: Scale & Optimise (2025)
+- **Priority: Low**
+- Microservices architecture migration
+- Redis caching implementation
+- CDN for media delivery
+- Advanced security features (2FA, audit logging)
+- Machine learning for fraud detection
+- White-label solution for other organisations
+
+## Development Guidelines
+
+### Code Organisation
+- Follow SOLID principles and clean architecture
+- Use the mediator pattern via WolverineFx
+- Implement comprehensive unit and integration tests
+- Maintain API documentation via Swagger
+- Follow conventional commits for version control
+
+### Security Considerations
+- JWT tokens with refresh mechanism
+- Input validation and sanitisation
+- SQL injection prevention via EF Core
+- CORS configuration for frontend integration
+- Role-based access control
+
+### Performance Guidelines
+- Use async/await for all database operations
+- Implement pagination for large data sets
+- Consider caching strategies for frequently accessed data
+- Optimise database queries with proper indexing
+
+## Contributing
+
+For detailed development instructions, navigate to individual project README.md files:
+- `Marketplace.Api/README.md` - API development guidelines
+- `Marketplace.Data/README.md` - Database and migration instructions
+- `Marketplace.Test/README.md` - Testing strategies and examples
+
+## Docker Development
+
+The project includes Docker support for the SQL Server database:
+
+```yaml
+# Start database container
+docker compose up -d
+
+# Stop and remove containers
+docker compose down
+
+# View logs
+docker compose logs -f
+```
+
+**Database Connection Details:**
+- Server: `127.0.0.1,1433`
+- Authentication: SQL Server Authentication
+- Username: `sa`
+- Password: `P@ssw0rd!` (change in docker-compose.yaml)
+
+## Testing
+
+The solution includes comprehensive testing:
+
+```bash
+# Run all tests
+dotnet test
+
+# Run with coverage
+dotnet test --collect:"XPlat Code Coverage"
+
+# Integration tests
+dotnet test --filter "Category=Integration"
+```
