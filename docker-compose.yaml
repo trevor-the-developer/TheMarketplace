@@ -8,13 +8,7 @@ services:
         environment:
             ACCEPT_EULA: 'Y'
             MSSQL_SA_PASSWORD: 'P@ssw0rd!'   # change this to your secure password
-            MSSQL_DATA_DIR: /var/opt/mssql/data
             MSSQL_PID: 'developer'
-            MSSQL_TCP_PORT: 1433
         ports:
             - "1433:1433"
-        volumes:
-            - ./data:/var/opt/mssql/data
-            - ./log:/var/opt/mssql/log
-            - ./secrets:/var/opt/mssq/secrets
              

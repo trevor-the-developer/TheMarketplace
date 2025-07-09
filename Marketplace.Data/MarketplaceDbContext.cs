@@ -8,6 +8,13 @@ namespace Marketplace.Data
     public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options)
         : IdentityDbContext<ApplicationUser>(options)
     {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.ConfigureWarnings(warnings => 
+                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        }
+
         protected override void OnModelCreating(ModelBuilder modalBuilder)
         {
             base.OnModelCreating(modalBuilder);

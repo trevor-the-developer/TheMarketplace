@@ -51,13 +51,7 @@ builder.Host.UseWolverine(opts =>
 
 #region DbContext
 
-// This is weirdly important! Using Singleton scoping
-// of the options allows Wolverine + Lamar to significantly
-// optimize the runtime pipeline of the handlers that
-// use this DbContext types
-builder.Services.AddDbContext<MarketplaceDbContext>(options =>
-    options.UseSqlServer(connectionString),
-    ServiceLifetime.Singleton);
+// DbContext is already registered with Wolverine integration above
 
 #endregion
 
@@ -200,8 +194,14 @@ app.UseCors("AllowAll");
 
 #endregion
 
-// Ensure the database is created
-await app.Services.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
+// Ensure the database is created (skip in testing environment)
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        await scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
+    }
+}
 
 #region Endpoints
 

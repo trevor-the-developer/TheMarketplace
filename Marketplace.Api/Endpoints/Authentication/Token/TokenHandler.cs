@@ -79,10 +79,10 @@ namespace Marketplace.Api.Endpoints.Authentication.Token
             TokenValidationParameters tokenValidationParameters,
             ILogger<ITokenService> logger, IConfiguration configuration)
         {
-            ArgumentNullException.ThrowIfNull(nameof(command));
-            ArgumentNullException.ThrowIfNull(nameof(userManager));
-            ArgumentNullException.ThrowIfNull(nameof(logger));
-            ArgumentNullException.ThrowIfNull(nameof(configuration));
+            ArgumentNullException.ThrowIfNull(command, nameof(command));
+            ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
+            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+            ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
             logger.LogInformation(AuthConstants.TokenRevokeRequest);
 
