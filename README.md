@@ -2,7 +2,7 @@
 
 ## Overview
 
-TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
+TheMarketplace is a .NET 9 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
 
 ## Current Architecture
 
@@ -14,11 +14,11 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 - **User Management**: JWT-based authentication with role-based access
 
 ### Technology Stack
-- **.NET 8** - Modern C# runtime with minimal API architecture
+- **.NET 9** - Modern C# runtime with minimal API architecture
 - **[WolverineFx](https://github.com/JasperFx/wolverine)** - Message bus for CQRS pattern implementation
-- **Entity Framework Core 8** - Data access layer with Code First approach
+- **Entity Framework Core 9** - Data access layer with Code First approach
 - **ASP.NET Core Identity** - User authentication and authorisation
-- **JWT Authentication** - Secure token-based authentication
+- **JWT Authentication** - Secure token-based authentication with refresh tokens
 - **SQL Server 2022** - Primary database (containerised)
 - **AutoMapper** - Object-to-object mapping
 - **Swagger/OpenAPI** - API documentation and testing
@@ -31,7 +31,7 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 - **Authentication System**
   - User registration with email confirmation
   - JWT token-based login/logout
-  - Token refresh and revocation
+  - Token refresh and revocation with proper validation
   - Role-based authorisation
   
 - **Core Data Models**
@@ -47,10 +47,12 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
   - Swagger documentation
   
 - **Infrastructure**
-  - Docker containerisation for SQL Server
-  - EF Core migrations setup
-  - Comprehensive test structure
+  - Docker containerisation for SQL Server with proper volume management
+  - EF Core migrations setup with .NET 9 compatibility
+  - Automated database initialisation for tests
+  - Comprehensive test structure with 55 passing tests
   - CORS configuration
+  - Proper dependency injection configuration
   
 ### 🚧 In Progress
 - Full CRUD operations for listings and cards
@@ -61,7 +63,7 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 ## Getting Started
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 9 SDK
 - Docker Desktop
 - SQL Server Management Studio (optional)
 
@@ -97,7 +99,7 @@ The solution follows a clean architecture pattern with four main projects:
 
 ## Future Roadmap
 
-### Phase 1: Core Marketplace Features (Q1 2024)
+### Phase 1: Core Marketplace Features (Q2 2025)
 - **Priority: High**
 - Complete CRUD operations for all entities
 - File upload and media management
@@ -106,7 +108,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Email notifications system
 - Performance optimisation
 
-### Phase 2: Enhanced User Experience (Q2 2024)
+### Phase 2: Enhanced User Experience (Q3 2025)
 - **Priority: High**
 - Advanced search with filters and sorting
 - Real-time notifications (SignalR)
@@ -115,7 +117,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Wishlist/favorites functionality
 - Mobile-responsive web interface
 
-### Phase 3: Business Features (Q3 2024)
+### Phase 3: Business Features (Q4 2025)
 - **Priority: Medium**
 - Payment integration (Stripe/PayPal)
 - Rating and review system
@@ -124,7 +126,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Reporting and analytics
 - API rate limiting and monitoring
 
-### Phase 4: Advanced Features (Q4 2024)
+### Phase 4: Advanced Features (Q1 2026)
 - **Priority: Medium**
 - AI-powered product recommendations
 - Automated content moderation
@@ -133,7 +135,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Advanced analytics dashboard
 - Integration with external marketplaces
 
-### Phase 5: Scale & Optimise (2025)
+### Phase 5: Scale & Optimise (2026)
 - **Priority: Low**
 - Microservices architecture migration
 - Redis caching implementation
@@ -197,12 +199,18 @@ docker compose logs -f
 The solution includes comprehensive testing:
 
 ```bash
-# Run all tests
+# Run all tests (currently 55 passing tests)
 dotnet test
+
+# Run with verbose output
+dotnet test --verbosity normal
 
 # Run with coverage
 dotnet test --collect:"XPlat Code Coverage"
 
 # Integration tests
 dotnet test --filter "Category=Integration"
+
+# Run specific test project
+dotnet test Marketplace.Test
 ```
