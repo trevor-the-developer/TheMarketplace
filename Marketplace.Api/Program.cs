@@ -3,7 +3,7 @@ using Marketplace.Api.Endpoints.Authentication;
 using Marketplace.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorisation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +19,7 @@ using Wolverine.SqlServer;
 using Marketplace.Core.Security;
 using Marketplace.Core.Helpers;
 using Marketplace.Data.Entities;
+using Marketplace.Core.Services;
 
 #region Host builder setup
 
@@ -41,7 +42,7 @@ builder.Host.UseWolverine(opts =>
     opts.UseEntityFrameworkCoreTransactions();
     opts.Policies.AutoApplyTransactions();
 
-    // Optimizes Wolverine for usage as strictly a mediator tool.
+    // Optimises Wolverine for usage as strictly a mediator tool.
     // This completely disables all node persistence including the
     // inbox and outbox
     opts.Durability.Mode = DurabilityMode.MediatorOnly;
@@ -55,7 +56,7 @@ builder.Host.UseWolverine(opts =>
 
 #endregion
 
-#region Identity (Authentication and Authorization)
+#region Identity (Authentication and Authorisation)
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
@@ -171,6 +172,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Register TokenValidationParameters for dependency injection
 builder.Services.AddSingleton<TokenValidationParameters>(provider =>

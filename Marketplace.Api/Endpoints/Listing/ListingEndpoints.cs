@@ -9,6 +9,49 @@ public static class ListingEndpoints
 {
     public static void MapListingEndpoints(this IEndpointRouteBuilder routes)
     {
+        routes.MapPost("/api/listing/create", async (ListingCreate command, IMessageBus bus) =>
+        {
+            var response = await bus.InvokeAsync<ListingResponse>(command);
+            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.BadRequest();
+        })
+        .RequireAuthorization()
+        .WithTags("Listing")
+        .WithName("Create Listing")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status500InternalServerError);
+
+        routes.MapPut("/api/listing/update/{id}", async (int id, ListingUpdate command, IMessageBus bus) =>
+        {
+            if (id != command.Id)
+            {
+                return Results.BadRequest();
+            }
+
+            var response = await bus.InvokeAsync<ListingResponse>(command);
+            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.NotFound();
+        })
+        .RequireAuthorization()
+        .WithTags("Listing")
+        .WithName("Update Listing")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status500InternalServerError);
+
+        routes.MapDelete("/api/listing/delete/{id}", async (int id, IMessageBus bus) =>
+        {
+            await bus.InvokeAsync(new ListingDelete { Id = id });
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .WithTags("Listing")
+        .WithName("Delete Listing")
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status500InternalServerError);
         routes.MapPost("/api/get/listing/", async (ListingRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<ListingResponse>(command);
