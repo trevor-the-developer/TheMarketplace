@@ -20,7 +20,8 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
         });
 
         var result = await response.ReadAsJsonAsync<dynamic>();
-        Assert.Equal("New Card", (string)result?.Title);
+        Assert.NotNull(result);
+        Assert.Equal("New Card", (string)result.Title);
     }
 
     [Fact]
@@ -35,7 +36,8 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
         });
 
         var result = await response.ReadAsJsonAsync<dynamic>();
-        Assert.Equal("Updated Card", (string)result?.Title);
+        Assert.NotNull(result);
+        Assert.Equal("Updated Card", (string)result.Title);
     }
 
     [Fact]

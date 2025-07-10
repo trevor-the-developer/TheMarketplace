@@ -20,7 +20,8 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture)
         });
 
         var result = await response.ReadAsJsonAsync<dynamic>();
-        Assert.Equal("New Listing", (string)result?.Title);
+        Assert.NotNull(result);
+        Assert.Equal("New Listing", (string)result.Title);
     }
 
     [Fact]
@@ -35,7 +36,8 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture)
         });
 
         var result = await response.ReadAsJsonAsync<dynamic>();
-        Assert.Equal("Updated Listing", (string)result?.Title);
+        Assert.NotNull(result);
+        Assert.Equal("Updated Listing", (string)result.Title);
     }
 
     [Fact]

@@ -248,6 +248,7 @@ public class DatabaseTestFixture : IAsyncLifetime
         catch (Exception ex)
         {
             // If EF migrations fail, we'll try running them via dotnet ef command
+            Console.WriteLine($"EF migrations failed: {ex.Message}. Trying CLI approach...");
             await RunMigrationsViaCliAsync();
         }
     }

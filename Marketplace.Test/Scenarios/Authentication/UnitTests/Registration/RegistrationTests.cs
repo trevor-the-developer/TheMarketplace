@@ -311,7 +311,7 @@ public class RegistrationTests
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
             await registerHandler.Handle(
-                null! as ConfirmEmailRequest,
+                (ConfirmEmailRequest)null!,
                 mockUserManager.Object,
                 mockLogger.Object,
                 mockDbContext.Object);
@@ -412,7 +412,7 @@ public class RegistrationTests
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
             await registerHandler.Handle(
-                null! as RegisterStepTwoRequest,
+                (RegisterStepTwoRequest)null!,
                 mockUserManager.Object,
                 mockLogger.Object,
                 mockDbContext.Object);
