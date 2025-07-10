@@ -3,20 +3,33 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using Marketplace.Api.Endpoints.Card;
 using Marketplace.Test.Mocks;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Marketplace.Test.Scenarios.Cards.UnitTests;
 
-public class CardHandlerTests
+public class CardHandlerTests : IDisposable
 {
     private readonly Mock<ILogger<CardHandler>> _loggerMock;
     private readonly MockCurrentUserService _currentUserService;
     private readonly CardHandler _handler;
+    private readonly MarketplaceDbContext _dbContext;
 
     public CardHandlerTests()
     {
         _loggerMock = new Mock<ILogger<CardHandler>>();
         _currentUserService = new MockCurrentUserService();
         _handler = new CardHandler();
+        
+        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        _dbContext = new MarketplaceDbContext(options);
+    }
+    
+    public void Dispose()
+    {
+        _dbContext.Dispose();
     }
 
     [Fact]
@@ -32,7 +45,7 @@ public class CardHandlerTests
     }
 
     [Fact]
-    public void CreateCard_WithValidData_ReturnsCard()
+    public async Task CreateCard_WithValidData_ReturnsCard()
     {
         // Arrange
         var createCommand = new CardCreate
@@ -43,14 +56,16 @@ public class CardHandlerTests
         };
 
         // Act
-        // TODO: Implement when handler is available
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
 
         // Assert
-        Assert.True(true); // Placeholder
+        Assert.NotNull(response.Card);
+        Assert.Equal("Test Card", response.Card.Title);
+        Assert.Equal("Test Description", response.Card.Description);
     }
 
     [Fact]
-    public void UpdateCard_WithValidData_ReturnsUpdatedCard()
+    public async Task UpdateCard_WithValidData_ReturnsUpdatedCard()
     {
         // Arrange
         var updateCommand = new CardUpdate
@@ -61,22 +76,53 @@ public class CardHandlerTests
         };
 
         // Act
-        // TODO: Implement when handler is available
+        // First create a card to update
+        var existingCard = new Marketplace.Data.Entities.Card
+        {
+            Id = 1,
+            Title = "Original Card",
+            Description = "Original Description",
+            CreatedBy = "TestUser",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "TestUser", 
+            ModifiedDate = DateTime.UtcNow
+        };
+        _dbContext.Cards.Add(existingCard);
+        await _dbContext.SaveChangesAsync();
+        
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
 
         // Assert
-        Assert.True(true); // Placeholder
+        Assert.NotNull(response.Card);
+        Assert.Equal("Updated Card", response.Card.Title);
+        Assert.Equal("Updated Description", response.Card.Description);
     }
 
     [Fact]
-    public void DeleteCard_WithValidId_DeletesCard()
+    public async Task DeleteCard_WithValidId_DeletesCard()
     {
         // Arrange
         var deleteCommand = new CardDelete { Id = 1 };
 
         // Act
-        // TODO: Implement when handler is available
+        // First create a card to delete
+        var existingCard = new Marketplace.Data.Entities.Card
+        {
+            Id = 1,
+            Title = "Card to Delete",
+            Description = "Description",
+            CreatedBy = "TestUser",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "TestUser",
+            ModifiedDate = DateTime.UtcNow
+        };
+        _dbContext.Cards.Add(existingCard);
+        await _dbContext.SaveChangesAsync();
+        
+        await _handler.Handle(deleteCommand, _dbContext);
 
         // Assert
-        Assert.True(true); // Placeholder
+        var card = await _dbContext.Cards.FindAsync(deleteCommand.Id);
+        Assert.Null(card);
     }
 }

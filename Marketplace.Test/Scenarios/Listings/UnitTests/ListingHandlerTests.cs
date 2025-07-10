@@ -3,20 +3,33 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using Marketplace.Api.Endpoints.Listing;
 using Marketplace.Test.Mocks;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Marketplace.Test.Scenarios.Listings.UnitTests;
 
-public class ListingHandlerTests
+public class ListingHandlerTests : IDisposable
 {
     private readonly Mock<ILogger<ListingHandler>> _loggerMock;
     private readonly MockCurrentUserService _currentUserService;
     private readonly ListingHandler _handler;
+    private readonly MarketplaceDbContext _dbContext;
 
     public ListingHandlerTests()
     {
         _loggerMock = new Mock<ILogger<ListingHandler>>();
         _currentUserService = new MockCurrentUserService();
         _handler = new ListingHandler();
+        
+        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        _dbContext = new MarketplaceDbContext(options);
+    }
+    
+    public void Dispose()
+    {
+        _dbContext.Dispose();
     }
 
     [Fact]
@@ -32,7 +45,7 @@ public class ListingHandlerTests
     }
 
     [Fact]
-    public void CreateListing_WithValidData_ReturnsListing()
+    public async Task CreateListing_WithValidData_ReturnsListing()
     {
         // Arrange
         var createCommand = new ListingCreate
@@ -42,14 +55,16 @@ public class ListingHandlerTests
         };
 
         // Act
-        // TODO: Implement when database context is available for unit testing
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
 
         // Assert
-        Assert.True(true); // Placeholder
+        Assert.NotNull(response.Listing);
+        Assert.Equal("Test Listing", response.Listing.Title);
+        Assert.Equal("Test Description", response.Listing.Description);
     }
 
     [Fact]
-    public void UpdateListing_WithValidData_ReturnsUpdatedListing()
+    public async Task UpdateListing_WithValidData_ReturnsUpdatedListing()
     {
         // Arrange
         var updateCommand = new ListingUpdate
@@ -60,22 +75,53 @@ public class ListingHandlerTests
         };
 
         // Act
-        // TODO: Implement when database context is available for unit testing
+        // First create a listing to update
+        var existingListing = new Marketplace.Data.Entities.Listing
+        {
+            Id = 1,
+            Title = "Original Listing",
+            Description = "Original Description",
+            CreatedBy = "TestUser",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "TestUser",
+            ModifiedDate = DateTime.UtcNow
+        };
+        _dbContext.Listings.Add(existingListing);
+        await _dbContext.SaveChangesAsync();
+        
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
 
         // Assert
-        Assert.True(true); // Placeholder
+        Assert.NotNull(response.Listing);
+        Assert.Equal("Updated Listing", response.Listing.Title);
+        Assert.Equal("Updated Description", response.Listing.Description);
     }
 
     [Fact]
-    public void DeleteListing_WithValidId_DeletesListing()
+    public async Task DeleteListing_WithValidId_DeletesListing()
     {
         // Arrange
         var deleteCommand = new ListingDelete { Id = 1 };
 
         // Act
-        // TODO: Implement when database context is available for unit testing
+        // First create a listing to delete
+        var existingListing = new Marketplace.Data.Entities.Listing
+        {
+            Id = 1,
+            Title = "Listing to Delete",
+            Description = "Description",
+            CreatedBy = "TestUser",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "TestUser",
+            ModifiedDate = DateTime.UtcNow
+        };
+        _dbContext.Listings.Add(existingListing);
+        await _dbContext.SaveChangesAsync();
+        
+        await _handler.Handle(deleteCommand, _dbContext);
 
         // Assert
-        Assert.True(true); // Placeholder
+        var listing = await _dbContext.Listings.FindAsync(deleteCommand.Id);
+        Assert.Null(listing);
     }
 }
