@@ -172,6 +172,27 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+// Register TokenValidationParameters for dependency injection
+builder.Services.AddSingleton<TokenValidationParameters>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var secret = configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
+    
+    return new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = false, // For refresh tokens, we allow expired tokens
+        ValidateIssuerSigningKey = true,
+        ValidAudience = configuration["JwtSettings:Audience"],
+        ValidIssuer = configuration["JwtSettings:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+        NameClaimType = "name",
+        RoleClaimType = "role",
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
 #endregion
 
 #region App configuration
