@@ -12,7 +12,7 @@ public static class ListingEndpoints
         routes.MapPost("/api/listing/create", async (ListingCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ListingResponse>(command);
-            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.BadRequest();
+            return Results.Ok(response);
         })
         .RequireAuthorization()
         .WithTags("Listing")
@@ -30,7 +30,7 @@ public static class ListingEndpoints
             }
 
             var response = await bus.InvokeAsync<ListingResponse>(command);
-            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.NotFound();
+            return Results.Ok(response);
         })
         .RequireAuthorization()
         .WithTags("Listing")
@@ -59,7 +59,7 @@ public static class ListingEndpoints
                 return response switch
                 {
                     null => Results.Unauthorized(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()
@@ -77,7 +77,7 @@ public static class ListingEndpoints
                 return response switch
                 {
                     null => Results.Unauthorized(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()
@@ -95,7 +95,7 @@ public static class ListingEndpoints
                 return response switch
                 {
                     null => Results.Unauthorized(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()

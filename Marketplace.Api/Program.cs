@@ -20,6 +20,10 @@ using Marketplace.Core.Security;
 using Marketplace.Core.Helpers;
 using Marketplace.Data.Entities;
 using Marketplace.Core.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Http;
 
 #region Host builder setup
 
@@ -173,6 +177,27 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Add IUrlHelper support
+builder.Services.AddScoped<IUrlHelper>(factory =>
+{
+    var actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
+    var urlHelperFactory = factory.GetRequiredService<IUrlHelperFactory>();
+    var httpContextAccessor = factory.GetRequiredService<IHttpContextAccessor>();
+    
+    // Create ActionContext with HttpContext if available
+    var actionContext = actionContextAccessor.ActionContext;
+    if (actionContext == null || actionContext.HttpContext == null)
+    {
+        actionContext = new ActionContext
+        {
+            HttpContext = httpContextAccessor.HttpContext ?? new DefaultHttpContext()
+        };
+    }
+    
+    return urlHelperFactory.GetUrlHelper(actionContext);
+});
+builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
 // Register TokenValidationParameters for dependency injection
 builder.Services.AddSingleton<TokenValidationParameters>(provider =>

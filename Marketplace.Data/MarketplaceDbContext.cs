@@ -11,8 +11,9 @@ namespace Marketplace.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.ConfigureWarnings(warnings => 
-                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            // Note: PendingModelChangesWarning is only available in .NET 9.0+
+            // optionsBuilder.ConfigureWarnings(warnings => 
+            //     warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
 
         protected override void OnModelCreating(ModelBuilder modalBuilder)
@@ -24,6 +25,7 @@ namespace Marketplace.Data
             modalBuilder.ApplyConfiguration(new RoleConfiguration());
             modalBuilder.ApplyConfiguration(new UserConfiguration());
             modalBuilder.ApplyConfiguration(new UserRoleConfiguration());
+            // modalBuilder.ApplyConfiguration(new UserProfileConfiguration());
             
             // entity configurations
             modalBuilder.ApplyConfiguration(new MediaConfiguration());

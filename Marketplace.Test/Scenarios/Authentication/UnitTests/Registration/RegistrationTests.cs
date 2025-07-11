@@ -75,7 +75,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        var mockUrlHelper = new Mock<IUrlHelper>();
 
         var registerHandler = new RegisterHandler();
 
@@ -87,8 +86,7 @@ public class RegistrationTests
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-                mockDbContext.Object,
-                mockUrlHelper.Object);
+mockDbContext.Object);
         });
     }
 
@@ -103,7 +101,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        var mockUrlHelper = new Mock<IUrlHelper>();
 
         var registerHandler = new RegisterHandler();
 
@@ -113,8 +110,7 @@ public class RegistrationTests
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object,
-            mockUrlHelper.Object);
+mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -134,7 +130,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager(role);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        IUrlHelper? mockUrlHelper = null!; // Use null to trigger fallback URL generation
 
         var registerHandler = new RegisterHandler();
 
@@ -144,8 +139,7 @@ public class RegistrationTests
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object,
-            mockUrlHelper);
+mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -174,7 +168,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        var mockUrlHelper = new Mock<IUrlHelper>();
 
         var registerHandler = new RegisterHandler();
 
@@ -184,14 +177,13 @@ public class RegistrationTests
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object,
-            mockUrlHelper.Object);
+mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
         Assert.False(response.RegistrationStepOne);
         Assert.NotNull(response.ApiError);
-        Assert.Equal(500, response.ApiError.StatusCode);
+        Assert.Equal(400, response.ApiError.StatusCode);
         Assert.NotNull(response.Errors);
         Assert.Single(response.Errors);
         Assert.Equal("PasswordTooShort", response.Errors.First().Code);
@@ -207,7 +199,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager(null, new MockRoleManagerOptions { CreateAsyncFailed = true });
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        IUrlHelper? mockUrlHelper = null!; // Use null to trigger fallback URL generation
 
         var registerHandler = new RegisterHandler();
 
@@ -217,8 +208,7 @@ public class RegistrationTests
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object,
-            mockUrlHelper);
+mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -242,7 +232,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager(role);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        IUrlHelper? mockUrlHelper = null!; // Use null to trigger fallback URL generation
 
         var registerHandler = new RegisterHandler();
 
@@ -252,8 +241,7 @@ public class RegistrationTests
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object,
-            mockUrlHelper);
+mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -277,7 +265,6 @@ public class RegistrationTests
         var mockRoleManager = new EnhancedMockRoleManager(role);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
-        var mockUrlHelper = new Mock<IUrlHelper>();
 
         var registerHandler = new RegisterHandler();
 
@@ -289,8 +276,7 @@ public class RegistrationTests
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-                mockDbContext.Object,
-                mockUrlHelper.Object);
+mockDbContext.Object);
         });
     }
 

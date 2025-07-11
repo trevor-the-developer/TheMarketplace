@@ -10,7 +10,7 @@ public static class CardEndpoints
         routes.MapPost("/api/card/create", async (CardCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<CardResponse>(command);
-            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.BadRequest();
+            return Results.Ok(response);
         })
         .RequireAuthorization()
         .WithTags("Card")
@@ -28,7 +28,7 @@ public static class CardEndpoints
             }
 
             var response = await bus.InvokeAsync<CardResponse>(command);
-            return response != null ? Results.Ok(JsonConvert.SerializeObject(response)) : Results.NotFound();
+            return Results.Ok(response);
         })
         .RequireAuthorization()
         .WithTags("Card")
@@ -57,7 +57,7 @@ public static class CardEndpoints
                 return response switch
                 {
                     null => Results.NotFound(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()
@@ -76,7 +76,7 @@ public static class CardEndpoints
                 return response switch
                 {
                     null => Results.NotFound(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()
@@ -95,7 +95,7 @@ public static class CardEndpoints
                 return response switch
                 {
                     null => Results.NotFound(),
-                    _ => Results.Ok(JsonConvert.SerializeObject(response))
+                    _ => Results.Ok(response)
                 };
             })
             .RequireAuthorization()

@@ -53,15 +53,19 @@ namespace Marketplace.Api.Endpoints.Authentication
 
                 if(response.ApiError != null)
                 {
-                    return Results.Problem(response.ApiError?.ErrorMessage);
+                    return Results.Problem(
+                        detail: response.ApiError?.ErrorMessage, 
+                        statusCode: response.ApiError?.StatusCode,
+                        type: response.ApiError?.HttpStatusCode,
+                        title: "Registration endpoint.");
                 }
 
                 if (response.Errors!.Any())
                 {
-                    return Results.Problem(JsonConvert.SerializeObject(response.Errors));
+                    return Results.BadRequest(new { errors = response.Errors });
                 }
 
-                return Results.Ok(JsonConvert.SerializeObject(response));
+                return Results.Ok(response);
             })
             .AllowAnonymous()
             .WithTags(ApiConstants.Authentication)
@@ -114,7 +118,7 @@ namespace Marketplace.Api.Endpoints.Authentication
 
                 if (response.RegistrationStepTwo.HasValue && response.RegistrationStepTwo.Value)
                 {
-                    return Results.Ok(JsonConvert.SerializeObject(response));
+                    return Results.Ok(response);
                 }
 
                 return Results.UnprocessableEntity(response);
@@ -150,7 +154,7 @@ namespace Marketplace.Api.Endpoints.Authentication
                 }
                 else
                 {
-                    return Results.Ok(JsonConvert.SerializeObject(response));
+                    return Results.Ok(response);
                 }
             })
             .RequireAuthorization()
@@ -175,7 +179,7 @@ namespace Marketplace.Api.Endpoints.Authentication
                     return Results.Problem(response.ApiError?.ErrorMessage);
                 }
 
-                return Results.Ok(JsonConvert.SerializeObject(response));
+                return Results.Ok(response);
             })
             .WithTags(ApiConstants.Authentication)
             .WithName(ApiConstants.Revoke)

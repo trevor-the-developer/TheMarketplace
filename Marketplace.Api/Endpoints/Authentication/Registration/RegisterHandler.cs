@@ -19,8 +19,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext,
-            IUrlHelper urlHelper)
+            RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
 
@@ -36,7 +35,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                     ApiError = new Core.ApiError(
                         HttpStatusCode: StatusCodes.Status500InternalServerError.ToString(),
                         StatusCode: StatusCodes.Status500InternalServerError,
-                        ErrorMessage: AuthConstants.RevokeFailed,
+                        ErrorMessage: AuthConstants.UserAlreadyExists,
                         StackTrace: null)
                 };
             }
@@ -53,30 +52,23 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
             // if succeeded ensure the role is created and if that fails make sure
             // the user is deleted so it doesn't cause a duplicate user validation error
-            // TODO: remove/move this comment block to the lesson guide for this area.
             if (result.Succeeded)
             {
                 user.EmailConfirmed = false;
 
                 await AddUserToRoleAsync(userManager, logger, dbContext, user, role);
 
-                if (urlHelper != null)
-                {
-                    await GenerateEmailConfirmationTokenAsync(userManager, urlHelper, user, registrationResponse);
-                }
-                else
-                {
-                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    registrationResponse.ConfirmationEmailLink = $"/api/confirm_email?userId={user.Id}&token={token}&email={user.Email}";
-                }
+                // Generate email confirmation token and simple URL
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                registrationResponse.ConfirmationEmailLink = $"/api/confirm_email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
             }
             else
             {
                 logger.LogError(RegistrationFailed);
                 registrationResponse.ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status500InternalServerError.ToString(),
-                    StatusCode: StatusCodes.Status500InternalServerError,
-                    ErrorMessage: AuthConstants.RevokeFailed,
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: AuthConstants.RegistrationFailed,
                     StackTrace: null);
             }
 
@@ -236,23 +228,6 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             return role = role ?? new IdentityRole(AuthConstants.UserRole);
         }
 
-        private static async Task GenerateEmailConfirmationTokenAsync(UserManager<ApplicationUser> userManager, IUrlHelper urlHelper,
-            ApplicationUser user, RegisterStepOneResponse registrationResponse)
-        {
-            try
-            {
-                var cnfEmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                
-                // Generate the confirmation email link
-                registrationResponse.ConfirmationEmailLink = urlHelper.Action("ConfirmEmail", "Authentication",
-                    new { userId = user.Id, token = cnfEmToken, email = user.Email }, "https");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
-            }
-        }
 
         private static async Task AddUserToRoleAsync(UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext,
             ApplicationUser user, IdentityRole role)

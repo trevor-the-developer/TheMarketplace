@@ -236,6 +236,7 @@ public class DatabaseTestFixture : IAsyncLifetime
             var context = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
 
             // Ensure database is created and migrated
+            await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
             
             // Apply any pending migrations

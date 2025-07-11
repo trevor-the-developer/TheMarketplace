@@ -109,9 +109,8 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
 
     private static async Task<TokenResponse?> GetTokenResponse(IScenarioResult response)
     {
-        var jsonResult = await JsonHelper.ReadAsJsonAsync(response);
-        var unescapedJson = JsonConvert.DeserializeObject<string>(jsonResult);
-        var result = JsonConvert.DeserializeObject<TokenResponse>(unescapedJson!);
+        var jsonString = await response.ReadAsTextAsync();
+        var result = JsonConvert.DeserializeObject<TokenResponse>(jsonString);
         return result;
     }
 
@@ -122,11 +121,13 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
             _.Post
                 .Json(new { Email = "admin@localhost", Password = "P@ssw0rd!" }, JsonStyle.MinimalApi)
                 .ToUrl(ApiConstants.ApiSlashLogin);
+            _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
         Assert.NotNull(loginResponse);
         Assert.IsType<ScenarioResult>(loginResponse);
-        var loginResult = await loginResponse.ReadAsJsonAsync<LoginResponse>();
+        var jsonString = await loginResponse.ReadAsTextAsync();
+        var loginResult = JsonConvert.DeserializeObject<LoginResponse>(jsonString);
         Assert.True(loginResult?.Succeeded);
         Assert.NotNull(loginResult?.SecurityToken);
         Assert.NotNull(loginResult.Expiration);

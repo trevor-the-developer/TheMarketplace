@@ -14,7 +14,7 @@ namespace Marketplace.Data.Configurations
             builder.HasOne(u => u.UserProfile)
                 .WithOne(up => up.ApplicationUser)
                 .HasForeignKey<UserProfile>(up => up.ApplicationUserId)
-                .IsRequired();
+                .IsRequired(false);
             builder.Property(u => u.RefreshTokenExpiry).IsRequired();
             builder.Property(u => u.ApplicationUserId).IsRequired();
             builder.Property(u => u.DateOfBirth).IsRequired(false);
@@ -26,6 +26,7 @@ namespace Marketplace.Data.Configurations
                 new ApplicationUser
                 {
                     Id = "a5ac5ebb-5f11-4363-a58d-4362d8ff6863",
+                    ApplicationUserId = 1,
                     Email = "admin@localhost",
                     NormalizedEmail = "ADMIN@LOCALHOST",
                     NormalizedUserName = "ADMIN@LOCALHOST",
@@ -34,11 +35,13 @@ namespace Marketplace.Data.Configurations
                     LastName = "Administrator",
                     PasswordHash = hasher.HashPassword(new ApplicationUser() { UserName = "Admin" }, "P@ssw0rd!"),
                     EmailConfirmed = true,
-                    Role = Role.Adminstrator
+                    Role = Role.Adminstrator,
+                    RefreshTokenExpiry = new DateTime(2025, 12, 31)
                 },
                 new ApplicationUser
                 {
                     Id = "69a38a69-e24d-4c7f-bdf2-c7bc2222cbe7",
+                    ApplicationUserId = 2,
                     Email = "demouser@localhost",
                     NormalizedEmail = "DEMOUSER@LOCALHOST",
                     NormalizedUserName = "DEMOUSER@LOCALHOST",
@@ -47,7 +50,8 @@ namespace Marketplace.Data.Configurations
                     LastName = "User",
                     PasswordHash = hasher.HashPassword(new ApplicationUser() { UserName = "DemoUser1" }, "P@ssword1"),
                     EmailConfirmed = true,
-                    Role = Role.User
+                    Role = Role.User,
+                    RefreshTokenExpiry = new DateTime(2025, 12, 31)
                 }
             );
         }

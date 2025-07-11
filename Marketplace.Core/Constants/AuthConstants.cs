@@ -15,6 +15,8 @@ public static class AuthConstants
     public const string LoginSucceeded = "Login succeeded";
     public const string LoginFailed = "Login failed";
     public const string Unauthorised = "Unauthorised";
+    public const string UserAlreadyExists = "User already exists";
+    public const string RegistrationFailed = "Registration failed";
     
     // Jwt
     public const string RevokeFailed = "Revoke failed";
