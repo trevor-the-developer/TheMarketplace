@@ -5,7 +5,7 @@ using Moq;
 namespace Marketplace.Test.Mocks;
 
 /// <summary>
-/// Enhanced MockRoleManager with comprehensive options for registration testing
+///     Enhanced MockRoleManager with comprehensive options for registration testing
 /// </summary>
 public class EnhancedMockRoleManager : Mock<RoleManager<IdentityRole>>
 {
@@ -29,6 +29,8 @@ public class EnhancedMockRoleManager : Mock<RoleManager<IdentityRole>>
         SetupFindByNameAsync(role, options);
         SetupFindByIdAsync(role, options);
     }
+
+    public override RoleManager<IdentityRole> Object => _roleManager.Object;
 
     private void SetupCreateAsync(MockRoleManagerOptions options)
     {
@@ -72,44 +74,30 @@ public class EnhancedMockRoleManager : Mock<RoleManager<IdentityRole>>
     private void SetupRoleExistsAsync(IdentityRole? role, MockRoleManagerOptions options)
     {
         if (options.RoleDoesNotExist || role == null)
-        {
             _roleManager.Setup(x => x.RoleExistsAsync(It.IsAny<string>()))
                 .ReturnsAsync(false);
-        }
         else
-        {
             _roleManager.Setup(x => x.RoleExistsAsync(role.Name!))
                 .ReturnsAsync(true);
-        }
     }
 
     private void SetupFindByNameAsync(IdentityRole? role, MockRoleManagerOptions options)
     {
         if (options.RoleDoesNotExist || role == null)
-        {
             _roleManager.Setup(x => x.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityRole?)null);
-        }
         else
-        {
             _roleManager.Setup(x => x.FindByNameAsync(role.Name!))
                 .ReturnsAsync(role);
-        }
     }
 
     private void SetupFindByIdAsync(IdentityRole? role, MockRoleManagerOptions options)
     {
         if (options.RoleDoesNotExist || role == null)
-        {
             _roleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityRole?)null);
-        }
         else
-        {
             _roleManager.Setup(x => x.FindByIdAsync(role.Id))
                 .ReturnsAsync(role);
-        }
     }
-
-    public override RoleManager<IdentityRole> Object => _roleManager.Object;
 }

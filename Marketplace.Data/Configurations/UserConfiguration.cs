@@ -36,7 +36,7 @@ namespace Marketplace.Data.Configurations
                     PasswordHash = hasher.HashPassword(new ApplicationUser() { UserName = "Admin" }, "P@ssw0rd!"),
                     EmailConfirmed = true,
                     Role = Role.Adminstrator,
-                    RefreshTokenExpiry = new DateTime(2025, 12, 31)
+                    RefreshTokenExpiry = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new ApplicationUser
                 {
@@ -51,7 +51,7 @@ namespace Marketplace.Data.Configurations
                     PasswordHash = hasher.HashPassword(new ApplicationUser() { UserName = "DemoUser1" }, "P@ssword1"),
                     EmailConfirmed = true,
                     Role = Role.User,
-                    RefreshTokenExpiry = new DateTime(2025, 12, 31)
+                    RefreshTokenExpiry = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

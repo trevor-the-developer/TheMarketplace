@@ -1,10 +1,10 @@
 using System.Net;
+using System.Web;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Core.Constants;
 using Marketplace.Test.Factories;
 using Marketplace.Test.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.IntegrationTests.Authentication;
@@ -15,7 +15,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     public async Task RegisterStepOne_Success()
     {
         var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest("newuser@example.com");
-        
+
         var response = await Host.Scenario(_ =>
         {
             _.Post
@@ -26,7 +26,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
 
         // Work around Alba JSON parsing issues by reading as text and checking status
         var responseText = await response.ReadAsTextAsync();
-        
+
         Assert.NotNull(responseText);
         Assert.Contains("registrationStepOne", responseText);
         Assert.Contains("true", responseText);
@@ -41,7 +41,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
         // First registration
         var uniqueEmail = "duplicate@example.com";
         var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest(uniqueEmail);
-        
+
         await Host.Scenario(_ =>
         {
             _.Post
@@ -58,10 +58,10 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
                 .ToUrl(ApiConstants.ApiSlashRegister);
             _.StatusCodeShouldBe(HttpStatusCode.InternalServerError);
         });
-        
+
         // Work around Alba JSON parsing issues by reading as text and checking content
         var responseText = await duplicateResponse.ReadAsTextAsync();
-        
+
         Assert.NotNull(responseText);
         // For 500 errors, the response format is different, just check for the error message
         Assert.Contains(AuthConstants.UserAlreadyExists, responseText);
@@ -71,7 +71,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     public async Task RegisterStepOne_Invalid_Data_Returns_BadRequest()
     {
         var invalidRequest = RegistrationTestFactory.CreateInvalidRegisterRequest();
-        
+
         await Host.Scenario(_ =>
         {
             _.Post
@@ -86,7 +86,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     {
         // First register a user
         var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest("confirm@example.com");
-        
+
         var registerResponse = await Host.Scenario(_ =>
         {
             _.Post
@@ -97,23 +97,23 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
 
         // Work around Alba JSON parsing issues by reading as text and parsing manually
         var responseText = await registerResponse.ReadAsTextAsync();
-        
+
         Assert.NotNull(responseText);
         Assert.Contains("registrationStepOne", responseText);
         Assert.Contains("true", responseText);
         Assert.Contains("userId", responseText);
         Assert.Contains("confirmationEmailLink", responseText);
-        
+
         // Extract confirmation link from the raw response text
         var confirmLinkStart = responseText.IndexOf("confirmationEmailLink\":\"") + "confirmationEmailLink\":\"".Length;
         var confirmLinkEnd = responseText.IndexOf("\"", confirmLinkStart);
         var confirmationUrl = responseText.Substring(confirmLinkStart, confirmLinkEnd - confirmLinkStart);
         Assert.NotNull(confirmationUrl);
-        
+
         // Parse the confirmation parameters
         var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        
+        var query = HttpUtility.ParseQueryString(uri.Query);
+
         var confirmRequest = new ConfirmEmailRequest
         {
             UserId = query["userId"],
@@ -123,12 +123,13 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
 
         var confirmResponse = await Host.Scenario(_ =>
         {
-            _.Get.Url($"/api/confirm_email/?userId={confirmRequest.UserId}&token={Uri.EscapeDataString(confirmRequest.Token!)}&email={confirmRequest.Email}");
+            _.Get.Url(
+                $"/api/confirm_email/?userId={confirmRequest.UserId}&token={Uri.EscapeDataString(confirmRequest.Token!)}&email={confirmRequest.Email}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
         var confirmResult = await confirmResponse.ReadAsJsonAsync<ConfirmEmailResponse>();
-        
+
         Assert.NotNull(confirmResult);
         Assert.Equal("EmailConfirmed", confirmResult.ConfirmationCode);
         Assert.Null(confirmResult.ApiError);
@@ -146,7 +147,8 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
 
         await Host.Scenario(_ =>
         {
-            _.Get.Url($"/api/confirm_email/?userId={confirmRequest.UserId}&token={confirmRequest.Token}&email={confirmRequest.Email}");
+            _.Get.Url(
+                $"/api/confirm_email/?userId={confirmRequest.UserId}&token={confirmRequest.Token}&email={confirmRequest.Email}");
             _.StatusCodeShouldBe(HttpStatusCode.NotFound);
         });
     }
@@ -156,7 +158,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     {
         // First register a user
         var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest("steptwo@example.com");
-        
+
         var registerResponse = await Host.Scenario(_ =>
         {
             _.Post
@@ -167,22 +169,22 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
 
         // Work around Alba JSON parsing issues by reading as text and parsing manually
         var responseText = await registerResponse.ReadAsTextAsync();
-        
+
         Assert.NotNull(responseText);
         Assert.Contains("registrationStepOne", responseText);
         Assert.Contains("true", responseText);
         Assert.Contains("userId", responseText);
         Assert.Contains("confirmationEmailLink", responseText);
-        
+
         // Extract confirmation link from the raw response text
         var confirmLinkStart = responseText.IndexOf("confirmationEmailLink\":\"") + "confirmationEmailLink\":\"".Length;
         var confirmLinkEnd = responseText.IndexOf("\"", confirmLinkStart);
         var confirmationUrl = responseText.Substring(confirmLinkStart, confirmLinkEnd - confirmLinkStart);
         Assert.NotNull(confirmationUrl);
-        
+
         var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        
+        var query = HttpUtility.ParseQueryString(uri.Query);
+
         var stepTwoRequest = new RegisterStepTwoRequest
         {
             UserId = query["userId"]!,
@@ -199,7 +201,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
         });
 
         var stepTwoResult = await stepTwoResponse.ReadAsJsonAsync<RegisterStepTwoResponse>();
-        
+
         Assert.NotNull(stepTwoResult);
         Assert.True(stepTwoResult.RegistrationStepTwo);
         Assert.Equal("RegistrationComplete", stepTwoResult.ConfirmationCode);
@@ -209,7 +211,9 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     [Fact]
     public async Task RegisterStepTwo_Invalid_User_Returns_NotFound()
     {
-        var stepTwoRequest = RegistrationTestFactory.CreateRegisterStepTwoRequest("invalid-user-id", "invalid-token", "invalid@example.com");
+        var stepTwoRequest =
+            RegistrationTestFactory.CreateRegisterStepTwoRequest("invalid-user-id", "invalid-token",
+                "invalid@example.com");
 
         await Host.Scenario(_ =>
         {
@@ -224,7 +228,7 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
     public async Task FullRegistrationWorkflow_Success()
     {
         var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest("fullworkflow@example.com");
-        
+
         // Step 1: Initial Registration
         var registerResponse = await Host.Scenario(_ =>
         {
@@ -241,13 +245,14 @@ public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(
         // Step 2: Email Confirmation
         var confirmationUrl = registrationResult.ConfirmationEmailLink;
         Assert.NotNull(confirmationUrl);
-        
+
         var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var query = HttpUtility.ParseQueryString(uri.Query);
 
         var confirmResponse = await Host.Scenario(_ =>
         {
-            _.Get.Url($"/api/confirm_email/?userId={query["userId"]}&token={Uri.EscapeDataString(query["token"]!)}&email={query["email"]}");
+            _.Get.Url(
+                $"/api/confirm_email/?userId={query["userId"]}&token={Uri.EscapeDataString(query["token"]!)}&email={query["email"]}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 

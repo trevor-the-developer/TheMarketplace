@@ -1,8 +1,8 @@
 using Alba;
+using Marketplace.Test.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Oakton;
 using Xunit;
-using Marketplace.Test.Infrastructure;
 
 namespace Marketplace.Test;
 
@@ -14,8 +14,8 @@ public class ScenarioCollection : ICollectionFixture<WebAppFixture>
 
 public class WebAppFixture : IAsyncLifetime
 {
+    private readonly DatabaseTestFixture _databaseFixture;
     public IAlbaHost? AlbaHost;
-    private DatabaseTestFixture _databaseFixture;
 
     public WebAppFixture()
     {
@@ -26,7 +26,7 @@ public class WebAppFixture : IAsyncLifetime
     {
         // Initialize database first
         await _databaseFixture.InitializeAsync();
-        
+
         // This is absolutely necessary if you 
         // use Oakton for command line processing and want to 
         // use WebApplicationFactory and/or Alba for integration testing

@@ -13,7 +13,6 @@ public static class TestData
 {
     // Authentication/authorization
     public static readonly string TestId = StringHelper.GuidToFlattenedString();
-    public static readonly string? AccessToken = StringHelper.GuidToFlattenedString();
     public static readonly string? RefreshToken = StringHelper.GuidToFlattenedString();
     public static string TestUserOne = "admin@localhost";
     public static readonly string SecretKey = "622d70c6b650418c8bc7aa1e6e8c9ac6";
@@ -36,7 +35,7 @@ public static class TestData
                 SocialMedia = "https://www.testuser.com",
                 ApplicationUserId = TestId
             },
-            RefreshTokenExpiry = DateTime.Now.AddDays(7),
+            RefreshTokenExpiry = DateTime.Now.AddDays(7)
         };
 
     public static JwtSecurityToken JwtSecurityToken
@@ -75,16 +74,13 @@ public static class TestData
         }
     }
 
-    public static IdentityRole TestAppUserRole
-    {
-        get
+    public static string AccessToken => new JwtSecurityTokenHandler().WriteToken(JwtSecurityToken);
+
+    public static IdentityRole TestAppUserRole =>
+        new()
         {
-            return new IdentityRole
-            {
-                Id = "1",
-                Name = "User",
-                NormalizedName = "USER"
-            };
-        }
-    }
+            Id = "1",
+            Name = "User",
+            NormalizedName = "USER"
+        };
 }

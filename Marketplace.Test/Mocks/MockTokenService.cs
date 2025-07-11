@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Marketplace.Core.Security;
 using Marketplace.Data.Entities;
@@ -30,28 +29,24 @@ public class MockTokenService : Mock<ITokenService>
 
         // Setup principal from expired token with correct test data
         if (!string.IsNullOrEmpty(options.Token))
-        {
             Setup(x => x.GetPrincipalFromExpiredToken(
-                    It.IsAny<string>(),  // Changed to accept any string to handle multiple calls
+                    It.IsAny<string>(), // Changed to accept any string to handle multiple calls
                     It.IsAny<TokenValidationParameters>(),
                     It.IsAny<IConfiguration>(),
                     It.IsAny<ILogger<ITokenService>>()))
                 .Returns(() => new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
-                    new(ClaimTypes.Name, TestData.TestUserOne),  // Use TestData email
+                    new(ClaimTypes.Name, TestData.TestUserOne), // Use TestData email
                     new(ClaimTypes.NameIdentifier, TestData.TestId),
                     new("name", "Test User")
                 }, "TestAuthType")));
-        }
         else
-        {
             Setup(x => x.GetPrincipalFromExpiredToken(
                     It.IsAny<string>(),
                     It.IsAny<TokenValidationParameters>(),
                     It.IsAny<IConfiguration>(),
                     It.IsAny<ILogger<ITokenService>>()))
                 .Returns((ClaimsPrincipal?)null);
-        }
     }
 }
 

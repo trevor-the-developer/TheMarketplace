@@ -6,12 +6,12 @@ using RegisterStepOneResponse = Marketplace.Api.Endpoints.Authentication.Registr
 namespace Marketplace.Test.Factories;
 
 /// <summary>
-/// Factory for creating registration-related test objects
+///     Factory for creating registration-related test objects
 /// </summary>
 public static class RegistrationTestFactory
 {
     /// <summary>
-    /// Creates a valid RegisterRequest for testing
+    ///     Creates a valid RegisterRequest for testing
     /// </summary>
     public static RegisterRequest CreateValidRegisterRequest(string? email = null)
     {
@@ -26,7 +26,7 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a RegisterRequest with missing required fields
+    ///     Creates a RegisterRequest with missing required fields
     /// </summary>
     public static RegisterRequest CreateInvalidRegisterRequest()
     {
@@ -36,12 +36,12 @@ public static class RegistrationTestFactory
             LastName = "",
             Email = "",
             Password = "",
-            DateOfBirth = default(DateTime)
+            DateOfBirth = default
         };
     }
 
     /// <summary>
-    /// Creates a test ApplicationUser for registration scenarios
+    ///     Creates a test ApplicationUser for registration scenarios
     /// </summary>
     public static ApplicationUser CreateTestUser(string? email = null, bool emailConfirmed = false)
     {
@@ -58,9 +58,10 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a ConfirmEmailRequest for testing
+    ///     Creates a ConfirmEmailRequest for testing
     /// </summary>
-    public static ConfirmEmailRequest CreateConfirmEmailRequest(string? userId = null, string? token = null, string? email = null)
+    public static ConfirmEmailRequest CreateConfirmEmailRequest(string? userId = null, string? token = null,
+        string? email = null)
     {
         return new ConfirmEmailRequest
         {
@@ -71,9 +72,10 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a RegisterStepTwoRequest for testing
+    ///     Creates a RegisterStepTwoRequest for testing
     /// </summary>
-    public static RegisterStepTwoRequest CreateRegisterStepTwoRequest(string? userId = null, string? token = null, string? email = null)
+    public static RegisterStepTwoRequest CreateRegisterStepTwoRequest(string? userId = null, string? token = null,
+        string? email = null)
     {
         return new RegisterStepTwoRequest
         {
@@ -84,7 +86,7 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a successful RegisterStepOneResponse
+    ///     Creates a successful RegisterStepOneResponse
     /// </summary>
     public static RegisterStepOneResponse CreateSuccessfulRegistrationResponse(string? userId = null)
     {
@@ -99,7 +101,7 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a failed RegisterStepOneResponse with errors
+    ///     Creates a failed RegisterStepOneResponse with errors
     /// </summary>
     public static RegisterStepOneResponse CreateFailedRegistrationResponse(IEnumerable<IdentityError>? errors = null)
     {
@@ -117,7 +119,7 @@ public static class RegistrationTestFactory
     }
 
     /// <summary>
-    /// Creates a test IdentityRole
+    ///     Creates a test IdentityRole
     /// </summary>
     public static IdentityRole CreateTestRole(string? name = null)
     {

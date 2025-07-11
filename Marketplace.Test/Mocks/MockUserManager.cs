@@ -14,7 +14,7 @@ public class MockUserManager : Mock<UserManager<ApplicationUser>>
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManager;
 
-    public MockUserManager( 
+    public MockUserManager(
         ApplicationUser user = null!,
         bool nullEmail = false,
         bool invalidPassword = false,
@@ -30,7 +30,7 @@ public class MockUserManager : Mock<UserManager<ApplicationUser>>
             new Mock<IdentityErrorDescriber>().Object,
             new Mock<IServiceProvider>().Object,
             new Mock<ILogger<UserManager<ApplicationUser>>>().Object);
-        
+
         _userManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
 
@@ -47,16 +47,16 @@ public class MockUserManager : Mock<UserManager<ApplicationUser>>
         }
 
         if (nullEmail)
-        { 
+        {
             _userManager.Setup(x => x.FindByEmailAsync(null!))
                 .ReturnsAsync((ApplicationUser)null!);
         }
-        else 
+        else
         {
             // Only return user for specific email addresses that should exist
             _userManager.Setup(x => x.FindByEmailAsync(It.Is<string>(e => e != TestData.TestUserOne)))
                 .ReturnsAsync(user);
-    
+
             // Return null for the test email
             _userManager.Setup(x => x.FindByEmailAsync(TestData.TestUserOne))
                 .ReturnsAsync((ApplicationUser)null!);

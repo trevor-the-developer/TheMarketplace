@@ -1,6 +1,5 @@
 using System.Net;
 using Alba;
-using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
 using Marketplace.Test.Data;
@@ -16,7 +15,8 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task TokenRefreshRequest()
     {
         // Arrange
-        var loginResult = await GetLoginResponse();
+        await Task.Delay(100); // Add small delay to avoid race conditions
+        var loginResult = await AuthenticationHelper.GetLoginResponse(Host);
         var command = new TokenRefreshRequest
         (
             loginResult.SecurityToken!,
@@ -55,7 +55,8 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task Bad_RefreshToken_RefreshRequest()
     {
         // Arrange
-        var loginResult = await GetLoginResponse();
+        await Task.Delay(200); // Add delay to avoid race conditions
+        var loginResult = await AuthenticationHelper.GetLoginResponse(Host);
         var badCommand = new TokenRefreshRequest
         (
             loginResult.SecurityToken!,
@@ -82,10 +83,11 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task Bad_SecurityToken_RefreshRequest()
     {
         // Arrange
-        var loginResult = await GetLoginResponse();
+        await Task.Delay(300); // Add delay to avoid race conditions
+        var loginResult = await AuthenticationHelper.GetLoginResponse(Host);
         var badCommand = new TokenRefreshRequest
         (
-            TestData.AccessToken!,
+            "invalid.jwt.token.format", // Use genuinely invalid token format
             loginResult.RefreshToken!
         );
 
@@ -112,27 +114,5 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
         var jsonString = await response.ReadAsTextAsync();
         var result = JsonConvert.DeserializeObject<TokenResponse>(jsonString);
         return result;
-    }
-
-    private async Task<LoginResponse> GetLoginResponse()
-    {
-        var loginResponse = await Host.Scenario(_ =>
-        {
-            _.Post
-                .Json(new { Email = "admin@localhost", Password = "P@ssw0rd!" }, JsonStyle.MinimalApi)
-                .ToUrl(ApiConstants.ApiSlashLogin);
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
-        });
-
-        Assert.NotNull(loginResponse);
-        Assert.IsType<ScenarioResult>(loginResponse);
-        var jsonString = await loginResponse.ReadAsTextAsync();
-        var loginResult = JsonConvert.DeserializeObject<LoginResponse>(jsonString);
-        Assert.True(loginResult?.Succeeded);
-        Assert.NotNull(loginResult?.SecurityToken);
-        Assert.NotNull(loginResult.Expiration);
-        Assert.NotNull(loginResult.RefreshToken);
-        Assert.Null(loginResult.ApiError);
-        return loginResult;
     }
 }

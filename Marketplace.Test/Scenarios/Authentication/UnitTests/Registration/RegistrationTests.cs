@@ -1,14 +1,9 @@
 using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
-using Marketplace.Data;
-using Marketplace.Data.Entities;
-using Marketplace.Test.Data;
 using Marketplace.Test.Factories;
 using Marketplace.Test.Mocks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -49,14 +44,14 @@ public class RegistrationTests
     public void Registration_Step_One_ApiError_Test()
     {
         // Arrange & Act
-        var registrationStepOne = new RegisterStepOneResponse()
+        var registrationStepOne = new RegisterStepOneResponse
         {
             RegistrationStepOne = false,
             ConfirmationEmailLink = "TestConfirmationLink",
             ApiError = new ApiError(
-                "Not authorised", 
-                403, 
-                "Not authorised to view object.", 
+                "Not authorised",
+                403,
+                "Not authorised to view object.",
                 "TesStackTrace")
         };
 
@@ -86,7 +81,7 @@ public class RegistrationTests
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-mockDbContext.Object);
+                mockDbContext.Object);
         });
     }
 
@@ -96,7 +91,7 @@ mockDbContext.Object);
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("existing@example.com");
         var existingUser = RegistrationTestFactory.CreateTestUser("existing@example.com");
-        
+
         var mockUserManager = new EnhancedMockUserManager(existingUser);
         var mockRoleManager = new EnhancedMockRoleManager();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
@@ -110,7 +105,7 @@ mockDbContext.Object);
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-mockDbContext.Object);
+            mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -125,7 +120,7 @@ mockDbContext.Object);
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
         var role = RegistrationTestFactory.CreateTestRole();
-        
+
         var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
         var mockRoleManager = new EnhancedMockRoleManager(role);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
@@ -139,7 +134,7 @@ mockDbContext.Object);
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-mockDbContext.Object);
+            mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -158,9 +153,9 @@ mockDbContext.Object);
         {
             new() { Code = "PasswordTooShort", Description = "Password is too short" }
         };
-        
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions 
-        { 
+
+        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
+        {
             UserNotFound = true,
             CreateAsyncFailed = true,
             CustomErrors = customErrors
@@ -177,7 +172,7 @@ mockDbContext.Object);
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-mockDbContext.Object);
+            mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -194,9 +189,10 @@ mockDbContext.Object);
     {
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
-        
+
         var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
-        var mockRoleManager = new EnhancedMockRoleManager(null, new MockRoleManagerOptions { CreateAsyncFailed = true });
+        var mockRoleManager =
+            new EnhancedMockRoleManager(null, new MockRoleManagerOptions { CreateAsyncFailed = true });
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
 
@@ -208,7 +204,7 @@ mockDbContext.Object);
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-mockDbContext.Object);
+            mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -223,9 +219,9 @@ mockDbContext.Object);
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
         var role = RegistrationTestFactory.CreateTestRole();
-        
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions 
-        { 
+
+        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
+        {
             UserNotFound = true,
             AddToRoleAsyncFailed = true
         });
@@ -241,7 +237,7 @@ mockDbContext.Object);
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-mockDbContext.Object);
+            mockDbContext.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -256,9 +252,9 @@ mockDbContext.Object);
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
         var role = RegistrationTestFactory.CreateTestRole();
-        
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions 
-        { 
+
+        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
+        {
             UserNotFound = true,
             GenerateEmailConfirmationTokenAsyncFailed = true
         });
@@ -276,7 +272,7 @@ mockDbContext.Object);
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-mockDbContext.Object);
+                mockDbContext.Object);
         });
     }
 
@@ -334,7 +330,7 @@ mockDbContext.Object);
         // Arrange
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateConfirmEmailRequest(user.Id, "valid-token", user.Email);
-        
+
         var mockUserManager = new EnhancedMockUserManager(user);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
@@ -361,8 +357,9 @@ mockDbContext.Object);
         // Arrange
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateConfirmEmailRequest(user.Id, "invalid-token", user.Email);
-        
-        var mockUserManager = new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
+
+        var mockUserManager =
+            new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
@@ -436,7 +433,7 @@ mockDbContext.Object);
         // Arrange
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "valid-token", user.Email);
-        
+
         var mockUserManager = new EnhancedMockUserManager(user);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
@@ -463,8 +460,9 @@ mockDbContext.Object);
         // Arrange
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "invalid-token", user.Email);
-        
-        var mockUserManager = new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
+
+        var mockUserManager =
+            new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();

@@ -1,7 +1,5 @@
 using System.Net;
-using Alba;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 using Marketplace.Test.Helpers;
 using Xunit;
 
@@ -13,7 +11,7 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task CreateCard_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
@@ -32,13 +30,13 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task UpdateCard_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
                 .Json(new { Id = 1, Title = "Updated Card", Description = "An updated card description." })
-                .ToUrl($"/api/card/update/1");
+                .ToUrl("/api/card/update/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -51,7 +49,7 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
     public async Task DeleteCard_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         // First create a card to delete
         var createResponse = await Host.Scenario(_ =>
         {
@@ -61,12 +59,12 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture)
                 .ToUrl("/api/card/create");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
-        
+
         var createResponseText = await createResponse.ReadAsTextAsync();
         // Extract the card ID from the response - this is a simplified approach
-        var cardIdMatch = System.Text.RegularExpressions.Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        var cardIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
         var cardId = cardIdMatch.Success ? cardIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
-        
+
         // Now delete the card
         await Host.Scenario(_ =>
         {

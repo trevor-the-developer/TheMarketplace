@@ -1,6 +1,7 @@
 # Test Factories & Infrastructure
 
-Factory classes provide standardised object creation and lifecycle management for testing scenarios. The test infrastructure includes automated database setup, user authentication, and consistent test data generation.
+Factory classes provide standardised object creation and lifecycle management for testing scenarios. The test
+infrastructure includes automated database setup, user authentication, and consistent test data generation.
 
 ## Factory Pattern Benefits
 
@@ -12,18 +13,21 @@ Factory classes provide standardised object creation and lifecycle management fo
 ## Current Test Infrastructure
 
 ### Database Test Fixture
+
 - **Automated Setup**: SQL Server container management
 - **Migration Application**: Automatic database schema creation
 - **Cleanup**: Proper disposal of test resources
 - **Isolation**: Each test run uses a clean database state
 
 ### Authentication Factories
+
 - **User Creation**: Generate test users with appropriate roles
 - **Token Generation**: Create valid JWT tokens for authenticated tests
 - **Role Management**: Test different authorisation scenarios
 - **Mock Services**: Properly configured authentication mocks
 
 ### Data Factories
+
 - **Entity Creation**: Generate test entities with valid relationships
 - **Seed Data**: Create consistent test data for integration tests
 - **Mock Objects**: Properly configured mocks for unit tests
@@ -31,6 +35,7 @@ Factory classes provide standardised object creation and lifecycle management fo
 ## Usage Examples
 
 ### Database Test Setup
+
 ```csharp
 [Collection("DatabaseCollection")]
 public class IntegrationTestBase
@@ -47,6 +52,7 @@ public class IntegrationTestBase
 ```
 
 ### Authentication Test Setup
+
 ```csharp
 public class AuthenticationTests : IntegrationTestBase
 {
@@ -69,18 +75,21 @@ public class AuthenticationTests : IntegrationTestBase
 ## Test Infrastructure Features
 
 ### Automated Database Management
+
 - **Container Health Checks**: Ensure SQL Server is ready before tests
 - **Migration Application**: Apply EF Core migrations automatically
 - **Data Cleanup**: Clean state between test runs
 - **Connection Management**: Proper connection string configuration
 
 ### Authentication Infrastructure
+
 - **JWT Token Validation**: Proper token validation setup
 - **Role-Based Testing**: Test different user roles and permissions
 - **Refresh Token Testing**: Validate token refresh mechanisms
 - **Authorisation Testing**: Test protected endpoints
 
 ### Test Data Management
+
 - **Consistent Data**: Standardised test data across all tests
 - **Relationship Handling**: Proper foreign key relationships
 - **Cleanup Strategies**: Efficient test data cleanup

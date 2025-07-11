@@ -1,32 +1,33 @@
-using Moq;
-using Microsoft.Extensions.Logging;
-using Xunit;
 using Marketplace.Api.Endpoints.Listing;
-using Marketplace.Test.Mocks;
 using Marketplace.Data;
+using Marketplace.Data.Entities;
+using Marketplace.Test.Mocks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace Marketplace.Test.Scenarios.Listings.UnitTests;
 
 public class ListingHandlerTests : IDisposable
 {
-    private readonly Mock<ILogger<ListingHandler>> _loggerMock;
     private readonly MockCurrentUserService _currentUserService;
-    private readonly ListingHandler _handler;
     private readonly MarketplaceDbContext _dbContext;
+    private readonly ListingHandler _handler;
+    private readonly Mock<ILogger<ListingHandler>> _loggerMock;
 
     public ListingHandlerTests()
     {
         _loggerMock = new Mock<ILogger<ListingHandler>>();
         _currentUserService = new MockCurrentUserService();
         _handler = new ListingHandler();
-        
+
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _dbContext = new MarketplaceDbContext(options);
     }
-    
+
     public void Dispose()
     {
         _dbContext.Dispose();
@@ -76,7 +77,7 @@ public class ListingHandlerTests : IDisposable
 
         // Act
         // First create a listing to update
-        var existingListing = new Marketplace.Data.Entities.Listing
+        var existingListing = new Listing
         {
             Id = 1,
             Title = "Original Listing",
@@ -88,7 +89,7 @@ public class ListingHandlerTests : IDisposable
         };
         _dbContext.Listings.Add(existingListing);
         await _dbContext.SaveChangesAsync();
-        
+
         var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
 
         // Assert
@@ -105,7 +106,7 @@ public class ListingHandlerTests : IDisposable
 
         // Act
         // First create a listing to delete
-        var existingListing = new Marketplace.Data.Entities.Listing
+        var existingListing = new Listing
         {
             Id = 1,
             Title = "Listing to Delete",
@@ -117,7 +118,7 @@ public class ListingHandlerTests : IDisposable
         };
         _dbContext.Listings.Add(existingListing);
         await _dbContext.SaveChangesAsync();
-        
+
         await _handler.Handle(deleteCommand, _dbContext);
 
         // Assert

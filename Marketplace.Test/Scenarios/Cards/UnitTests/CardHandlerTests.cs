@@ -1,32 +1,33 @@
-using Moq;
-using Microsoft.Extensions.Logging;
-using Xunit;
 using Marketplace.Api.Endpoints.Card;
-using Marketplace.Test.Mocks;
 using Marketplace.Data;
+using Marketplace.Data.Entities;
+using Marketplace.Test.Mocks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace Marketplace.Test.Scenarios.Cards.UnitTests;
 
 public class CardHandlerTests : IDisposable
 {
-    private readonly Mock<ILogger<CardHandler>> _loggerMock;
     private readonly MockCurrentUserService _currentUserService;
-    private readonly CardHandler _handler;
     private readonly MarketplaceDbContext _dbContext;
+    private readonly CardHandler _handler;
+    private readonly Mock<ILogger<CardHandler>> _loggerMock;
 
     public CardHandlerTests()
     {
         _loggerMock = new Mock<ILogger<CardHandler>>();
         _currentUserService = new MockCurrentUserService();
         _handler = new CardHandler();
-        
+
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _dbContext = new MarketplaceDbContext(options);
     }
-    
+
     public void Dispose()
     {
         _dbContext.Dispose();
@@ -77,19 +78,19 @@ public class CardHandlerTests : IDisposable
 
         // Act
         // First create a card to update
-        var existingCard = new Marketplace.Data.Entities.Card
+        var existingCard = new Card
         {
             Id = 1,
             Title = "Original Card",
             Description = "Original Description",
             CreatedBy = "TestUser",
             CreatedDate = DateTime.UtcNow,
-            ModifiedBy = "TestUser", 
+            ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
         _dbContext.Cards.Add(existingCard);
         await _dbContext.SaveChangesAsync();
-        
+
         var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
 
         // Assert
@@ -106,7 +107,7 @@ public class CardHandlerTests : IDisposable
 
         // Act
         // First create a card to delete
-        var existingCard = new Marketplace.Data.Entities.Card
+        var existingCard = new Card
         {
             Id = 1,
             Title = "Card to Delete",
@@ -118,7 +119,7 @@ public class CardHandlerTests : IDisposable
         };
         _dbContext.Cards.Add(existingCard);
         await _dbContext.SaveChangesAsync();
-        
+
         await _handler.Handle(deleteCommand, _dbContext);
 
         // Assert

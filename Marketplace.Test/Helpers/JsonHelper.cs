@@ -31,7 +31,7 @@ public static class JsonHelper
             copy.Position = 0;
             response.Context.Response.Body = copy;
         }
-        
+
         return json;
     }
 }

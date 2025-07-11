@@ -4,11 +4,12 @@ namespace Marketplace.Test.Mocks;
 
 public class MockCurrentUserService : ICurrentUserService
 {
-    private readonly string _userId;
     private readonly string _email;
     private readonly bool _isAuthenticated;
+    private readonly string _userId;
 
-    public MockCurrentUserService(string userId = "test-user-id", string email = "test@example.com", bool isAuthenticated = true)
+    public MockCurrentUserService(string userId = "test-user-id", string email = "test@example.com",
+        bool isAuthenticated = true)
     {
         _userId = userId;
         _email = email;

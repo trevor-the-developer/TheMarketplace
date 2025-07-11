@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
-using Oakton.Parsing;
 using Xunit;
 using TokenHandler = Marketplace.Api.Endpoints.Authentication.Token.TokenHandler;
 

@@ -16,7 +16,7 @@ public class MockRoleManager : Mock<RoleManager<IdentityRole>>
             new Mock<ILookupNormalizer>().Object,
             new Mock<IdentityErrorDescriber>().Object,
             new Mock<ILogger<RoleManager<IdentityRole>>>().Object);
-        
+
         _roleManager.Setup(x => x.CreateAsync(It.IsAny<IdentityRole>()))
             .ReturnsAsync(IdentityResult.Success);
 

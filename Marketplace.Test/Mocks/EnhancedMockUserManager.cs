@@ -10,7 +10,7 @@ using Moq;
 namespace Marketplace.Test.Mocks;
 
 /// <summary>
-/// Enhanced MockUserManager with comprehensive options for registration testing
+///     Enhanced MockUserManager with comprehensive options for registration testing
 /// </summary>
 public class EnhancedMockUserManager : Mock<UserManager<ApplicationUser>>
 {
@@ -45,32 +45,26 @@ public class EnhancedMockUserManager : Mock<UserManager<ApplicationUser>>
         SetupFindByNameAsync(user);
     }
 
+    public override UserManager<ApplicationUser> Object => _userManager.Object;
+
     private void SetupFindByEmailAsync(ApplicationUser? user, MockUserManagerOptions options)
     {
         if (options.UserNotFound || user == null)
-        {
             _userManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync((ApplicationUser?)null);
-        }
         else
-        {
             _userManager.Setup(x => x.FindByEmailAsync(user.Email!))
                 .ReturnsAsync(user);
-        }
     }
 
     private void SetupFindByIdAsync(ApplicationUser? user, MockUserManagerOptions options)
     {
         if (options.UserNotFound || user == null)
-        {
             _userManager.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync((ApplicationUser?)null);
-        }
         else
-        {
             _userManager.Setup(x => x.FindByIdAsync(user.Id))
                 .ReturnsAsync(user);
-        }
     }
 
     private void SetupCreateAsync(MockUserManagerOptions options)
@@ -134,15 +128,11 @@ public class EnhancedMockUserManager : Mock<UserManager<ApplicationUser>>
     private void SetupGenerateEmailConfirmationTokenAsync(MockUserManagerOptions options)
     {
         if (options.GenerateEmailConfirmationTokenAsyncFailed)
-        {
             _userManager.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>()))
                 .ThrowsAsync(new InvalidOperationException("Failed to generate email confirmation token"));
-        }
         else
-        {
             _userManager.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(options.EmailConfirmationToken ?? "test-confirmation-token");
-        }
     }
 
     private void SetupConfirmEmailAsync(MockUserManagerOptions options)
@@ -161,29 +151,21 @@ public class EnhancedMockUserManager : Mock<UserManager<ApplicationUser>>
     private void SetupGetRolesAsync(ApplicationUser? user)
     {
         if (user != null)
-        {
             _userManager.Setup(x => x.GetRolesAsync(user))
                 .ReturnsAsync(new List<string> { Role.User.ToString() });
-        }
     }
 
     private void SetupGetClaimsAsync(ApplicationUser? user)
     {
         if (user != null)
-        {
             _userManager.Setup(x => x.GetClaimsAsync(user))
                 .ReturnsAsync(new List<Claim> { new(JwtRegisteredClaimNames.Name, user.Email ?? string.Empty) });
-        }
     }
 
     private void SetupFindByNameAsync(ApplicationUser? user)
     {
         if (user != null)
-        {
             _userManager.Setup(x => x.FindByNameAsync(user.UserName!))
                 .ReturnsAsync(user);
-        }
     }
-
-    public override UserManager<ApplicationUser> Object => _userManager.Object;
 }

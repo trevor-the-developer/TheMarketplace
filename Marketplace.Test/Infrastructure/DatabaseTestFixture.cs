@@ -1,12 +1,10 @@
 using System.Diagnostics;
-using System.Text.Json;
+using Marketplace.Data;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Marketplace.Data;
 using Xunit;
-using Microsoft.Data.SqlClient;
 
 namespace Marketplace.Test.Infrastructure;
 
@@ -14,8 +12,10 @@ public class DatabaseTestFixture : IAsyncLifetime
 {
     private const string ContainerName = "marketplace-db";
     private const string DatabaseName = "Marketplace";
-    private const string ConnectionString = "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
-    
+
+    private const string ConnectionString =
+        "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
+
     public async Task InitializeAsync()
     {
         Console.WriteLine("Starting database test fixture initialization...");
@@ -59,7 +59,7 @@ public class DatabaseTestFixture : IAsyncLifetime
             Console.WriteLine("SQL Server is already accessible, no need to start container.");
             return;
         }
-        
+
         // Check if container is running
         var checkProcess = new Process
         {
@@ -163,7 +163,8 @@ public class DatabaseTestFixture : IAsyncLifetime
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "docker",
-                        Arguments = $"exec {ContainerName} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1'",
+                        Arguments =
+                            $"exec {ContainerName} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1'",
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,
@@ -179,23 +180,23 @@ public class DatabaseTestFixture : IAsyncLifetime
                     Console.WriteLine("SQL Server is ready!");
                     return; // SQL Server is ready
                 }
-                else
-                {
-                    lastError = await testProcess.StandardError.ReadToEndAsync();
-                    Console.WriteLine($"SQL Server not ready (attempt {attempt + 1}/{maxAttempts}): {lastError}");
-                }
+
+                lastError = await testProcess.StandardError.ReadToEndAsync();
+                Console.WriteLine($"SQL Server not ready (attempt {attempt + 1}/{maxAttempts}): {lastError}");
             }
             catch (Exception ex)
             {
                 lastError = ex.Message;
-                Console.WriteLine($"Exception waiting for SQL Server (attempt {attempt + 1}/{maxAttempts}): {ex.Message}");
+                Console.WriteLine(
+                    $"Exception waiting for SQL Server (attempt {attempt + 1}/{maxAttempts}): {ex.Message}");
             }
 
             attempt++;
             await Task.Delay(2000); // Wait 2 seconds before next attempt
         }
 
-        throw new InvalidOperationException($"SQL Server container did not start within expected time. Last error: {lastError}");
+        throw new InvalidOperationException(
+            $"SQL Server container did not start within expected time. Last error: {lastError}");
     }
 
     private async Task EnsureDatabaseExistsAsync()
@@ -203,16 +204,17 @@ public class DatabaseTestFixture : IAsyncLifetime
         try
         {
             // Use .NET connection to create database instead of docker exec
-            var masterConnectionString = "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
+            var masterConnectionString =
+                "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
             using var connection = new SqlConnection(masterConnectionString);
             await connection.OpenAsync();
-            
+
             var createDbSql = $@"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '{DatabaseName}') 
                                 CREATE DATABASE {DatabaseName}";
-            
+
             using var command = new SqlCommand(createDbSql, connection);
             await command.ExecuteNonQueryAsync();
-            
+
             Console.WriteLine($"Database {DatabaseName} is ready.");
         }
         catch (Exception ex)
@@ -237,14 +239,9 @@ public class DatabaseTestFixture : IAsyncLifetime
 
             // Ensure database is created and migrated
             await context.Database.EnsureDeletedAsync();
-            await context.Database.EnsureCreatedAsync();
-            
-            // Apply any pending migrations
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
-            {
-                await context.Database.MigrateAsync();
-            }
+
+            // Apply migrations to create schema and seed data
+            await context.Database.MigrateAsync();
         }
         catch (Exception ex)
         {
@@ -278,7 +275,7 @@ public class DatabaseTestFixture : IAsyncLifetime
             {
                 var error = await migrateProcess.StandardError.ReadToEndAsync();
                 Console.WriteLine($"Migration warning (might be expected): {error}");
-                
+
                 // Even if migrations fail, we can continue - the tests might still work
                 // with the basic database structure
             }
