@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.IntegrationTests.Authentication;
 
+[Collection("scenarios")]
 public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
 {
     [Fact]
