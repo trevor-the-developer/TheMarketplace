@@ -18,6 +18,7 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
     {
         await Task.CompletedTask;
     }
+
     [Fact]
     public async Task CreateCard_Success()
     {
@@ -42,12 +43,28 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
+        // First create a card to update
+        var createResponse = await Host.Scenario(_ =>
+        {
+            _.WithBearerToken(token);
+            _.Post
+                .Json(new { Title = "Card to Update", Description = "A card that will be updated.", ListingId = 1 })
+                .ToUrl("/api/card/create");
+            _.StatusCodeShouldBe(HttpStatusCode.OK);
+        });
+
+        var createResponseText = await createResponse.ReadAsTextAsync();
+        // Extract the card ID from the response - this is a simplified approach
+        var cardIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
+        var cardId = cardIdMatch.Success ? cardIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
+
+        // Now update the card
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new { Id = 1, Title = "Updated Card", Description = "An updated card description." })
-                .ToUrl("/api/card/update/1");
+                .Json(new { Id = int.Parse(cardId), Title = "Updated Card", Description = "An updated card description." })
+                .ToUrl($"/api/card/update/{cardId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 

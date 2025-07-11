@@ -171,5 +171,21 @@ public class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
+
+        // Add sample data for testing
+        context.Listings.AddRange(new List<Listing>
+        {
+            new()
+            {
+                Title = "Sample Listing", 
+                Description = "Sample listing for testing",
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
     }
 }
