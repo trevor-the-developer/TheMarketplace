@@ -9,8 +9,18 @@ using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.IntegrationTests.Authentication;
 
-public class RegistrationTests(WebAppFixture fixture) : DatabaseCleanupTestBase(fixture)
+[Collection("scenarios")]
+public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncLifetime
 {
+    public async Task InitializeAsync()
+    {
+        await DatabaseResetService.ResetDatabaseAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
     [Fact]
     public async Task RegisterStepOne_Success()
     {

@@ -2,13 +2,24 @@ using System.Net;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
+using Marketplace.Test.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.IntegrationTests.Authentication;
 
-public class LoginTests(WebAppFixture fixture) : ScenarioContext(fixture)
+[Collection("scenarios")]
+public class LoginTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncLifetime
 {
+    public async Task InitializeAsync()
+    {
+        await DatabaseResetService.ResetDatabaseAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
     [Fact]
     public async Task Login_Success()
     {

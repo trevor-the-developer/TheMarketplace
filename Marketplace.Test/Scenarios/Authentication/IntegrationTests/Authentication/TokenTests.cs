@@ -4,14 +4,25 @@ using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
 using Marketplace.Test.Data;
 using Marketplace.Test.Helpers;
+using Marketplace.Test.Infrastructure;
 using Newtonsoft.Json;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.IntegrationTests.Authentication;
 
 [Collection("scenarios")]
-public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
+public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncLifetime
 {
+    public async Task InitializeAsync()
+    {
+        await DatabaseResetService.ResetDatabaseAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
+
     [Fact]
     public async Task TokenRefreshRequest()
     {
@@ -47,10 +58,39 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture)
         Assert.Null(result.ApiError);
     }
 
-    // [Fact]
-    // public async Task TokenRevokeRequest()
-    // {
-    // }
+    [Fact]
+    public async Task TokenRevokeRequest()
+    {
+        // Arrange
+        await Task.Delay(400); // Add delay to avoid race conditions
+        var loginResult = await AuthenticationHelper.GetLoginResponse(Host);
+        var command = new TokenRevokeRequest
+        (
+            loginResult.SecurityToken!,
+            loginResult.RefreshToken!
+        );
+
+        var bearerToken = $"{loginResult.SecurityToken!}";
+
+        // Act
+        var response = await Host.Scenario(_ =>
+        {
+            _.WithBearerToken(bearerToken);
+            _.Post
+                .Json(command, JsonStyle.MinimalApi)
+                .ToUrl(ApiConstants.ApiSlashLogout);
+            _.StatusCodeShouldBe(HttpStatusCode.OK);
+        });
+
+        var result = await GetTokenResponse(response);
+
+        // Assert
+        Assert.NotNull(result?.Succeeded);
+        Assert.True(result?.Succeeded);
+        Assert.Null(result.ApiError);
+        // Note: After revocation, JwtToken and RefreshToken should be null/empty
+        // but the response structure might vary based on implementation
+    }
 
     [Fact]
     public async Task Bad_RefreshToken_RefreshRequest()

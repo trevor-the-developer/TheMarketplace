@@ -27,6 +27,10 @@ public class WebAppFixture : IAsyncLifetime
         // Initialize database first
         await _databaseFixture.InitializeAsync();
 
+        // Add a small delay to ensure database seeding is completely finished
+        // before starting the Alba host
+        await Task.Delay(1000);
+
         // This is absolutely necessary if you 
         // use Oakton for command line processing and want to 
         // use WebApplicationFactory and/or Alba for integration testing

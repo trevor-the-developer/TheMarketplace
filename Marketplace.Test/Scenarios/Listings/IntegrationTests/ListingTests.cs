@@ -1,12 +1,23 @@
 using System.Net;
 using System.Text.RegularExpressions;
 using Marketplace.Test.Helpers;
+using Marketplace.Test.Infrastructure;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Listings.IntegrationTests;
 
-public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture)
+[Collection("scenarios")]
+public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncLifetime
 {
+    public async Task InitializeAsync()
+    {
+        await DatabaseResetService.ResetDatabaseAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
     [Fact]
     public async Task CreateListing_Success()
     {

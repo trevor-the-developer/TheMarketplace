@@ -16,15 +16,34 @@ public class DatabaseTestFixture : IAsyncLifetime
     private const string ConnectionString =
         "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
 
+    private static readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
+    private static bool _isInitialized = false;
+
     public async Task InitializeAsync()
     {
-        Console.WriteLine("Starting database test fixture initialization...");
-        await EnsureDockerContainerIsRunningAsync();
-        Console.WriteLine("Database container is ready, ensuring database exists...");
-        await EnsureDatabaseExistsAsync();
-        Console.WriteLine("Database exists, running migrations...");
-        await RunMigrationsAsync();
-        Console.WriteLine("Database test fixture initialization complete.");
+        await InitializationSemaphore.WaitAsync();
+        try
+        {
+            if (_isInitialized)
+            {
+                Console.WriteLine("Database test fixture already initialized, skipping...");
+                return;
+            }
+
+            Console.WriteLine("Starting database test fixture initialization...");
+            await EnsureDockerContainerIsRunningAsync();
+            Console.WriteLine("Database container is ready, ensuring database exists...");
+            await EnsureDatabaseExistsAsync();
+            Console.WriteLine("Database exists, running migrations...");
+            await RunMigrationsAsync();
+            Console.WriteLine("Database test fixture initialization complete.");
+            
+            _isInitialized = true;
+        }
+        finally
+        {
+            InitializationSemaphore.Release();
+        }
     }
 
     public Task DisposeAsync()
