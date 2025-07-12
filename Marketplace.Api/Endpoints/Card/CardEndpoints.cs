@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Card;
@@ -7,7 +7,7 @@ public static class CardEndpoints
 {
     public static void MapCardEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/card/create", async (CardCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashCardCreate, async (CardCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<CardResponse>(command);
             return Results.Ok(response);
@@ -20,7 +20,7 @@ public static class CardEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/card/update/{id}", async (int id, CardUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashCardUpdate, async (int id, CardUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -39,7 +39,7 @@ public static class CardEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/card/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashCardDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new CardDelete { Id = id });
             return Results.NoContent();
@@ -51,7 +51,7 @@ public static class CardEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/card/", async (CardRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetCards, async (CardRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<CardResponse>(command);
 
@@ -68,7 +68,7 @@ public static class CardEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/card/{cardId}", async (int cardId, 
+        routes.MapPost(ApiConstants.ApiSlashGetCardById, async (int cardId, 
                 CardRequest command, IMessageBus bus) =>
             {
                 command.CardId = cardId;
@@ -87,7 +87,7 @@ public static class CardEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/card/all/", async (
+        routes.MapPost(ApiConstants.ApiSlashGetAllCards, async (
                 CardRequest command, IMessageBus bus) =>
             {
                 command.AllCards = true;

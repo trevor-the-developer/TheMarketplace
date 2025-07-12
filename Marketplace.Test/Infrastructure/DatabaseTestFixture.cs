@@ -183,7 +183,7 @@ public class DatabaseTestFixture : IAsyncLifetime
                     {
                         FileName = "docker",
                         Arguments =
-                            $"exec {ContainerName} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1'",
+                            $"exec {ContainerName} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q \"SELECT 1\"",
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,

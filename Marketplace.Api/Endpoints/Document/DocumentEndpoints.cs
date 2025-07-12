@@ -1,3 +1,4 @@
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Document;
@@ -6,7 +7,7 @@ public static class DocumentEndpoints
 {
     public static void MapDocumentEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/document/create", async (DocumentCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashDocumentCreate, async (DocumentCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<DocumentResponse>(command);
             return Results.Ok(response);
@@ -19,7 +20,7 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/document/update/{id}", async (int id, DocumentUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashDocumentUpdate, async (int id, DocumentUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -38,7 +39,7 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/document/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashDocumentDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new DocumentDelete { Id = id });
             return Results.NoContent();
@@ -50,7 +51,7 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/document/", async (DocumentRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetDocument, async (DocumentRequest command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<DocumentResponse>(command);
 
@@ -67,7 +68,7 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/document/{documentId}", async (int documentId, DocumentRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetDocumentById, async (int documentId, DocumentRequest command, IMessageBus bus) =>
         {
             command.DocumentId = documentId;
             var response = await bus.InvokeAsync<DocumentResponse>(command);
@@ -85,7 +86,7 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/document/all/", async (DocumentRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllDocuments, async (DocumentRequest command, IMessageBus bus) =>
         {
             command.AllDocuments = true;
             var response = await bus.InvokeAsync<DocumentResponse>(command);

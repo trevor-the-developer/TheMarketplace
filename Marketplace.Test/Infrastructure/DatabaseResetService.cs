@@ -2,14 +2,13 @@ using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Enums;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Marketplace.Test.Infrastructure;
 
-public class DatabaseResetService
+public static class DatabaseResetService
 {
     private const string ConnectionString =
         "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
@@ -24,7 +23,7 @@ public class DatabaseResetService
                 options.UseSqlServer(ConnectionString));
             services.AddLogging(builder => builder.AddConsole());
 
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
 

@@ -1,3 +1,4 @@
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Media;
@@ -6,7 +7,7 @@ public static class MediaEndpoints
 {
     public static void MapMediaEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/media/create", async (MediaCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashMediaCreate, async (MediaCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<MediaResponse>(command);
             return Results.Ok(response);
@@ -19,7 +20,7 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/media/update/{id}", async (int id, MediaUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashMediaUpdate, async (int id, MediaUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -38,7 +39,7 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/media/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashMediaDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new MediaDelete { Id = id });
             return Results.NoContent();
@@ -50,7 +51,7 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/media/", async (MediaRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetMedia, async (MediaRequest command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<MediaResponse>(command);
 
@@ -67,7 +68,7 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/media/{mediaId}", async (int mediaId, MediaRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetMediaById, async (int mediaId, MediaRequest command, IMessageBus bus) =>
         {
             command.MediaId = mediaId;
             var response = await bus.InvokeAsync<MediaResponse>(command);
@@ -85,7 +86,7 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/media/all/", async (MediaRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllMedia, async (MediaRequest command, IMessageBus bus) =>
         {
             command.AllMedia = true;
             var response = await bus.InvokeAsync<MediaResponse>(command);

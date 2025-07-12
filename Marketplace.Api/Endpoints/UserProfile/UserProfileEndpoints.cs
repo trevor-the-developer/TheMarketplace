@@ -1,3 +1,4 @@
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.UserProfile;
@@ -6,7 +7,7 @@ public static class UserProfileEndpoints
 {
     public static void MapUserProfileEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/userprofile/create", async (UserProfileCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashUserProfileCreate, async (UserProfileCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
             return Results.Ok(response);
@@ -19,7 +20,7 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/userprofile/update/{applicationUserId}", async (string applicationUserId, UserProfileUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashUserProfileUpdate, async (string applicationUserId, UserProfileUpdate command, IMessageBus bus) =>
         {
             if (applicationUserId != command.ApplicationUserId)
             {
@@ -38,7 +39,7 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/userprofile/delete/{applicationUserId}", async (string applicationUserId, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashUserProfileDelete, async (string applicationUserId, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new UserProfileDelete { ApplicationUserId = applicationUserId });
             return Results.NoContent();
@@ -50,7 +51,7 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/userprofile/", async (UserProfileRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetUserProfile, async (UserProfileRequest command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
 
@@ -67,7 +68,7 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/userprofile/{applicationUserId}", async (string applicationUserId, UserProfileRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetUserProfileById, async (string applicationUserId, UserProfileRequest command, IMessageBus bus) =>
         {
             command.ApplicationUserId = applicationUserId;
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
@@ -85,7 +86,7 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/userprofile/all/", async (UserProfileRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllUserProfiles, async (UserProfileRequest command, IMessageBus bus) =>
         {
             command.AllUserProfiles = true;
             var response = await bus.InvokeAsync<UserProfileResponse>(command);

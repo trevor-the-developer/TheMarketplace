@@ -1,3 +1,4 @@
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Product;
@@ -6,7 +7,7 @@ public static class ProductEndpoints
 {
     public static void MapProductEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/product/create", async (ProductCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashProductCreate, async (ProductCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ProductResponse>(command);
             return Results.Ok(response);
@@ -19,7 +20,7 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/product/update/{id}", async (int id, ProductUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashProductUpdate, async (int id, ProductUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -38,7 +39,7 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/product/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashProductDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new ProductDelete { Id = id });
             return Results.NoContent();
@@ -50,7 +51,7 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/product/", async (ProductRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetProduct, async (ProductRequest command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ProductResponse>(command);
 
@@ -67,7 +68,7 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/product/{productId}", async (int productId, ProductRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetProductById, async (int productId, ProductRequest command, IMessageBus bus) =>
         {
             command.ProductId = productId;
             var response = await bus.InvokeAsync<ProductResponse>(command);
@@ -85,7 +86,7 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/product/all/", async (ProductRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllProducts, async (ProductRequest command, IMessageBus bus) =>
         {
             command.AllProducts = true;
             var response = await bus.InvokeAsync<ProductResponse>(command);

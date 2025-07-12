@@ -1,3 +1,4 @@
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Tag;
@@ -6,7 +7,7 @@ public static class TagEndpoints
 {
     public static void MapTagEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/tag/create", async (TagCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashTagCreate, async (TagCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<TagResponse>(command);
             return Results.Ok(response);
@@ -19,7 +20,7 @@ public static class TagEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/tag/update/{id}", async (int id, TagUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashTagUpdate, async (int id, TagUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -38,7 +39,7 @@ public static class TagEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/tag/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashTagDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new TagDelete { Id = id });
             return Results.NoContent();
@@ -50,7 +51,7 @@ public static class TagEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/tag/", async (TagRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetTag, async (TagRequest command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<TagResponse>(command);
 
@@ -67,7 +68,7 @@ public static class TagEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/tag/{tagId}", async (int tagId, TagRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetTagById, async (int tagId, TagRequest command, IMessageBus bus) =>
         {
             command.TagId = tagId;
             var response = await bus.InvokeAsync<TagResponse>(command);
@@ -85,7 +86,7 @@ public static class TagEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost("/api/get/tag/all/", async (TagRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllTags, async (TagRequest command, IMessageBus bus) =>
         {
             command.AllTags = true;
             var response = await bus.InvokeAsync<TagResponse>(command);

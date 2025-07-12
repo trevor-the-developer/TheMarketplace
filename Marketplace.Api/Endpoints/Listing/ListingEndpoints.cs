@@ -1,5 +1,4 @@
-using Marketplace.Api.Endpoints.Authentication.Login;
-using Newtonsoft.Json;
+using Marketplace.Core.Constants;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Listing;
@@ -9,7 +8,7 @@ public static class ListingEndpoints
 {
     public static void MapListingEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/listing/create", async (ListingCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashListingCreate, async (ListingCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ListingResponse>(command);
             return Results.Ok(response);
@@ -22,7 +21,7 @@ public static class ListingEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut("/api/listing/update/{id}", async (int id, ListingUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiSlashListingUpdate, async (int id, ListingUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -41,7 +40,7 @@ public static class ListingEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete("/api/listing/delete/{id}", async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiSlashListingDelete, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new ListingDelete { Id = id });
             return Results.NoContent();
@@ -52,7 +51,7 @@ public static class ListingEndpoints
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
-        routes.MapPost("/api/get/listing/", async (ListingRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetListing, async (ListingRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<ListingResponse>(command);
 
@@ -69,7 +68,7 @@ public static class ListingEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/listing/{listingId}", async (int listingId, ListingRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetListingById, async (int listingId, ListingRequest command, IMessageBus bus) =>
             {
                 command.ListingId = listingId;
                 var response = await bus.InvokeAsync<ListingResponse>(command);
@@ -87,7 +86,7 @@ public static class ListingEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/all/listing/", async (ListingRequest command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiSlashGetAllListings, async (ListingRequest command, IMessageBus bus) =>
             {
                 command.AllListings = true;
                 var response = await bus.InvokeAsync<ListingResponse>(command);
