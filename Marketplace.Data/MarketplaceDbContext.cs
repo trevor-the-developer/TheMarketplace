@@ -34,6 +34,7 @@ namespace Marketplace.Data
             modalBuilder.ApplyConfiguration(new ProductConfiguration());
             modalBuilder.ApplyConfiguration(new CardConfiguration());
             modalBuilder.ApplyConfiguration(new ListingConfiguration());
+            modalBuilder.ApplyConfiguration(new TagConfiguration());
         }
 
         public DbSet<Listing> Listings { get; set; }

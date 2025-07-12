@@ -76,12 +76,14 @@ public class RegistrationTests
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
+            var mockValidationService = new MockValidationService();
             await registerHandler.Handle(
                 null!,
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-                mockDbContext.Object);
+                mockDbContext.Object,
+                mockValidationService);
         });
     }
 
@@ -100,12 +102,14 @@ public class RegistrationTests
         var registerHandler = new RegisterHandler();
 
         // Act
+        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object);
+            mockDbContext.Object,
+            mockValidationService);
 
         // Assert
         Assert.NotNull(response);
@@ -129,12 +133,14 @@ public class RegistrationTests
         var registerHandler = new RegisterHandler();
 
         // Act
+        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object);
+            mockDbContext.Object,
+            mockValidationService);
 
         // Assert
         Assert.NotNull(response);
@@ -167,12 +173,14 @@ public class RegistrationTests
         var registerHandler = new RegisterHandler();
 
         // Act
+        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object);
+            mockDbContext.Object,
+            mockValidationService);
 
         // Assert
         Assert.NotNull(response);
@@ -199,12 +207,14 @@ public class RegistrationTests
         var registerHandler = new RegisterHandler();
 
         // Act
+        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object);
+            mockDbContext.Object,
+            mockValidationService);
 
         // Assert
         Assert.NotNull(response);
@@ -232,12 +242,14 @@ public class RegistrationTests
         var registerHandler = new RegisterHandler();
 
         // Act
+        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
             mockUserManager.Object,
             mockRoleManager.Object,
             mockLogger.Object,
-            mockDbContext.Object);
+            mockDbContext.Object,
+            mockValidationService);
 
         // Assert
         Assert.NotNull(response);
@@ -267,12 +279,14 @@ public class RegistrationTests
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
+            var mockValidationService = new MockValidationService();
             await registerHandler.Handle(
                 command,
                 mockUserManager.Object,
                 mockRoleManager.Object,
                 mockLogger.Object,
-                mockDbContext.Object);
+                mockDbContext.Object,
+                mockValidationService);
         });
     }
 

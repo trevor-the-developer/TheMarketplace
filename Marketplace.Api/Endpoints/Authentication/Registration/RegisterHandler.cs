@@ -1,10 +1,12 @@
-﻿using Marketplace.Core;
+using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Attributes;
+using Marketplace.Core.Validation;
+using Newtonsoft.Json;
 
 namespace Marketplace.Api.Endpoints.Authentication.Registration
 {
@@ -19,11 +21,29 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
+            RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext, IValidationService validationService)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
+            ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
             logger.LogInformation(ApiConstants.RegisterHandlerCalled);
+
+            // Validate input
+            var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+            if (validationErrors.Count != 0)
+            {
+                logger.LogError("Registration request validation failed: {Errors}", string.Join(", ", validationErrors));
+                return new RegisterStepOneResponse
+                {
+                    RegistrationStepOne = false,
+                    ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                        StatusCode: StatusCodes.Status400BadRequest,
+                        ErrorMessage: "Validation failed",
+                        StackTrace: JsonConvert.SerializeObject(validationErrors)
+                    )
+                };
+            }
 
             var user = await userManager.FindByEmailAsync(command.Email);
             if (user is not null)

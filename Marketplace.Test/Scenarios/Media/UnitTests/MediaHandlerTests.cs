@@ -15,11 +15,13 @@ public class MediaHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly MediaHandler _handler;
     private readonly Mock<ILogger<MediaHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public MediaHandlerTests()
     {
         _loggerMock = new Mock<ILogger<MediaHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new MediaHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -60,7 +62,7 @@ public class MediaHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Media);
@@ -102,7 +104,7 @@ public class MediaHandlerTests : IDisposable
         _dbContext.Files.Add(existingMedia);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Media);

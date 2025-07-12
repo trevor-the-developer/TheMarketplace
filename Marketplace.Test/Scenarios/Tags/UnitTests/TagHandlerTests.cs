@@ -15,11 +15,13 @@ public class TagHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly TagHandler _handler;
     private readonly Mock<ILogger<TagHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public TagHandlerTests()
     {
         _loggerMock = new Mock<ILogger<TagHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new TagHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -57,7 +59,7 @@ public class TagHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Tag);
@@ -93,7 +95,7 @@ public class TagHandlerTests : IDisposable
         _dbContext.Tags.Add(existingTag);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Tag);

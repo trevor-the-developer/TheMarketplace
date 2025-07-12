@@ -15,11 +15,13 @@ public class ListingHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly ListingHandler _handler;
     private readonly Mock<ILogger<ListingHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public ListingHandlerTests()
     {
         _loggerMock = new Mock<ILogger<ListingHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new ListingHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -56,7 +58,7 @@ public class ListingHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);
@@ -90,7 +92,7 @@ public class ListingHandlerTests : IDisposable
         _dbContext.Listings.Add(existingListing);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);

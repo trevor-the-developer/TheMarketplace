@@ -2,6 +2,9 @@ using Marketplace.Data;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
+using Marketplace.Core.Validation;
+using Marketplace.Core;
+using Newtonsoft.Json;
 
 namespace Marketplace.Api.Endpoints.Tag;
 
@@ -54,11 +57,27 @@ public class TagHandler
     }
 
     [Transactional]
-    public async Task<TagResponse> Handle(TagCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<TagResponse> Handle(TagCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new TagResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var tag = new Data.Entities.Tag
@@ -79,11 +98,27 @@ public class TagHandler
     }
 
     [Transactional]
-    public async Task<TagResponse> Handle(TagUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<TagResponse> Handle(TagUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new TagResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var tag = await dbContext.Tags.FindAsync(command.Id);
         if (tag == null)

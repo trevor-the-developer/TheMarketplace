@@ -2,6 +2,9 @@ using Marketplace.Data;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
+using Marketplace.Core.Validation;
+using Marketplace.Core;
+using Newtonsoft.Json;
 
 namespace Marketplace.Api.Endpoints.Listing;
 
@@ -34,11 +37,27 @@ public class ListingHandler
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<ListingResponse> Handle(ListingCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new ListingResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var listing = new Data.Entities.Listing
@@ -58,11 +77,27 @@ public class ListingHandler
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<ListingResponse> Handle(ListingUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new ListingResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var listing = await dbContext.Listings.FindAsync(command.Id);
         if (listing == null)

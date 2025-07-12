@@ -2,6 +2,9 @@ using Marketplace.Data;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
+using Marketplace.Core.Validation;
+using Marketplace.Core;
+using Newtonsoft.Json;
 
 namespace Marketplace.Api.Endpoints.UserProfile;
 
@@ -68,11 +71,27 @@ public class UserProfileHandler
     }
 
     [Transactional]
-    public async Task<UserProfileResponse> Handle(UserProfileCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<UserProfileResponse> Handle(UserProfileCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new UserProfileResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var userProfile = new Data.Entities.UserProfile
@@ -94,11 +113,27 @@ public class UserProfileHandler
     }
 
     [Transactional]
-    public async Task<UserProfileResponse> Handle(UserProfileUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<UserProfileResponse> Handle(UserProfileUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new UserProfileResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var userProfile = await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
         if (userProfile == null)

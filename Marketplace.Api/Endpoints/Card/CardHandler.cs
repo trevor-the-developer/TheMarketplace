@@ -2,6 +2,9 @@ using Marketplace.Data;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
+using Marketplace.Core.Validation;
+using Marketplace.Core;
+using Newtonsoft.Json;
 
 namespace Marketplace.Api.Endpoints.Card;
 
@@ -34,11 +37,27 @@ public class CardHandler
     }
 
     [Transactional]
-    public async Task<CardResponse> Handle(CardCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<CardResponse> Handle(CardCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new CardResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var card = new Data.Entities.Card
@@ -59,11 +78,27 @@ public class CardHandler
     }
 
     [Transactional]
-    public async Task<CardResponse> Handle(CardUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService)
+    public async Task<CardResponse> Handle(CardUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Count != 0)
+        {
+            return new CardResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         var card = await dbContext.Cards.FindAsync(command.Id);
         if (card == null)

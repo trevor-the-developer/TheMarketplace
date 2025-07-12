@@ -15,11 +15,13 @@ public class CardHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly CardHandler _handler;
     private readonly Mock<ILogger<CardHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public CardHandlerTests()
     {
         _loggerMock = new Mock<ILogger<CardHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new CardHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -57,7 +59,7 @@ public class CardHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Card);
@@ -91,7 +93,7 @@ public class CardHandlerTests : IDisposable
         _dbContext.Cards.Add(existingCard);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Card);

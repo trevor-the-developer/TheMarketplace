@@ -15,11 +15,13 @@ public class UserProfileHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly UserProfileHandler _handler;
     private readonly Mock<ILogger<UserProfileHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public UserProfileHandlerTests()
     {
         _loggerMock = new Mock<ILogger<UserProfileHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new UserProfileHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -58,7 +60,7 @@ public class UserProfileHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.UserProfile);
@@ -95,7 +97,7 @@ public class UserProfileHandlerTests : IDisposable
         _dbContext.Profiles.Add(existingUserProfile);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.UserProfile);

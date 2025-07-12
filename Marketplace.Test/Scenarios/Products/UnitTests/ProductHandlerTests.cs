@@ -15,11 +15,13 @@ public class ProductHandlerTests : IDisposable
     private readonly MarketplaceDbContext _dbContext;
     private readonly ProductHandler _handler;
     private readonly Mock<ILogger<ProductHandler>> _loggerMock;
+    private readonly MockValidationService _validationService;
 
     public ProductHandlerTests()
     {
         _loggerMock = new Mock<ILogger<ProductHandler>>();
         _currentUserService = new MockCurrentUserService();
+        _validationService = new MockValidationService();
         _handler = new ProductHandler();
 
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
@@ -60,7 +62,7 @@ public class ProductHandlerTests : IDisposable
         };
 
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Product);
@@ -101,7 +103,7 @@ public class ProductHandlerTests : IDisposable
         _dbContext.Products.Add(existingProduct);
         await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService);
+        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Product);
