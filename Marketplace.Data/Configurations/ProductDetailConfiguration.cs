@@ -22,9 +22,10 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
         builder.HasData(
             new ProductDetail()
             {
-                Id = 30,
+                Id = 1,
                 Title = "Sample Product Detail",
                 Description = "This is a sample product detail",
+                ProductId = 1,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "John Doe",
                 ModifiedDate = DateTime.Now,
@@ -32,9 +33,10 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
             },
             new ProductDetail()
             {
-                Id = 31,
+                Id = 2,
                 Title = "Another Sample Product Detail",
                 Description = "This is another sample product detail",
+                ProductId = 2,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "Jane Smith",
                 ModifiedDate = DateTime.Now,
@@ -42,9 +44,10 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
             },
             new ProductDetail()
             {
-                Id = 32,
+                Id = 3,
                 Title = "Yet Another Sample Product Detail",
                 Description = "This is yet another sample product detail",
+                ProductId = 3,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "John Doe",
                 ModifiedDate = DateTime.Now,

@@ -408,9 +408,9 @@ namespace Marketplace.Data.Migrations
                 columns: new[] { "Id", "CreatedBy", "CreatedDate", "Description", "ModifiedBy", "ModifiedDate", "ProductId", "Title" },
                 values: new object[,]
                 {
-                    { 30, "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(6600), "This is a sample product detail", "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(6858), null, "Sample Product Detail" },
-                    { 31, "Jane Smith", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7092), "This is another sample product detail", "Jane Smith", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7100), null, "Another Sample Product Detail" },
-                    { 32, "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7103), "This is yet another sample product detail", "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7105), null, "Yet Another Sample Product Detail" }
+                    { 1, "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(6600), "This is a sample product detail", "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(6858), null, "Sample Product Detail" },
+                    { 2, "Jane Smith", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7092), "This is another sample product detail", "Jane Smith", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7100), null, "Another Sample Product Detail" },
+                    { 3, "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7103), "This is yet another sample product detail", "John Doe", new DateTime(2025, 7, 9, 22, 20, 21, 918, DateTimeKind.Local).AddTicks(7105), null, "Yet Another Sample Product Detail" }
                 });
 
             migrationBuilder.InsertData(
@@ -437,10 +437,15 @@ namespace Marketplace.Data.Migrations
                 columns: new[] { "Id", "CardId", "Category", "CreatedBy", "CreatedDate", "Description", "IsDeleted", "IsEnabled", "ModifiedBy", "ModifiedDate", "ProductDetailId", "ProductType", "Title" },
                 values: new object[,]
                 {
-                    { 1, 1, "Sample Category", "Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1240), "This is a sample product", false, true, "Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1328), 21, "Sample Type", "Sample Product" },
-                    { 2, 1, "Another Sample Category", "Another Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1391), "This is another sample product", false, true, "Another Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1394), 22, "Another Sample Type", "Another Sample Product" },
-                    { 3, 1, "Third Sample Category", "Third Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1399), "This is the third sample product", false, true, "Third Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1401), 23, "Third Sample Type", "Third Sample Product" }
+                    { 1, 1, "Sample Category", "Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1240), "This is a sample product", false, true, "Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1328), 1, "Sample Type", "Sample Product" },
+                    { 2, 1, "Another Sample Category", "Another Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1391), "This is another sample product", false, true, "Another Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1394), 2, "Another Sample Type", "Another Sample Product" },
+                    { 3, 1, "Third Sample Category", "Third Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1399), "This is the third sample product", false, true, "Third Sample User", new DateTime(2025, 7, 9, 22, 20, 21, 923, DateTimeKind.Local).AddTicks(1401), 3, "Third Sample Type", "Third Sample Product" }
                 });
+
+            // Update ProductDetails to set ProductId foreign key references
+            migrationBuilder.Sql("UPDATE ProductDetails SET ProductId = 1 WHERE Id = 1;");
+            migrationBuilder.Sql("UPDATE ProductDetails SET ProductId = 2 WHERE Id = 2;");
+            migrationBuilder.Sql("UPDATE ProductDetails SET ProductId = 3 WHERE Id = 3;");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

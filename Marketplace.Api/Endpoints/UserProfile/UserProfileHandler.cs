@@ -100,7 +100,7 @@ public class UserProfileHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
 
-        var userProfile = await dbContext.Profiles.FindAsync(command.Id);
+        var userProfile = await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
         if (userProfile == null)
         {
             return new UserProfileResponse { UserProfile = null };
@@ -124,7 +124,7 @@ public class UserProfileHandler
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
-        var userProfile = await dbContext.Profiles.FindAsync(command.Id);
+        var userProfile = await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
         if (userProfile != null)
         {
             dbContext.Profiles.Remove(userProfile);

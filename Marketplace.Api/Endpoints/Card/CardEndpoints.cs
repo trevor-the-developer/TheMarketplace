@@ -50,6 +50,7 @@ public static class CardEndpoints
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
+        
         routes.MapPost("/api/get/card/", async (CardRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<CardResponse>(command);
@@ -86,7 +87,7 @@ public static class CardEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost("/api/get/card/all/", async (int cardId, 
+        routes.MapPost("/api/get/card/all/", async (
                 CardRequest command, IMessageBus bus) =>
             {
                 command.AllCards = true;

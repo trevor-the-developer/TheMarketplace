@@ -187,5 +187,98 @@ public class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
+        
+        // Add sample cards for testing
+        context.Cards.AddRange(new List<Card>
+        {
+            new()
+            {
+                Title = "Sample Card",
+                Description = "Sample card for testing",
+                IsEnabled = true,
+                Colour = "#007bff",
+                ListingId = 1,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            },
+            new()
+            {
+                Title = "Sample Card 2",
+                Description = "Second sample card for testing",
+                IsEnabled = true,
+                Colour = "#28a745",
+                ListingId = 1,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
+        
+        // Add sample products for testing
+        context.Products.AddRange(new List<Product>
+        {
+            new()
+            {
+                Title = "Sample Product",
+                Description = "Sample product for testing",
+                ProductType = "Sample Type",
+                Category = "Sample Category",
+                IsEnabled = true,
+                IsDeleted = false,
+                CardId = 1,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            },
+            new()
+            {
+                Title = "Sample Product 2",
+                Description = "Second sample product for testing",
+                ProductType = "Sample Type 2",
+                Category = "Sample Category 2",
+                IsEnabled = true,
+                IsDeleted = false,
+                CardId = 2,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
+        
+        // Add sample product details for testing
+        context.ProductDetails.AddRange(new List<ProductDetail>
+        {
+            new()
+            {
+                Title = "Sample Product Detail",
+                Description = "Sample product detail for testing",
+                ProductId = 1,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            },
+            new()
+            {
+                Title = "Sample Product Detail 2",
+                Description = "Second sample product detail for testing",
+                ProductId = 2,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
     }
 }

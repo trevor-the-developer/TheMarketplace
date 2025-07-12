@@ -13,6 +13,12 @@ using Oakton.Resources;
 using System.Text;
 using Marketplace.Api.Endpoints.Card;
 using Marketplace.Api.Endpoints.Listing;
+using Marketplace.Api.Endpoints.Product;
+using Marketplace.Api.Endpoints.ProductDetail;
+using Marketplace.Api.Endpoints.Media;
+using Marketplace.Api.Endpoints.Document;
+using Marketplace.Api.Endpoints.Tag;
+using Marketplace.Api.Endpoints.UserProfile;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.SqlServer;
@@ -257,6 +263,12 @@ if (!app.Environment.IsEnvironment("Testing"))
 app.MapAuthenticationEndpoints();
 app.MapListingEndpoints();
 app.MapCardEndpoints();
+app.MapProductEndpoints();
+app.MapProductDetailEndpoints();
+app.MapMediaEndpoints();
+app.MapDocumentEndpoints();
+app.MapTagEndpoints();
+app.MapUserProfileEndpoints();
 
 #endregion
 
