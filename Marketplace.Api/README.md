@@ -1,13 +1,13 @@
 # Marketplace API Project
 
-.NET 9 Minimal API project demonstrating a lean coding pattern with emphasis on readable code, semantic naming conventions, and comprehensive testing. The project leverages WolverineFx as a mediator library (a better, easier-to-work-with version of .NET MediatR).
+.NET 8 Minimal API project demonstrating a lean coding pattern with emphasis on readable code, semantic naming conventions, and comprehensive testing. The project leverages WolverineFx as a mediator library (a better, easier-to-work-with version of .NET MediatR).
 
 ## Features
 
 - **Authentication & Authorisation**: JWT-based authentication with refresh tokens, role-based access control
 - **Clean Architecture**: Minimal API endpoints with proper separation of concerns
 - **CQRS Pattern**: Implemented using WolverineFx mediator for command and query separation
-- **Comprehensive Testing**: 55 passing tests including unit and integration tests
+- **Comprehensive Testing**: Extensive unit and integration tests with Alba framework
 - **API Documentation**: Swagger/OpenAPI documentation for all endpoints
 
 ## Docker Configuration
@@ -50,7 +50,8 @@ This project uses WolverineFx as a mediator tool for implementing the CQRS patte
 - Clean separation between API endpoints and business logic
 - Automatic handler discovery and registration
 - Better testability with isolated handlers
-- Simplified command/query processing pipeline
+- **Simplified command/query processing pipeline
+- **Complete CRUD Operations**: Full Create, Read, Update, Delete operations for all entities
 
 ### Handler Pattern:
 Each endpoint uses a corresponding handler class that processes incoming commands/queries. For example:

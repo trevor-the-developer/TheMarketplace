@@ -1,6 +1,6 @@
 # Data Layer - Marketplace.Data
 
-.NET 9 Entity Framework Core data layer with comprehensive entity modeling and automated database management.
+.NET 8 Entity Framework Core data layer with comprehensive entity modeling and automated database management.
 
 ## Data Structure Hierarchy
 
@@ -23,7 +23,7 @@
 
 ## Database Features
 
-### Entity Framework Core 9
+### Entity Framework Core 8
 - **Code First Approach**: Database schema generated from entity models
 - **Migrations**: Automated database schema versioning and updates
 - **Identity Integration**: ASP.NET Core Identity for user management
@@ -31,7 +31,7 @@
 
 ### Database Management
 - **Automated Setup**: Database creation and migration application during test runs
-- **Design-Time Factory**: Proper EF Core tooling support for .NET 9
+- **Design-Time Factory**: Proper EF Core tooling support for .NET 8
 - **Connection Management**: Scoped DbContext lifetime for proper dependency injection
 
 ### Migration Commands

@@ -40,16 +40,71 @@ Wolverine provides automatic handler discovery that:
 - **POST /api/auth/login** - User authentication with JWT token generation
 - **POST /api/auth/register** - User registration with email confirmation
 - **POST /api/auth/refresh** - JWT token refresh using refresh tokens
-- **POST /api/auth/logout** - User logout and token revocation
+- **POST /api/auth/revoke** - User logout and token revocation
 
 ### Listings Module
-- **GET /api/listings** - Retrieve all listings with pagination
-- **GET /api/listings/{id}** - Get specific listing by ID
-- **GET /api/listings/user/{userId}** - Get user-specific listings
+- **POST /api/listing/create** - Create new listing
+- **PUT /api/listing/update/{id}** - Update existing listing
+- **DELETE /api/listing/delete/{id}** - Delete listing
+- **POST /api/listing/get** - Retrieve listings
+- **POST /api/listing/get/{id}** - Get specific listing by ID
+- **POST /api/listing/get/all** - Get all listings
 
 ### Cards Module
-- **GET /api/cards** - Retrieve all cards with filtering
-- **GET /api/cards/{id}** - Get specific card by ID
+- **POST /api/card/create** - Create new card
+- **PUT /api/card/update/{id}** - Update existing card
+- **DELETE /api/card/delete/{id}** - Delete card
+- **POST /api/card/get** - Retrieve cards
+- **POST /api/card/get/{id}** - Get specific card by ID
+- **POST /api/card/get/all** - Get all cards
+
+### Products Module
+- **POST /api/product/create** - Create new product
+- **PUT /api/product/update/{id}** - Update existing product
+- **DELETE /api/product/delete/{id}** - Delete product
+- **POST /api/product/get** - Retrieve products
+- **POST /api/product/get/{id}** - Get specific product by ID
+- **POST /api/product/get/all** - Get all products
+
+### Product Details Module
+- **POST /api/productdetail/create** - Create new product detail
+- **PUT /api/productdetail/update/{id}** - Update existing product detail
+- **DELETE /api/productdetail/delete/{id}** - Delete product detail
+- **POST /api/productdetail/get** - Retrieve product details
+- **POST /api/productdetail/get/{id}** - Get specific product detail by ID
+- **POST /api/productdetail/get/all** - Get all product details
+
+### Media Module
+- **POST /api/media/create** - Create new media
+- **PUT /api/media/update/{id}** - Update existing media
+- **DELETE /api/media/delete/{id}** - Delete media
+- **POST /api/media/get** - Retrieve media
+- **POST /api/media/get/{id}** - Get specific media by ID
+- **POST /api/media/get/all** - Get all media
+
+### Documents Module
+- **POST /api/document/create** - Create new document
+- **PUT /api/document/update/{id}** - Update existing document
+- **DELETE /api/document/delete/{id}** - Delete document
+- **POST /api/document/get** - Retrieve documents
+- **POST /api/document/get/{id}** - Get specific document by ID
+- **POST /api/document/get/all** - Get all documents
+
+### Tags Module
+- **POST /api/tag/create** - Create new tag
+- **PUT /api/tag/update/{id}** - Update existing tag
+- **DELETE /api/tag/delete/{id}** - Delete tag
+- **POST /api/tag/get** - Retrieve tags
+- **POST /api/tag/get/{id}** - Get specific tag by ID
+- **POST /api/tag/get/all** - Get all tags
+
+### User Profiles Module
+- **POST /api/userprofile/create** - Create new user profile
+- **PUT /api/userprofile/update/{id}** - Update existing user profile
+- **DELETE /api/userprofile/delete/{id}** - Delete user profile
+- **POST /api/userprofile/get** - Retrieve user profiles
+- **POST /api/userprofile/get/{id}** - Get specific user profile by ID
+- **POST /api/userprofile/get/all** - Get all user profiles
 
 ## Handler Pattern Example
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-TheMarketplace is a .NET 9 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
+TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
 
 ## Current Architecture
 
@@ -14,9 +14,9 @@ TheMarketplace is a .NET 9 web API backend for a community-based buy/sell/trade 
 - **User Management**: JWT-based authentication with role-based access
 
 ### Technology Stack
-- **.NET 9** - Modern C# runtime with minimal API architecture
+- **.NET 8** - Modern C# runtime with minimal API architecture
 - **[WolverineFx](https://github.com/JasperFx/wolverine)** - Message bus for CQRS pattern implementation
-- **Entity Framework Core 9** - Data access layer with Code First approach
+- **Entity Framework Core 8** - Data access layer with Code First approach
 - **ASP.NET Core Identity** - User authentication and authorisation
 - **JWT Authentication** - Secure token-based authentication with refresh tokens
 - **SQL Server 2022** - Primary database (containerised)
@@ -41,29 +41,30 @@ TheMarketplace is a .NET 9 web API backend for a community-based buy/sell/trade 
   - Media and document support
   
 - **API Endpoints**
+  - Complete CRUD operations for all entities (Listings, Cards, Products, ProductDetails, Media, Documents, Tags, UserProfiles)
   - Authentication endpoints (login, register, token management)
-  - Listing retrieval endpoints (all, by ID, user-specific)
-  - Card retrieval endpoints (all, by ID, filtered)
-  - Swagger documentation
+  - Comprehensive endpoint coverage with proper HTTP verbs
+  - Swagger documentation with security schemes
   
 - **Infrastructure**
   - Docker containerisation for SQL Server with proper volume management
-  - EF Core migrations setup with .NET 9 compatibility
+  - EF Core migrations setup with .NET 8 compatibility
   - Automated database initialisation for tests
-  - Comprehensive test structure with 55 passing tests
+  - Comprehensive test structure with Alba integration testing
+  - Scenario-based testing with proper database isolation
   - CORS configuration
   - Proper dependency injection configuration
   
-### 🚧 In Progress
-- Full CRUD operations for listings and cards
-- Product management endpoints
-- File upload and media handling
-- Search functionality
+### 🚧 Future Enhancements
+- Advanced search and filtering functionality
+- File upload and media handling optimization
+- Real-time notifications
+- Performance optimizations
 
 ## Getting Started
 
 ### Prerequisites
-- .NET 9 SDK
+- .NET 8 SDK
 - Docker Desktop
 - SQL Server Management Studio (optional)
 
@@ -101,12 +102,12 @@ The solution follows a clean architecture pattern with four main projects:
 
 ### Phase 1: Core Marketplace Features (Q2 2025)
 - **Priority: High**
-- Complete CRUD operations for all entities
-- File upload and media management
-- Basic search and filtering
-- User profile management
+- ✅ Complete CRUD operations for all entities (COMPLETED)
+- File upload and media handling optimization
+- Advanced search and filtering functionality
 - Email notifications system
-- Performance optimisation
+- Input validation and error handling enhancements
+- Performance optimisation and caching
 
 ### Phase 2: Enhanced User Experience (Q3 2025)
 - **Priority: High**
@@ -199,7 +200,7 @@ docker compose logs -f
 The solution includes comprehensive testing:
 
 ```bash
-# Run all tests (currently 55 passing tests)
+# Run all tests
 dotnet test
 
 # Run with verbose output
@@ -208,9 +209,9 @@ dotnet test --verbosity normal
 # Run with coverage
 dotnet test --collect:"XPlat Code Coverage"
 
-# Integration tests
-dotnet test --filter "Category=Integration"
-
 # Run specific test project
 dotnet test Marketplace.Test
+
+# Run tests with Alba integration testing
+dotnet test --logger "console;verbosity=detailed"
 ```
