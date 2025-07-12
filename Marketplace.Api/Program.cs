@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Http;
+using FluentValidation;
 
 #region Host builder setup
 
@@ -183,6 +184,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Register FluentValidation services
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddScoped<Marketplace.Core.Validation.IValidationService, Marketplace.Core.Validation.ValidationService>();
 
 // Add IUrlHelper support
 builder.Services.AddScoped<IUrlHelper>(factory =>

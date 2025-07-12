@@ -23,7 +23,7 @@ public static class ApiConstants
     // endpoints -card
     public const string ApiSlashCardCreate = "/api/card/create";
     public const string ApiSlashCardDelete = "/api/card/delete/{id}";
-    public const string ApiSlashCardUpdate = "/api/card/update{id}";
+    public const string ApiSlashCardUpdate = "/api/card/update/{id}";
     public const string ApiSlashGetCards = "/api/get/card";
     public const string ApiSlashGetAllCards = "/api/get/card/all/";
     public const string ApiSlashGetCardById = "/api/get/card/{cardId}";

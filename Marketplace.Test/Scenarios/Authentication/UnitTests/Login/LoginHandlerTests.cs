@@ -32,6 +32,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -46,6 +47,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 configuration.Object,
                 tokenService.Object,
+                validationService,
                 logger.Object
             );
         });
@@ -57,6 +59,7 @@ public class LoginHandlerTests
         // Arrange
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -72,6 +75,7 @@ public class LoginHandlerTests
                 null!,
                 configuration.Object,
                 tokenService.Object,
+                validationService,
                 logger.Object
             );
         });
@@ -83,6 +87,7 @@ public class LoginHandlerTests
         // Arrange
         var userManager = new MockUserManager(TestData.TestApplicationUser);
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -98,6 +103,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 null!,
                 tokenService.Object,
+                validationService,
                 logger.Object
             );
         });
@@ -109,6 +115,7 @@ public class LoginHandlerTests
         // Arrange
         var userManager = new MockUserManager(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -124,6 +131,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 configuration.Object,
                 null!,
+                validationService,
                 logger.Object
             );
         });
@@ -135,6 +143,7 @@ public class LoginHandlerTests
         // Arrange
         var userManager = new MockUserManager(TestData.TestApplicationUser);
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var configuration = new Mock<IConfiguration>();
         var loginHandler = new LoginHandler();
 
@@ -150,6 +159,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 configuration.Object,
                 tokenService.Object,
+                validationService,
                 null!
             );
         });
@@ -165,6 +175,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -175,6 +186,7 @@ public class LoginHandlerTests
             userManager.Object,
             configuration.Object,
             tokenService.Object,
+            validationService,
             logger.Object
         );
 
@@ -198,6 +210,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -208,6 +221,7 @@ public class LoginHandlerTests
             userManager.Object,
             configuration.Object,
             tokenService.Object,
+            validationService,
             logger.Object
         );
 
@@ -229,6 +243,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(TestData.TestApplicationUser, true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -239,6 +254,7 @@ public class LoginHandlerTests
             userManager.Object,
             configuration.Object,
             tokenService.Object,
+            validationService,
             logger.Object
         );
 
@@ -261,6 +277,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(user, invalidPassword: true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -271,6 +288,7 @@ public class LoginHandlerTests
             userManager.Object,
             configuration.Object,
             tokenService.Object,
+            validationService,
             logger.Object
         );
 
@@ -293,6 +311,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService(new MockTokenServiceOptions { ReturnNullToken = true });
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -307,6 +326,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 configuration.Object,
                 tokenService.Object,
+                validationService,
                 logger.Object
             );
         });
@@ -322,6 +342,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService(new MockTokenServiceOptions { ReturnNullRefreshToken = true });
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -336,6 +357,7 @@ public class LoginHandlerTests
                 userManager.Object,
                 configuration.Object,
                 tokenService.Object,
+                validationService,
                 logger.Object
             );
         });
@@ -351,6 +373,7 @@ public class LoginHandlerTests
         var userManager = new MockUserManager(user, updateAsyncFailed: true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
+        var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 
@@ -361,6 +384,7 @@ public class LoginHandlerTests
             userManager.Object,
             configuration.Object,
             tokenService.Object,
+            validationService,
             logger.Object
         );
 
@@ -371,5 +395,45 @@ public class LoginHandlerTests
         Assert.True(result.ApiError?.StatusCode is (int)HttpStatusCode.InternalServerError);
         Assert.True(result.ApiError?.HttpStatusCode == ((int)HttpStatusCode.InternalServerError).ToString());
         Assert.Equal(AuthConstants.LoginFailed, result.ApiError?.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ValidationFailed_Returns_LoginResponse_400()
+    {
+        // Arrange
+        var command = new LoginRequest("", "123"); // Invalid email and password
+        var user = TestData.TestApplicationUser;
+        user.EmailConfirmed = true;
+        var userManager = new MockUserManager(user);
+        var configuration = new Mock<IConfiguration>();
+        var tokenService = new MockTokenService();
+        
+        // Setup validation service to return validation errors
+        var validationErrors = new List<string> { "Email is required", "Password must be at least 6 characters long" };
+        var validationService = new MockValidationService(new MockValidationServiceOptions { ValidationErrors = validationErrors });
+        
+        var logger = new Mock<ILogger<LoginHandler>>();
+        var loginHandler = new LoginHandler();
+
+        // Act
+        var result = await loginHandler.Handle
+        (
+            command,
+            userManager.Object,
+            configuration.Object,
+            tokenService.Object,
+            validationService,
+            logger.Object
+        );
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsType<LoginResponse>(result);
+        Assert.NotNull(result.ApiError);
+        Assert.True(result.ApiError?.StatusCode is (int)HttpStatusCode.BadRequest);
+        Assert.True(result.ApiError?.HttpStatusCode == ((int)HttpStatusCode.BadRequest).ToString());
+        Assert.Equal("Validation failed", result.ApiError?.ErrorMessage);
+        Assert.Contains("Email is required", result.ApiError?.StackTrace ?? "");
+        Assert.Contains("Password must be at least 6 characters long", result.ApiError?.StackTrace ?? "");
     }
 }

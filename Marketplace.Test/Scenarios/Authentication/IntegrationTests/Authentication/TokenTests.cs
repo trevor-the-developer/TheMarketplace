@@ -85,8 +85,9 @@ public class TokenTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var result = await GetTokenResponse(response);
 
         // Assert
-        Assert.NotNull(result?.Succeeded);
-        Assert.True(result?.Succeeded);
+        Assert.NotNull(result);
+        Assert.NotNull(result.Succeeded);
+        Assert.True(result.Succeeded);
         Assert.Null(result.ApiError);
         // Note: After revocation, JwtToken and RefreshToken should be null/empty
         // but the response structure might vary based on implementation

@@ -71,6 +71,7 @@ public static class DatabaseResetService
         {
             try
             {
+                // These are hardcoded table names from a predefined list, so they're safe
                 await context.Database.ExecuteSqlRawAsync($"DELETE FROM [{table}]");
                 
                 // Reset identity columns if they exist
@@ -103,6 +104,7 @@ public static class DatabaseResetService
         {
             try
             {
+                // These are hardcoded table names from a predefined list, so they're safe
                 await context.Database.ExecuteSqlRawAsync($"IF OBJECT_ID('{table}', 'U') IS NOT NULL DELETE FROM [{table}]");
             }
             catch (Exception ex)

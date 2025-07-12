@@ -1,8 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Security;
+using Marketplace.Core.Validation;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
@@ -17,16 +18,33 @@ public class LoginHandler
 
     [Transactional]
     public async Task<LoginResponse> Handle(LoginRequest command, UserManager<ApplicationUser> userManager, 
-        IConfiguration configuration, ITokenService tokenService,
+        IConfiguration configuration, ITokenService tokenService, IValidationService validationService,
         ILogger<LoginHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
         ArgumentNullException.ThrowIfNull(tokenService, nameof(tokenService));
+        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
         ArgumentNullException.ThrowIfNull(logger, nameof(logger));
         
         logger.LogInformation(LoginRequest);
+
+        // Validate input
+        var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
+        if (validationErrors.Any())
+        {
+            logger.LogError("Login request validation failed: {Errors}", string.Join(", ", validationErrors));
+            return new LoginResponse
+            {
+                ApiError = new Core.ApiError(
+                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
+                    StatusCode: StatusCodes.Status400BadRequest,
+                    ErrorMessage: "Validation failed",
+                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                )
+            };
+        }
 
         // try to find the user in the identity store
         var user = await userManager.FindByEmailAsync(command.Email);
