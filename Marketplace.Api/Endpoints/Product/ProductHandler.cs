@@ -168,9 +168,9 @@ public class ProductHandler
 
         var product = await dbContext.Products
             .Include(p => p.ProductDetail)
-            .ThenInclude(pd => pd.Documents)
+            .ThenInclude(pd => pd!.Documents)
             .Include(p => p.ProductDetail)
-            .ThenInclude(pd => pd.Media)
+            .ThenInclude(pd => pd!.Media)
             .FirstOrDefaultAsync(p => p.Id == command.Id);
             
         if (product != null)

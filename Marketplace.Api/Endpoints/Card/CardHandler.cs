@@ -123,12 +123,12 @@ public class CardHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         var card = await dbContext.Cards
-            .Include(c => c.Products)
+            .Include(c => c.Products!)
             .ThenInclude(p => p.ProductDetail)
-            .ThenInclude(pd => pd.Documents)
-            .Include(c => c.Products)
+            .ThenInclude(pd => pd!.Documents)
+            .Include(c => c.Products!)
             .ThenInclude(p => p.ProductDetail)
-            .ThenInclude(pd => pd.Media)
+            .ThenInclude(pd => pd!.Media)
             .FirstOrDefaultAsync(c => c.Id == command.Id);
             
         if (card != null)
