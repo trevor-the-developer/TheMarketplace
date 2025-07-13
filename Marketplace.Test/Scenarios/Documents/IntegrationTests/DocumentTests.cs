@@ -50,40 +50,20 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new 
-                { 
-                    Title = "Document to Update", 
-                    Description = "A document that will be updated.",
-                    Text = "Original content.",
-                    DocumentType = "Original",
-                    ProductDetailId = 1
-                })
-                .ToUrl("/api/documents");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
-
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        var documentIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var documentId = documentIdMatch.Success ? documentIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
-
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
                 .Json(new 
                 { 
-                    Id = int.Parse(documentId), 
+                    Id = 1, 
                     Title = "Updated Document", 
                     Description = "An updated document description.",
                     Text = "Updated content.",
                     DocumentType = "Updated",
                     ProductDetailId = 1
                 })
-                .ToUrl($"/api/documents/{documentId}");
+                .ToUrl("/api/documents/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -96,31 +76,11 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
     public async Task DeleteDocument_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new 
-                { 
-                    Title = "Document to Delete", 
-                    Description = "A document that will be deleted.",
-                    Text = "Content",
-                    DocumentType = "Delete",
-                    ProductDetailId = 1
-                })
-                .ToUrl("/api/documents");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
 
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        var documentIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var documentId = documentIdMatch.Success ? documentIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
-        
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/documents/{documentId}");
+            _.Delete.Url("/api/documents/2");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

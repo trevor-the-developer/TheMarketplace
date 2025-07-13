@@ -43,28 +43,12 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        // First create a card to update
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new { Title = "Card to Update", Description = "A card that will be updated.", ListingId = 1 })
-                .ToUrl("/api/cards");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
-
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        // Extract the card ID from the response - this is a simplified approach
-        var cardIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var cardId = cardIdMatch.Success ? cardIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
-
-        // Now update the card
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new { Id = int.Parse(cardId), Title = "Updated Card", Description = "An updated card description." })
-                .ToUrl($"/api/cards/{cardId}");
+                .Json(new { Id = 1, Title = "Updated Card", Description = "An updated card description.", ListingId = 1 })
+                .ToUrl("/api/cards/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -78,26 +62,10 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        // First create a card to delete
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new { Title = "Card to Delete", Description = "A card that will be deleted.", ListingId = 1 })
-                .ToUrl("/api/cards");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
-
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        // Extract the card ID from the response - this is a simplified approach
-        var cardIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var cardId = cardIdMatch.Success ? cardIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
-
-        // Now delete the card
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/cards/{cardId}");
+            _.Delete.Url("/api/cards/2");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

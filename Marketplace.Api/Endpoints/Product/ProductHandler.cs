@@ -166,9 +166,23 @@ public class ProductHandler
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
-        var product = await dbContext.Products.FindAsync(command.Id);
+        var product = await dbContext.Products
+            .Include(p => p.ProductDetail)
+            .ThenInclude(pd => pd.Documents)
+            .Include(p => p.ProductDetail)
+            .ThenInclude(pd => pd.Media)
+            .FirstOrDefaultAsync(p => p.Id == command.Id);
+            
         if (product != null)
         {
+            // Delete related ProductDetail and its children first
+            if (product.ProductDetail != null)
+            {
+                // Documents and Media will be deleted automatically due to cascade delete
+                dbContext.ProductDetails.Remove(product.ProductDetail);
+            }
+            
+            // Now delete the product
             dbContext.Products.Remove(product);
             await dbContext.SaveChangesAsync();
         }

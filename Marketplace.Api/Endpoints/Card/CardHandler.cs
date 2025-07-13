@@ -122,9 +122,35 @@ public class CardHandler
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
-        var card = await dbContext.Cards.FindAsync(command.Id);
+        var card = await dbContext.Cards
+            .Include(c => c.Products)
+            .ThenInclude(p => p.ProductDetail)
+            .ThenInclude(pd => pd.Documents)
+            .Include(c => c.Products)
+            .ThenInclude(p => p.ProductDetail)
+            .ThenInclude(pd => pd.Media)
+            .FirstOrDefaultAsync(c => c.Id == command.Id);
+            
         if (card != null)
         {
+            // Delete related Products and their ProductDetails first
+            if (card.Products != null && card.Products.Any())
+            {
+                foreach (var product in card.Products)
+                {
+                    // Delete related ProductDetail and its children first
+                    if (product.ProductDetail != null)
+                    {
+                        // Documents and Media will be deleted automatically due to cascade delete
+                        dbContext.ProductDetails.Remove(product.ProductDetail);
+                    }
+                    
+                    // Delete the product
+                    dbContext.Products.Remove(product);
+                }
+            }
+            
+            // Now delete the card
             dbContext.Cards.Remove(card);
             await dbContext.SaveChangesAsync();
         }

@@ -52,35 +52,13 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new 
-                { 
-                    Title = "Product to Update", 
-                    Description = "A product that will be updated.",
-                    ProductType = "Original Type",
-                    Category = "Original Category",
-                    IsEnabled = true,
-                    IsDeleted = false,
-                    CardId = 1
-                })
-                .ToUrl("/api/products");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
-
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        var productIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productId = productIdMatch.Success ? productIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
-
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
                 .Json(new 
                 { 
-                    Id = int.Parse(productId), 
+                    Id = 1, 
                     Title = "Updated Product", 
                     Description = "An updated product description.",
                     ProductType = "Updated Type",
@@ -89,7 +67,7 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl($"/api/products/{productId}");
+                .ToUrl("/api/products/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -103,32 +81,10 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        var createResponse = await Host.Scenario(_ =>
-        {
-            _.WithBearerToken(token);
-            _.Post
-                .Json(new 
-                { 
-                    Title = "Product to Delete", 
-                    Description = "A product that will be deleted.",
-                    ProductType = "Delete Type",
-                    Category = "Delete Category",
-                    IsEnabled = true,
-                    IsDeleted = false,
-                    CardId = 1
-                })
-                .ToUrl("/api/products");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
-
-        var createResponseText = await createResponse.ReadAsTextAsync();
-        var productIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productId = productIdMatch.Success ? productIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
-
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/products/{productId}");
+            _.Delete.Url("/api/products/2");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

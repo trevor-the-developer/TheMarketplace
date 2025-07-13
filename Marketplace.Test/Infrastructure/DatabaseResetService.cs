@@ -259,6 +259,33 @@ public static class DatabaseResetService
 
         await context.SaveChangesAsync();
         
+        // Add sample tags for testing
+        context.Tags.AddRange(new List<Tag>
+        {
+            new()
+            {
+                Name = "Sample Tag",
+                Description = "Sample tag for testing",
+                IsEnabled = true,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            },
+            new()
+            {
+                Name = "Sample Tag 2",
+                Description = "Second sample tag for testing",
+                IsEnabled = true,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
+        
         // Add sample product details for testing
         context.ProductDetails.AddRange(new List<ProductDetail>
         {
@@ -281,6 +308,62 @@ public static class DatabaseResetService
                 CreatedDate = DateTime.UtcNow,
                 ModifiedBy = "admin@localhost",
                 ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
+        
+        // Add sample documents for testing
+        context.Documents.AddRange(new List<Document>
+        {
+            new()
+            {
+                Title = "Sample Document",
+                Description = "Sample document for testing",
+                Text = "Sample document content",
+                DocumentType = "Test",
+                ProductDetailId = 1,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            },
+            new()
+            {
+                Title = "Sample Document 2",
+                Description = "Second sample document for testing",
+                Text = "Second sample document content",
+                DocumentType = "Test",
+                ProductDetailId = 2,
+                CreatedBy = "admin@localhost",
+                CreatedDate = DateTime.UtcNow,
+                ModifiedBy = "admin@localhost",
+                ModifiedDate = DateTime.UtcNow
+            }
+        });
+
+        await context.SaveChangesAsync();
+        
+        // Add sample files for testing
+        context.Files.AddRange(new List<Media>
+        {
+            new Media()
+            {
+                Title = "Sample File",
+                Description = "Sample file for testing",
+                FilePath = "/sample/path/file1.mp4",
+                DirectoryPath = "/sample/path/",
+                MediaType = "video",
+                ProductDetailId = 1
+            },
+            new Media()
+            {
+                Title = "Sample File 2",
+                Description = "Second sample file for testing",
+                FilePath = "/sample/path/file2.mp4",
+                DirectoryPath = "/sample/path/",
+                MediaType = "video",
+                ProductDetailId = 2
             }
         });
 
