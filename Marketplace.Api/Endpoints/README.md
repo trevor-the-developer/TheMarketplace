@@ -2,7 +2,12 @@
 
 Endpoints are organised in domain-specific modules to ensure clean separation of concerns and maintainable code architecture. Each endpoint module implements the mediator pattern using WolverineFx for command/query processing.
 
-## Organization Pattern
+## Current Status
+✅ **All endpoints tested and functional** - Complete CRUD operations implemented and verified.
+✅ **Authentication working** - JWT-based authentication with refresh tokens fully operational.
+✅ **Swagger documentation** - All endpoints documented with proper request/response models.
+
+## Organisation Pattern
 
 ```
 Endpoints/

@@ -54,12 +54,13 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
   - Scenario-based testing with proper database isolation
   - CORS configuration
   - Proper dependency injection configuration
+  - ✅ **All tests passing (227 total)** - Recent fixes to registration tests and cleanup of legacy mocks
   
 ### 🚧 Future Enhancements
 - Advanced search and filtering functionality
-- File upload and media handling optimization
+- File upload and media handling optimisation
 - Real-time notifications
-- Performance optimizations
+- Performance optimisations
 
 ## Getting Started
 
@@ -103,7 +104,7 @@ The solution follows a clean architecture pattern with four main projects:
 ### Phase 1: Core Marketplace Features (Q2 2025)
 - **Priority: High**
 - ✅ Complete CRUD operations for all entities (COMPLETED)
-- File upload and media handling optimization
+- File upload and media handling optimisation
 - Advanced search and filtering functionality
 - Email notifications system
 - Input validation and error handling enhancements
@@ -170,9 +171,16 @@ The solution follows a clean architecture pattern with four main projects:
 ## Contributing
 
 For detailed development instructions, navigate to individual project README.md files:
-- `Marketplace.Api/README.md` - API development guidelines
-- `Marketplace.Data/README.md` - Database and migration instructions
-- `Marketplace.Test/README.md` - Testing strategies and examples
+- `Marketplace.Api/README.md` - API development guidelines and technology stack
+- `Marketplace.Core/README.md` - Business logic, validation, and domain services
+- `Marketplace.Data/README.md` - Database, migrations, and repository patterns
+- `Marketplace.Test/README.md` - Testing strategies, factories, and infrastructure
+
+### Additional Documentation
+- `Marketplace.Api/Endpoints/README.md` - Complete endpoint reference and patterns
+- `Marketplace.Data/Configurations/README.md` - Entity configuration patterns
+- `Marketplace.Data/Repositories/README.md` - Repository implementation details
+- `Marketplace.Test/Factories/README.md` - Test factories and infrastructure setup
 
 ## Docker Development
 

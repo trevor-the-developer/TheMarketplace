@@ -24,6 +24,21 @@ public class MockAuthenticationRepository : Mock<IAuthenticationRepository>
         Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
 
+        Setup(x => x.CreateRoleAsync(It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync("test-email-confirmation-token");
+
+        Setup(x => x.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        Setup(x => x.FindUserByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        Setup(x => x.DeleteUserAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(IdentityResult.Success);
+
         if (user != null)
         {
             Setup(x => x.GetRolesAsync(user))
@@ -73,5 +88,41 @@ public class MockAuthenticationRepository : Mock<IAuthenticationRepository>
             Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(IdentityResult.Success);
         }
+    }
+
+    public void SetupCreateUserFailed(List<IdentityError> errors)
+    {
+        Setup(x => x.CreateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed(errors.ToArray()));
+    }
+
+    public void SetupCreateRoleFailed()
+    {
+        Setup(x => x.CreateRoleAsync(It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed());
+    }
+
+    public void SetupAddToRoleFailed()
+    {
+        Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed());
+    }
+
+    public void SetupGenerateEmailTokenFailed()
+    {
+        Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>()))
+            .ThrowsAsync(new InvalidOperationException("Failed to generate email confirmation token"));
+    }
+
+    public void SetupUserNotFound()
+    {
+        Setup(x => x.FindUserByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync((ApplicationUser?)null);
+    }
+
+    public void SetupConfirmEmailFailed()
+    {
+        Setup(x => x.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed());
     }
 }

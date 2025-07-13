@@ -66,23 +66,19 @@ public class RegistrationTests
     public async Task Registration_Step_One_Null_Command_Throws_ArgumentNullException()
     {
         // Arrange
-        var mockUserManager = new EnhancedMockUserManager();
-        var mockRoleManager = new EnhancedMockRoleManager();
+        var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
+        var mockValidationService = new MockValidationService();
 
         var registerHandler = new RegisterHandler();
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
-            var mockValidationService = new MockValidationService();
             await registerHandler.Handle(
                 null!,
-                mockUserManager.Object,
-                mockRoleManager.Object,
+                mockAuthRepository.Object,
                 mockLogger.Object,
-                mockDbContext.Object,
                 mockValidationService);
         });
     }
@@ -94,21 +90,16 @@ public class RegistrationTests
         var command = RegistrationTestFactory.CreateValidRegisterRequest("existing@example.com");
         var existingUser = RegistrationTestFactory.CreateTestUser("existing@example.com");
 
-        var mockUserManager = new EnhancedMockUserManager(existingUser);
-        var mockRoleManager = new EnhancedMockRoleManager();
+        var mockAuthRepository = new MockAuthenticationRepository(existingUser);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act
-        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockRoleManager.Object,
+            mockAuthRepository.Object,
             mockLogger.Object,
-            mockDbContext.Object,
             mockValidationService);
 
         // Assert
@@ -123,23 +114,17 @@ public class RegistrationTests
     {
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
-        var role = RegistrationTestFactory.CreateTestRole();
 
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
-        var mockRoleManager = new EnhancedMockRoleManager(role);
+        var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act
-        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockRoleManager.Object,
+            mockAuthRepository.Object,
             mockLogger.Object,
-            mockDbContext.Object,
             mockValidationService);
 
         // Assert
@@ -160,26 +145,17 @@ public class RegistrationTests
             new() { Code = "PasswordTooShort", Description = "Password is too short" }
         };
 
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
-        {
-            UserNotFound = true,
-            CreateAsyncFailed = true,
-            CustomErrors = customErrors
-        });
-        var mockRoleManager = new EnhancedMockRoleManager();
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupCreateUserFailed(customErrors);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act
-        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockRoleManager.Object,
+            mockAuthRepository.Object,
             mockLogger.Object,
-            mockDbContext.Object,
             mockValidationService);
 
         // Assert
@@ -198,22 +174,17 @@ public class RegistrationTests
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
 
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
-        var mockRoleManager =
-            new EnhancedMockRoleManager(null, new MockRoleManagerOptions { CreateAsyncFailed = true });
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupCreateRoleFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act
-        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockRoleManager.Object,
+            mockAuthRepository.Object,
             mockLogger.Object,
-            mockDbContext.Object,
             mockValidationService);
 
         // Assert
@@ -228,27 +199,18 @@ public class RegistrationTests
     {
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
-        var role = RegistrationTestFactory.CreateTestRole();
 
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
-        {
-            UserNotFound = true,
-            AddToRoleAsyncFailed = true
-        });
-        var mockRoleManager = new EnhancedMockRoleManager(role);
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupAddToRoleFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act
-        var mockValidationService = new MockValidationService();
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockRoleManager.Object,
+            mockAuthRepository.Object,
             mockLogger.Object,
-            mockDbContext.Object,
             mockValidationService);
 
         // Assert
@@ -263,29 +225,20 @@ public class RegistrationTests
     {
         // Arrange
         var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
-        var role = RegistrationTestFactory.CreateTestRole();
 
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions
-        {
-            UserNotFound = true,
-            GenerateEmailConfirmationTokenAsyncFailed = true
-        });
-        var mockRoleManager = new EnhancedMockRoleManager(role);
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupGenerateEmailTokenFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
-
+        var mockValidationService = new MockValidationService();
         var registerHandler = new RegisterHandler();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            var mockValidationService = new MockValidationService();
             await registerHandler.Handle(
                 command,
-                mockUserManager.Object,
-                mockRoleManager.Object,
+                mockAuthRepository.Object,
                 mockLogger.Object,
-                mockDbContext.Object,
                 mockValidationService);
         });
     }
@@ -298,9 +251,8 @@ public class RegistrationTests
     public async Task ConfirmEmail_Null_Command_Throws_ArgumentNullException()
     {
         // Arrange
-        var mockUserManager = new EnhancedMockUserManager();
+        var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act & Assert
@@ -308,9 +260,8 @@ public class RegistrationTests
         {
             await registerHandler.Handle(
                 (ConfirmEmailRequest)null!,
-                mockUserManager.Object,
-                mockLogger.Object,
-                mockDbContext.Object);
+                mockAuthRepository.Object,
+                mockLogger.Object);
         });
     }
 
@@ -319,17 +270,16 @@ public class RegistrationTests
     {
         // Arrange
         var command = RegistrationTestFactory.CreateConfirmEmailRequest();
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupUserNotFound();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -345,17 +295,15 @@ public class RegistrationTests
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateConfirmEmailRequest(user.Id, "valid-token", user.Email);
 
-        var mockUserManager = new EnhancedMockUserManager(user);
+        var mockAuthRepository = new MockAuthenticationRepository(user);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -372,18 +320,16 @@ public class RegistrationTests
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateConfirmEmailRequest(user.Id, "invalid-token", user.Email);
 
-        var mockUserManager =
-            new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
+        var mockAuthRepository = new MockAuthenticationRepository(user);
+        mockAuthRepository.SetupConfirmEmailFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -400,9 +346,8 @@ public class RegistrationTests
     public async Task RegisterStepTwo_Null_Command_Throws_ArgumentNullException()
     {
         // Arrange
-        var mockUserManager = new EnhancedMockUserManager();
+        var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act & Assert
@@ -410,9 +355,8 @@ public class RegistrationTests
         {
             await registerHandler.Handle(
                 (RegisterStepTwoRequest)null!,
-                mockUserManager.Object,
-                mockLogger.Object,
-                mockDbContext.Object);
+                mockAuthRepository.Object,
+                mockLogger.Object);
         });
     }
 
@@ -421,17 +365,16 @@ public class RegistrationTests
     {
         // Arrange
         var command = RegistrationTestFactory.CreateRegisterStepTwoRequest();
-        var mockUserManager = new EnhancedMockUserManager(null, new MockUserManagerOptions { UserNotFound = true });
+        var mockAuthRepository = new MockAuthenticationRepository();
+        mockAuthRepository.SetupUserNotFound();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -448,17 +391,15 @@ public class RegistrationTests
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "valid-token", user.Email);
 
-        var mockUserManager = new EnhancedMockUserManager(user);
+        var mockAuthRepository = new MockAuthenticationRepository(user);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -475,18 +416,16 @@ public class RegistrationTests
         var user = RegistrationTestFactory.CreateTestUser("test@example.com");
         var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "invalid-token", user.Email);
 
-        var mockUserManager =
-            new EnhancedMockUserManager(user, new MockUserManagerOptions { ConfirmEmailAsyncFailed = true });
+        var mockAuthRepository = new MockAuthenticationRepository(user);
+        mockAuthRepository.SetupConfirmEmailFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var mockDbContext = new MockDbContext();
         var registerHandler = new RegisterHandler();
 
         // Act
         var response = await registerHandler.Handle(
             command,
-            mockUserManager.Object,
-            mockLogger.Object,
-            mockDbContext.Object);
+            mockAuthRepository.Object,
+            mockLogger.Object);
 
         // Assert
         Assert.NotNull(response);
