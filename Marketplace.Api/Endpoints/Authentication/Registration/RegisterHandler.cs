@@ -80,7 +80,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
                 // Generate email confirmation token and simple URL
                 var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                registrationResponse.ConfirmationEmailLink = $"/api/confirm_email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
+                registrationResponse.ConfirmationEmailLink = $"/api/auth/confirm-email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
             }
             else
             {

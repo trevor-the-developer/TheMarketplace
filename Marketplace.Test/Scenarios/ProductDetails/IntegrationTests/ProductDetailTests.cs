@@ -38,8 +38,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var productResponseText = await productResponse.ReadAsTextAsync();
@@ -56,8 +56,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     Description = "A new product detail description.",
                     ProductId = productId
                 })
-                .ToUrl("/api/productdetail/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/product-details");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -84,8 +84,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var productResponseText = await productResponse.ReadAsTextAsync();
@@ -102,8 +102,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     Description = "A product detail that will be updated.",
                     ProductId = productId
                 })
-                .ToUrl("/api/productdetail/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/product-details");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -121,7 +121,7 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     Description = "An updated product detail description.",
                     ProductId = productId
                 })
-                .ToUrl($"/api/productdetail/update/{productDetailId}");
+                .ToUrl($"/api/product-details/{productDetailId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -149,8 +149,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var productResponseText = await productResponse.ReadAsTextAsync();
@@ -167,8 +167,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
                     Description = "A product detail that will be deleted.",
                     ProductId = productId
                 })
-                .ToUrl("/api/productdetail/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/product-details");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -178,7 +178,7 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/productdetail/delete/{productDetailId}");
+            _.Delete.Url($"/api/product-details/{productDetailId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

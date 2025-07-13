@@ -34,8 +34,8 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
                     Description = "A new tag description.",
                     IsEnabled = true
                 })
-                .ToUrl("/api/tag/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/tags");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -58,8 +58,8 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
                     Description = "A tag that will be updated.",
                     IsEnabled = true
                 })
-                .ToUrl("/api/tag/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/tags");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -77,7 +77,7 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
                     Description = "An updated tag description.",
                     IsEnabled = false
                 })
-                .ToUrl($"/api/tag/update/{tagId}");
+                .ToUrl($"/api/tags/{tagId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -101,8 +101,8 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
                     Description = "A tag that will be deleted.",
                     IsEnabled = true
                 })
-                .ToUrl("/api/tag/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/tags");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -112,7 +112,7 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/tag/delete/{tagId}");
+            _.Delete.Url($"/api/tags/{tagId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

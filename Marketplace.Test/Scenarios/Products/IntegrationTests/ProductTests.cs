@@ -38,8 +38,8 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -66,8 +66,8 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -89,7 +89,7 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl($"/api/product/update/{productId}");
+                .ToUrl($"/api/products/{productId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -117,8 +117,8 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
                     IsDeleted = false,
                     CardId = 1
                 })
-                .ToUrl("/api/product/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/products");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -128,7 +128,7 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/product/delete/{productId}");
+            _.Delete.Url($"/api/products/{productId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

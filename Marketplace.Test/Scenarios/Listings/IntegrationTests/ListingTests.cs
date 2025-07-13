@@ -28,8 +28,8 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
             _.WithBearerToken(token);
             _.Post
                 .Json(new { Title = "New Listing", Description = "A new listing description." })
-                .ToUrl("/api/listing/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/listings");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -47,7 +47,7 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
             _.WithBearerToken(token);
             _.Put
                 .Json(new { Id = 1, Title = "Updated Listing", Description = "An updated listing description." })
-                .ToUrl("/api/listing/update/1");
+                .ToUrl("/api/listings/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -67,8 +67,8 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
             _.WithBearerToken(token);
             _.Post
                 .Json(new { Title = "Listing to Delete", Description = "A listing that will be deleted." })
-                .ToUrl("/api/listing/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/listings");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -80,7 +80,7 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/listing/delete/{listingId}");
+            _.Delete.Url($"/api/listings/{listingId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

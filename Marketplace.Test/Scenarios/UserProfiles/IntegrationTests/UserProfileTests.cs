@@ -35,8 +35,8 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
                     SocialMedia = "newuser@social.com",
                     ApplicationUserId = "69a38a69-e24d-4c7f-bdf2-c7bc2222cbe7"
                 })
-                .ToUrl("/api/userprofile/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/user-profiles");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -61,8 +61,8 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
                     SocialMedia = "update@social.com",
                     ApplicationUserId = applicationUserId
                 })
-                .ToUrl("/api/userprofile/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/user-profiles");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -80,7 +80,7 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
                     SocialMedia = "updated@social.com",
                     ApplicationUserId = applicationUserId
                 })
-                .ToUrl($"/api/userprofile/update/{applicationUserId}");
+                .ToUrl($"/api/user-profiles/{applicationUserId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -106,8 +106,8 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
                     SocialMedia = "delete@social.com",
                     ApplicationUserId = applicationUserId
                 })
-                .ToUrl("/api/userprofile/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/user-profiles");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -117,7 +117,7 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/userprofile/delete/{applicationUserId}");
+            _.Delete.Url($"/api/user-profiles/{applicationUserId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

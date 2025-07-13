@@ -36,8 +36,8 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
                     DocumentType = "Type",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/document/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/documents");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -62,8 +62,8 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
                     DocumentType = "Original",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/document/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/documents");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -83,7 +83,7 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
                     DocumentType = "Updated",
                     ProductDetailId = 1
                 })
-                .ToUrl($"/api/document/update/{documentId}");
+                .ToUrl($"/api/documents/{documentId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -109,8 +109,8 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
                     DocumentType = "Delete",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/document/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/documents");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -120,7 +120,7 @@ public class DocumentTests(WebAppFixture fixture) : ScenarioContext(fixture), IA
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/document/delete/{documentId}");
+            _.Delete.Url($"/api/documents/{documentId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

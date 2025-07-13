@@ -37,8 +37,8 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
                     MediaType = "Video",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/media/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/media");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -64,8 +64,8 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
                     MediaType = "Video",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/media/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/media");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -86,7 +86,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
                     MediaType = "Audio",
                     ProductDetailId = 1
                 })
-                .ToUrl($"/api/media/update/{mediaId}");
+                .ToUrl($"/api/media/{mediaId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -113,8 +113,8 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
                     MediaType = "Video",
                     ProductDetailId = 1
                 })
-                .ToUrl("/api/media/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/media");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -124,7 +124,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/media/delete/{mediaId}");
+            _.Delete.Url($"/api/media/{mediaId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

@@ -29,8 +29,8 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
             _.WithBearerToken(token);
             _.Post
                 .Json(new { Title = "New Card", Description = "A new card description.", ListingId = 1 })
-                .ToUrl("/api/card/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/cards");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var responseText = await response.ReadAsTextAsync();
@@ -49,8 +49,8 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
             _.WithBearerToken(token);
             _.Post
                 .Json(new { Title = "Card to Update", Description = "A card that will be updated.", ListingId = 1 })
-                .ToUrl("/api/card/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/cards");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -64,7 +64,7 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
             _.WithBearerToken(token);
             _.Put
                 .Json(new { Id = int.Parse(cardId), Title = "Updated Card", Description = "An updated card description." })
-                .ToUrl($"/api/card/update/{cardId}");
+                .ToUrl($"/api/cards/{cardId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -84,8 +84,8 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
             _.WithBearerToken(token);
             _.Post
                 .Json(new { Title = "Card to Delete", Description = "A card that will be deleted.", ListingId = 1 })
-                .ToUrl("/api/card/create");
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
+                .ToUrl("/api/cards");
+            _.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var createResponseText = await createResponse.ReadAsTextAsync();
@@ -97,7 +97,7 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Delete.Url($"/api/card/delete/{cardId}");
+            _.Delete.Url($"/api/cards/{cardId}");
             _.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
     }

@@ -134,7 +134,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(
-                $"/api/confirm_email/?userId={confirmRequest.UserId}&token={Uri.EscapeDataString(confirmRequest.Token!)}&email={confirmRequest.Email}");
+                $"/api/auth/confirm-email?userId={confirmRequest.UserId}&token={Uri.EscapeDataString(confirmRequest.Token!)}&email={confirmRequest.Email}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
@@ -158,7 +158,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         await Host.Scenario(_ =>
         {
             _.Get.Url(
-                $"/api/confirm_email/?userId={confirmRequest.UserId}&token={confirmRequest.Token}&email={confirmRequest.Email}");
+                $"/api/auth/confirm-email?userId={confirmRequest.UserId}&token={confirmRequest.Token}&email={confirmRequest.Email}");
             _.StatusCodeShouldBe(HttpStatusCode.NotFound);
         });
     }
@@ -262,7 +262,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(
-                $"/api/confirm_email/?userId={query["userId"]}&token={Uri.EscapeDataString(query["token"]!)}&email={query["email"]}");
+                $"/api/auth/confirm-email?userId={query["userId"]}&token={Uri.EscapeDataString(query["token"]!)}&email={query["email"]}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
 
