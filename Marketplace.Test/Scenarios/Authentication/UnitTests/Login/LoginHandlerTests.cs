@@ -1,6 +1,7 @@
 using System.Net;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
+using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
 using Marketplace.Test.Mocks;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +30,7 @@ public class LoginHandlerTests
     public async Task With_Null_LoginRequest_Parameter_Throws_ArgumentNullException()
     {
         // Arrange
-        var userManager = new MockUserManager(TestData.TestApplicationUser);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -44,7 +45,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 null!,
-                userManager.Object,
+                authRepository.Object,
                 configuration.Object,
                 tokenService.Object,
                 validationService,
@@ -85,7 +86,7 @@ public class LoginHandlerTests
     public async Task With_Null_Configuration_Parameter_Throws_ArgumentNullException()
     {
         // Arrange
-        var userManager = new MockUserManager(TestData.TestApplicationUser);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser);
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
@@ -100,7 +101,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 command,
-                userManager.Object,
+                authRepository.Object,
                 null!,
                 tokenService.Object,
                 validationService,
@@ -113,7 +114,7 @@ public class LoginHandlerTests
     public async Task With_Null_TokenService_Parameter_Throws_ArgumentNullException()
     {
         // Arrange
-        var userManager = new MockUserManager(TestData.TestApplicationUser);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
         var validationService = new MockValidationService();
         var logger = new Mock<ILogger<LoginHandler>>();
@@ -128,7 +129,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 command,
-                userManager.Object,
+                authRepository.Object,
                 configuration.Object,
                 null!,
                 validationService,
@@ -141,7 +142,7 @@ public class LoginHandlerTests
     public async Task With_Null_Logger_Parameter_Throws_ArgumentNullException()
     {
         // Arrange
-        var userManager = new MockUserManager(TestData.TestApplicationUser);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser);
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
         var configuration = new Mock<IConfiguration>();
@@ -156,7 +157,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 command,
-                userManager.Object,
+                authRepository.Object,
                 configuration.Object,
                 tokenService.Object,
                 validationService,
@@ -172,7 +173,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("test_user@tester.one", "password");
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user);
+        var authRepository = new MockAuthenticationRepository(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -183,7 +184,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,
@@ -207,7 +208,7 @@ public class LoginHandlerTests
         // Arrange
         var command = new LoginRequest("test_user@tester.one", "password");
 
-        var userManager = new MockUserManager(TestData.TestApplicationUser);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -218,7 +219,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,
@@ -240,7 +241,7 @@ public class LoginHandlerTests
         // Arrange
         var command = new LoginRequest("test_user@tester.one", "password");
 
-        var userManager = new MockUserManager(TestData.TestApplicationUser, true);
+        var authRepository = new MockAuthenticationRepository(TestData.TestApplicationUser, true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -251,7 +252,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,
@@ -274,7 +275,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("test_user@tester.one", null!);
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user, invalidPassword: true);
+        var authRepository = new MockAuthenticationRepository(user, invalidPassword: true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -285,7 +286,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,
@@ -308,7 +309,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("test_user@tester.one", null!);
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user);
+        var authRepository = new MockAuthenticationRepository(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService(new MockTokenServiceOptions { ReturnNullToken = true });
         var validationService = new MockValidationService();
@@ -323,7 +324,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 command,
-                userManager.Object,
+                authRepository.Object,
                 configuration.Object,
                 tokenService.Object,
                 validationService,
@@ -339,7 +340,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("test_user@tester.one", null!);
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user);
+        var authRepository = new MockAuthenticationRepository(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService(new MockTokenServiceOptions { ReturnNullRefreshToken = true });
         var validationService = new MockValidationService();
@@ -354,7 +355,7 @@ public class LoginHandlerTests
             var result = await loginHandler.Handle
             (
                 command,
-                userManager.Object,
+                authRepository.Object,
                 configuration.Object,
                 tokenService.Object,
                 validationService,
@@ -370,7 +371,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("test_user@tester.one", "password");
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user, updateAsyncFailed: true);
+        var authRepository = new MockAuthenticationRepository(user, updateAsyncFailed: true);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         var validationService = new MockValidationService();
@@ -381,7 +382,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,
@@ -404,7 +405,7 @@ public class LoginHandlerTests
         var command = new LoginRequest("", "123"); // Invalid email and password
         var user = TestData.TestApplicationUser;
         user.EmailConfirmed = true;
-        var userManager = new MockUserManager(user);
+        var authRepository = new MockAuthenticationRepository(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
         
@@ -419,7 +420,7 @@ public class LoginHandlerTests
         var result = await loginHandler.Handle
         (
             command,
-            userManager.Object,
+            authRepository.Object,
             configuration.Object,
             tokenService.Object,
             validationService,

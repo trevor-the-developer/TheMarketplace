@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Marketplace.Core.Security;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ public class MockTokenService : Mock<ITokenService>
 
         // Setup JWT token generation
         Setup(x => x.GenerateJwtSecurityTokenAsync(
-                It.IsAny<UserManager<ApplicationUser>>(),
+                It.IsAny<IAuthenticationRepository>(),
                 It.IsAny<ApplicationUser>(),
                 It.IsAny<IConfiguration>()))
             .ReturnsAsync(options.ReturnNullToken ? null! : TestData.JwtSecurityToken);

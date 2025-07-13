@@ -7,18 +7,19 @@ using System.Security.Claims;
 using Marketplace.Core.Constants;
 using Microsoft.IdentityModel.Tokens;
 using Wolverine.Attributes;
+using Marketplace.Data.Repositories;
 
 namespace Marketplace.Api.Endpoints.Authentication.Token
 {
     [WolverineHandler]
     public class TokenHandler
     {
-        public async Task<TokenResponse> Handle(TokenRefreshRequest command, UserManager<ApplicationUser> userManager,
+        public async Task<TokenResponse> Handle(TokenRefreshRequest command, IAuthenticationRepository authenticationRepository,
             ITokenService tokenService,TokenValidationParameters tokenValidationParameters,
             IConfiguration configuration, ILogger<ITokenService> logger)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
-            ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
+            ArgumentNullException.ThrowIfNull(authenticationRepository, nameof(authenticationRepository));
             ArgumentNullException.ThrowIfNull(tokenService, nameof(tokenService));
             ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
             ArgumentNullException.ThrowIfNull(logger, nameof(logger));
@@ -53,7 +54,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Token
                 return Unauthorised();
             }
 
-            var user = await userManager.FindByNameAsync(principal.Identity.Name);
+            var user = await authenticationRepository.FindUserByNameAsync(principal.Identity.Name);
 
             if (user is null || user.RefreshToken != command.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
             {
@@ -61,7 +62,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Token
                 return Unauthorised();
             }
 
-            var token = await tokenService.GenerateJwtSecurityTokenAsync(userManager, user, configuration);
+            var token = await tokenService.GenerateJwtSecurityTokenAsync(authenticationRepository, user, configuration);
 
             logger.LogInformation(AuthConstants.RefreshSucceeded);
 

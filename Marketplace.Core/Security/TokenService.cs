@@ -1,4 +1,5 @@
-﻿using Marketplace.Data.Entities;
+using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -13,15 +14,15 @@ namespace Marketplace.Core.Security
 {
     public class TokenService : ITokenService
     {
-        public async Task<JwtSecurityToken> GenerateJwtSecurityTokenAsync(UserManager<ApplicationUser> userManager, 
+        public async Task<JwtSecurityToken> GenerateJwtSecurityTokenAsync(IAuthenticationRepository authenticationRepository, 
             ApplicationUser applicationUser, IConfiguration configuration)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"] ?? string.Empty));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var roles = await userManager.GetRolesAsync(applicationUser);
+            var roles = await authenticationRepository.GetRolesAsync(applicationUser);
             var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
-            var userClaims = await userManager.GetClaimsAsync(applicationUser);
+            var userClaims = await authenticationRepository.GetClaimsAsync(applicationUser);
 
             var claims = new List<Claim>
             {

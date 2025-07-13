@@ -1,4 +1,4 @@
-using Marketplace.Data;
+using Marketplace.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
@@ -12,24 +12,24 @@ namespace Marketplace.Api.Endpoints.Card;
 public class CardHandler
 {
     [Transactional]
-    public async Task<CardResponse> Handle(CardRequest command, MarketplaceDbContext dbContext)
+public async Task<CardResponse> Handle(CardRequest command, ICardRepository cardRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
 
         Data.Entities.Card? card = null;
         if (command.CardId > 0)
         {
-            card = await dbContext.Cards.FindAsync(command.CardId);
+card = await cardRepository.GetByIdAsync(command.CardId);
         }
 
         if (command.AllCards)
         {
-            var cards = await dbContext.Cards.ToListAsync();
-            return new CardResponse() { Cards = cards };
+var cards = await cardRepository.GetAllAsync();
+            return new CardResponse() { Cards = cards.ToList() };
         }
 
-        card ??= await dbContext.Cards.FirstOrDefaultAsync();
+card ??= await cardRepository.GetFirstOrDefaultAsync(c => true);
         return new CardResponse()
         {
             Card = card
@@ -37,10 +37,10 @@ public class CardHandler
     }
 
     [Transactional]
-    public async Task<CardResponse> Handle(CardCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+public async Task<CardResponse> Handle(CardCreate command, ICardRepository cardRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -71,17 +71,17 @@ public class CardHandler
             ModifiedDate = DateTime.UtcNow
         };
 
-        dbContext.Cards.Add(card);
-        await dbContext.SaveChangesAsync();
+await cardRepository.AddAsync(card);
+        await cardRepository.SaveChangesAsync();
 
         return new CardResponse { Card = card };
     }
 
     [Transactional]
-    public async Task<CardResponse> Handle(CardUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+public async Task<CardResponse> Handle(CardUpdate command, ICardRepository cardRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -100,7 +100,7 @@ public class CardHandler
             };
         }
 
-        var card = await dbContext.Cards.FindAsync(command.Id);
+var card = await cardRepository.GetByIdAsync(command.Id);
         if (card == null)
         {
             return new CardResponse { Card = null };
@@ -111,25 +111,19 @@ public class CardHandler
         card.ModifiedBy = currentUserService.GetCurrentUserName();
         card.ModifiedDate = DateTime.UtcNow;
 
-        await dbContext.SaveChangesAsync();
+await cardRepository.UpdateAsync(card);
+        await cardRepository.SaveChangesAsync();
 
         return new CardResponse { Card = card };
     }
 
     [Transactional]
-    public async Task Handle(CardDelete command, MarketplaceDbContext dbContext)
+public async Task Handle(CardDelete command, ICardRepository cardRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
 
-        var card = await dbContext.Cards
-            .Include(c => c.Products!)
-            .ThenInclude(p => p.ProductDetail)
-            .ThenInclude(pd => pd!.Documents)
-            .Include(c => c.Products!)
-            .ThenInclude(p => p.ProductDetail)
-            .ThenInclude(pd => pd!.Media)
-            .FirstOrDefaultAsync(c => c.Id == command.Id);
+var card = await cardRepository.GetCardWithProductsAsync(command.Id);
             
         if (card != null)
         {
@@ -142,17 +136,16 @@ public class CardHandler
                     if (product.ProductDetail != null)
                     {
                         // Documents and Media will be deleted automatically due to cascade delete
-                        dbContext.ProductDetails.Remove(product.ProductDetail);
+                        await cardRepository.DeleteAsync(product.ProductDetail.Id);
                     }
-                    
                     // Delete the product
-                    dbContext.Products.Remove(product);
+                    await cardRepository.DeleteAsync(product.Id);
                 }
             }
             
             // Now delete the card
-            dbContext.Cards.Remove(card);
-            await dbContext.SaveChangesAsync();
+            await cardRepository.DeleteAsync(card.Id);
+            await cardRepository.SaveChangesAsync();
         }
     }
 }

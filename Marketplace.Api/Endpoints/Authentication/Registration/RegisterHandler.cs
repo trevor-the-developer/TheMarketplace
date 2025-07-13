@@ -2,6 +2,7 @@ using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Attributes;
@@ -20,8 +21,8 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         private const string RegistrationStepTwoFailed = "Registration step two failed";
         
         [Transactional]
-        public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext, IValidationService validationService)
+        public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, IAuthenticationRepository authenticationRepository,
+            ILogger<RegisterHandler> logger, IValidationService validationService)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
             ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
@@ -45,7 +46,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                 };
             }
 
-            var user = await userManager.FindByEmailAsync(command.Email);
+            var user = await authenticationRepository.FindUserByEmailAsync(command.Email);
             if (user is not null)
             {
                 logger.LogError(ApiConstants.UserAlreadyExists);
@@ -64,11 +65,11 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
             var registrationResponse = new RegisterStepOneResponse();
 
-            var result = await userManager.CreateAsync(user, command.Password);
+            var result = await authenticationRepository.CreateUserAsync(user, command.Password);
 
             IdentityRole? role = null;
             
-            role = await CreateRoleAsync(userManager, roleManager, logger, dbContext, user);
+            role = await CreateRoleAsync(authenticationRepository, logger, user);
 
             // if succeeded ensure the role is created and if that fails make sure
             // the user is deleted so it doesn't cause a duplicate user validation error
@@ -76,10 +77,10 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             {
                 user.EmailConfirmed = false;
 
-                await AddUserToRoleAsync(userManager, logger, dbContext, user, role);
+                await AddUserToRoleAsync(authenticationRepository, logger, user, role);
 
                 // Generate email confirmation token and simple URL
-                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                var token = await authenticationRepository.GenerateEmailConfirmationTokenAsync(user);
                 registrationResponse.ConfirmationEmailLink = $"/api/auth/confirm-email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
             }
             else
@@ -101,7 +102,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
         [Transactional]
         public async Task<ConfirmEmailResponse> Handle(ConfirmEmailRequest command,
-            UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
+            IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
             ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
@@ -109,7 +110,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
             logger.LogInformation(ApiConstants.ConfirmEmail);
 
-            var user = await userManager.FindByIdAsync(command.UserId);
+            var user = await authenticationRepository.FindUserByIdAsync(command.UserId);
             
             if (user == null)
             {
@@ -124,7 +125,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                 };
             }
 
-            var result = await userManager.ConfirmEmailAsync(user, command.Token);
+            var result = await authenticationRepository.ConfirmEmailAsync(user, command.Token);
             
             if (!result.Succeeded)
             {
@@ -151,7 +152,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         
         [Transactional]
         public async Task<RegisterStepTwoResponse> Handle(RegisterStepTwoRequest command,
-            UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext)
+            IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
             ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
@@ -160,7 +161,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             
             logger.LogInformation("Registration step two handler called for user {UserId}", command.UserId);
             
-            var user = await userManager.FindByIdAsync(command.UserId);
+            var user = await authenticationRepository.FindUserByIdAsync(command.UserId);
             
             if (user == null)
             {
@@ -177,7 +178,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             }
             
             // Verify the email confirmation token
-            var result = await userManager.ConfirmEmailAsync(user, command.Token);
+            var result = await authenticationRepository.ConfirmEmailAsync(user, command.Token);
             
             if (!result.Succeeded)
             {
@@ -196,8 +197,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             
             // Update user's email confirmation status
             user.EmailConfirmed = true;
-            await userManager.UpdateAsync(user);
-            await dbContext.SaveChangesAsync();
+            await authenticationRepository.UpdateUserAsync(user);
             
             logger.LogInformation(RegistrationStepTwoSuccessful);
             
@@ -209,14 +209,14 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             };
         }
 
-        private static async Task<IdentityRole> CreateRoleAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<RegisterHandler> logger,
-            MarketplaceDbContext dbContext, ApplicationUser user)
+        private static async Task<IdentityRole> CreateRoleAsync(IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger,
+            ApplicationUser user)
         {
             IdentityRole? role = null;
             try
             {
                 role = new IdentityRole(AuthConstants.UserRole);
-                var roleManagerCreateResult = await roleManager.CreateAsync(role);
+                var roleManagerCreateResult = await authenticationRepository.CreateRoleAsync(AuthConstants.UserRole);
                 if (roleManagerCreateResult.Succeeded)
                 {
                     logger.LogInformation(AuthConstants.CreatedRoleUser);   
@@ -228,7 +228,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
             }
             catch (Exception ex)
             {
-                var deleteUserResult = await userManager.DeleteAsync(user);
+                var deleteUserResult = await authenticationRepository.DeleteUserAsync(user);
                 if (deleteUserResult.Succeeded)
                 {
                     logger.LogError(AuthConstants.ErrorCreatingRoleUser);
@@ -240,32 +240,24 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                     throw new SystemException(AuthConstants.ErrorCreatingRoleUser);
                 }
             }
-            finally
-            {
-                await dbContext.SaveChangesAsync();
-            }
 
             return role = role ?? new IdentityRole(AuthConstants.UserRole);
         }
 
 
-        private static async Task AddUserToRoleAsync(UserManager<ApplicationUser> userManager, ILogger<RegisterHandler> logger, MarketplaceDbContext dbContext,
+        private static async Task AddUserToRoleAsync(IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger,
             ApplicationUser user, IdentityRole role)
         {
             try
             {
-                await userManager.AddToRoleAsync(user, role.Name!);
+                await authenticationRepository.AddToRoleAsync(user, role.Name!);
                 logger.LogInformation($"{RegistrationSuccessfulForUser} {user.UserName}");
             }
             catch (Exception ex)
             {
                 logger.LogInformation($"{RegistrationUnsuccessfulForUser} {user.UserName}");
                 logger.LogError(ex.Message);
-                await userManager.DeleteAsync(user);
-            }
-            finally
-            {
-                await dbContext.SaveChangesAsync();
+                await authenticationRepository.DeleteUserAsync(user);
             }
         }
 

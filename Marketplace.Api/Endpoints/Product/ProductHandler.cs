@@ -1,5 +1,4 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
+using Marketplace.Data.Repositories;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
@@ -12,57 +11,41 @@ namespace Marketplace.Api.Endpoints.Product;
 public class ProductHandler
 {
     [Transactional]
-    public async Task<ProductResponse> Handle(ProductRequest command, MarketplaceDbContext dbContext)
+public async Task<ProductResponse> Handle(ProductRequest command, IProductRepository productRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
 
         Data.Entities.Product? product = null;
         
-        if (command.ProductId > 0)
+        if (command.ProductId.HasValue && command.ProductId > 0)
         {
-            product = await dbContext.Products.FindAsync(command.ProductId);
+            product = await productRepository.GetByIdAsync(command.ProductId.Value);
         }
 
         if (command.AllProducts)
         {
-            var productsQuery = dbContext.Products.AsQueryable();
+            var products = await productRepository.GetAllAsync();
             
-            if (command.CardId.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.CardId == command.CardId);
-            }
+            // Filter products based on request parameters
+            var filteredProducts = products.Where(p => 
+                (!command.CardId.HasValue || p.CardId == command.CardId) &&
+                (string.IsNullOrEmpty(command.Category) || p.Category == command.Category) &&
+                (string.IsNullOrEmpty(command.ProductType) || p.ProductType == command.ProductType) &&
+                (!command.IsEnabled.HasValue || p.IsEnabled == command.IsEnabled) &&
+                (!command.IsDeleted.HasValue || p.IsDeleted == command.IsDeleted)
+            ).ToList();
             
-            if (!string.IsNullOrEmpty(command.Category))
-            {
-                productsQuery = productsQuery.Where(p => p.Category == command.Category);
-            }
-            
-            if (!string.IsNullOrEmpty(command.ProductType))
-            {
-                productsQuery = productsQuery.Where(p => p.ProductType == command.ProductType);
-            }
-            
-            if (command.IsEnabled.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.IsEnabled == command.IsEnabled);
-            }
-            
-            if (command.IsDeleted.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.IsDeleted == command.IsDeleted);
-            }
-            
-            var products = await productsQuery.ToListAsync();
-            return new ProductResponse() { Products = products };
+            return new ProductResponse() { Products = filteredProducts };
         }
 
         if (command.CardId.HasValue && product == null)
         {
-            product = await dbContext.Products.FirstOrDefaultAsync(p => p.CardId == command.CardId);
+            var cardProducts = await productRepository.GetProductsByCardIdAsync(command.CardId.Value);
+            product = cardProducts.FirstOrDefault();
         }
 
-        product ??= await dbContext.Products.FirstOrDefaultAsync();
+product ??= await productRepository.GetFirstOrDefaultAsync(p=>true);
         return new ProductResponse()
         {
             Product = product
@@ -70,10 +53,10 @@ public class ProductHandler
     }
 
     [Transactional]
-    public async Task<ProductResponse> Handle(ProductCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+public async Task<ProductResponse> Handle(ProductCreate command, IProductRepository productRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -109,17 +92,17 @@ public class ProductHandler
             ModifiedDate = DateTime.UtcNow
         };
 
-        dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+await productRepository.AddAsync(product);
+        await productRepository.SaveChangesAsync();
 
         return new ProductResponse { Product = product };
     }
 
     [Transactional]
-    public async Task<ProductResponse> Handle(ProductUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+public async Task<ProductResponse> Handle(ProductUpdate command, IProductRepository productRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -138,7 +121,7 @@ public class ProductHandler
             };
         }
 
-        var product = await dbContext.Products.FindAsync(command.Id);
+var product = await productRepository.GetByIdAsync(command.Id);
         if (product == null)
         {
             return new ProductResponse { Product = null };
@@ -155,23 +138,20 @@ public class ProductHandler
         product.ModifiedBy = currentUserService.GetCurrentUserName();
         product.ModifiedDate = DateTime.UtcNow;
 
-        await dbContext.SaveChangesAsync();
+await productRepository.UpdateAsync(product);
+        await productRepository.SaveChangesAsync();
 
         return new ProductResponse { Product = product };
     }
 
     [Transactional]
-    public async Task Handle(ProductDelete command, MarketplaceDbContext dbContext)
+public async Task Handle(ProductDelete command, IProductRepository productRepository, IProductDetailRepository productDetailRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
+        ArgumentNullException.ThrowIfNull(productDetailRepository, nameof(productDetailRepository));
 
-        var product = await dbContext.Products
-            .Include(p => p.ProductDetail)
-            .ThenInclude(pd => pd!.Documents)
-            .Include(p => p.ProductDetail)
-            .ThenInclude(pd => pd!.Media)
-            .FirstOrDefaultAsync(p => p.Id == command.Id);
+var product = await productRepository.GetProductWithDetailsAsync(command.Id);
             
         if (product != null)
         {
@@ -179,12 +159,12 @@ public class ProductHandler
             if (product.ProductDetail != null)
             {
                 // Documents and Media will be deleted automatically due to cascade delete
-                dbContext.ProductDetails.Remove(product.ProductDetail);
+                await productDetailRepository.DeleteAsync(product.ProductDetail.Id);
             }
             
             // Now delete the product
-            dbContext.Products.Remove(product);
-            await dbContext.SaveChangesAsync();
-        }
-    }
+            await productRepository.DeleteAsync(product.Id);
+            await productRepository.SaveChangesAsync();
+            }
+            }
 }

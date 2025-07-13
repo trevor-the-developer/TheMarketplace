@@ -1,6 +1,7 @@
 using Marketplace.Api.Endpoints.Listing;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,10 +10,10 @@ using Xunit;
 
 namespace Marketplace.Test.Scenarios.Listings.UnitTests;
 
-public class ListingHandlerTests : IDisposable
+public class ListingHandlerTests
 {
     private readonly MockCurrentUserService _currentUserService;
-    private readonly MarketplaceDbContext _dbContext;
+    private readonly Mock<IListingRepository> _listingRepositoryMock;
     private readonly ListingHandler _handler;
     private readonly Mock<ILogger<ListingHandler>> _loggerMock;
     private readonly MockValidationService _validationService;
@@ -22,17 +23,8 @@ public class ListingHandlerTests : IDisposable
         _loggerMock = new Mock<ILogger<ListingHandler>>();
         _currentUserService = new MockCurrentUserService();
         _validationService = new MockValidationService();
+        _listingRepositoryMock = new Mock<IListingRepository>();
         _handler = new ListingHandler();
-
-        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _dbContext = new MarketplaceDbContext(options);
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
     }
 
     [Fact]
@@ -57,13 +49,20 @@ public class ListingHandlerTests : IDisposable
             Description = "Test Description"
         };
 
+        _listingRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Listing>()))
+            .ReturnsAsync((Listing l) => { l.Id = 1; return l; });
+        _listingRepositoryMock.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _listingRepositoryMock.Object, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);
         Assert.Equal("Test Listing", response.Listing.Title);
         Assert.Equal("Test Description", response.Listing.Description);
+        _listingRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Listing>()), Times.Once);
+        _listingRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -77,8 +76,6 @@ public class ListingHandlerTests : IDisposable
             Description = "Updated Description"
         };
 
-        // Act
-        // First create a listing to update
         var existingListing = new Listing
         {
             Id = 1,
@@ -89,15 +86,24 @@ public class ListingHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Listings.Add(existingListing);
-        await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
+        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1))
+            .ReturnsAsync(existingListing);
+        _listingRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Listing>()))
+            .ReturnsAsync((Listing l) => l);
+        _listingRepositoryMock.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        var response = await _handler.Handle(updateCommand, _listingRepositoryMock.Object, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);
         Assert.Equal("Updated Listing", response.Listing.Title);
         Assert.Equal("Updated Description", response.Listing.Description);
+        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _listingRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Listing>()), Times.Once);
+        _listingRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -106,8 +112,6 @@ public class ListingHandlerTests : IDisposable
         // Arrange
         var deleteCommand = new ListingDelete { Id = 1 };
 
-        // Act
-        // First create a listing to delete
         var existingListing = new Listing
         {
             Id = 1,
@@ -118,13 +122,20 @@ public class ListingHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Listings.Add(existingListing);
-        await _dbContext.SaveChangesAsync();
 
-        await _handler.Handle(deleteCommand, _dbContext);
+        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1))
+            .ReturnsAsync(existingListing);
+        _listingRepositoryMock.Setup(r => r.DeleteAsync(It.IsAny<Listing>()))
+            .Returns(Task.CompletedTask);
+        _listingRepositoryMock.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _handler.Handle(deleteCommand, _listingRepositoryMock.Object);
 
         // Assert
-        var listing = await _dbContext.Listings.FindAsync(deleteCommand.Id);
-        Assert.Null(listing);
+        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _listingRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Listing>()), Times.Once);
+        _listingRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 }

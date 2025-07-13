@@ -1,6 +1,7 @@
 using Marketplace.Api.Endpoints.Card;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,10 +10,10 @@ using Xunit;
 
 namespace Marketplace.Test.Scenarios.Cards.UnitTests;
 
-public class CardHandlerTests : IDisposable
+public class CardHandlerTests
 {
     private readonly MockCurrentUserService _currentUserService;
-    private readonly MarketplaceDbContext _dbContext;
+    private readonly Mock<ICardRepository> _cardRepositoryMock;
     private readonly CardHandler _handler;
     private readonly Mock<ILogger<CardHandler>> _loggerMock;
     private readonly MockValidationService _validationService;
@@ -22,17 +23,8 @@ public class CardHandlerTests : IDisposable
         _loggerMock = new Mock<ILogger<CardHandler>>();
         _currentUserService = new MockCurrentUserService();
         _validationService = new MockValidationService();
+        _cardRepositoryMock = new Mock<ICardRepository>();
         _handler = new CardHandler();
-
-        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _dbContext = new MarketplaceDbContext(options);
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
     }
 
     [Fact]
@@ -58,8 +50,25 @@ public class CardHandlerTests : IDisposable
             ListingId = 1
         };
 
+        var expectedCard = new Card
+        {
+            Id = 1,
+            Title = "Test Card",
+            Description = "Test Description",
+            ListingId = 1,
+            CreatedBy = "TestUser",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "TestUser",
+            ModifiedDate = DateTime.UtcNow
+        };
+
+        _cardRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Card>()))
+            .ReturnsAsync(expectedCard);
+        _cardRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _cardRepositoryMock.Object, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Card);
@@ -78,8 +87,6 @@ public class CardHandlerTests : IDisposable
             Description = "Updated Description"
         };
 
-        // Act
-        // First create a card to update
         var existingCard = new Card
         {
             Id = 1,
@@ -90,10 +97,16 @@ public class CardHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Cards.Add(existingCard);
-        await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
+        _cardRepositoryMock.Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(existingCard);
+        _cardRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Card>()))
+            .ReturnsAsync(existingCard);
+        _cardRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        var response = await _handler.Handle(updateCommand, _cardRepositoryMock.Object, _currentUserService, _validationService);
 
         // Assert
         Assert.NotNull(response.Card);
@@ -107,8 +120,6 @@ public class CardHandlerTests : IDisposable
         // Arrange
         var deleteCommand = new CardDelete { Id = 1 };
 
-        // Act
-        // First create a card to delete
         var existingCard = new Card
         {
             Id = 1,
@@ -119,13 +130,19 @@ public class CardHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Cards.Add(existingCard);
-        await _dbContext.SaveChangesAsync();
 
-        await _handler.Handle(deleteCommand, _dbContext);
+        _cardRepositoryMock.Setup(x => x.GetCardWithProductsAsync(1))
+            .ReturnsAsync(existingCard);
+        _cardRepositoryMock.Setup(x => x.DeleteAsync(1))
+            .Returns(Task.CompletedTask);
+        _cardRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _handler.Handle(deleteCommand, _cardRepositoryMock.Object);
 
         // Assert
-        var card = await _dbContext.Cards.FindAsync(deleteCommand.Id);
-        Assert.Null(card);
+        _cardRepositoryMock.Verify(x => x.DeleteAsync(1), Times.Once);
+        _cardRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 }

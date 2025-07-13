@@ -1,5 +1,4 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
+using Marketplace.Data.Repositories;
 using Wolverine.Attributes;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
@@ -12,24 +11,24 @@ namespace Marketplace.Api.Endpoints.Listing;
 public class ListingHandler
 {
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingRequest command, MarketplaceDbContext dbContext)
+    public async Task<ListingResponse> Handle(ListingRequest command, IListingRepository listingRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
 
         Data.Entities.Listing? listing = null;
         if (command.ListingId > 0)
         {
-            listing = await dbContext.Listings.FirstOrDefaultAsync(l => l.Id == command.ListingId);
+            listing = await listingRepository.GetByIdAsync(command.ListingId);
         }
         
         if (command.AllListings)
         {
-            var listings = await dbContext.Listings.ToListAsync();
-            return new ListingResponse() { Listings = listings };
+            var listings = await listingRepository.GetAllAsync();
+            return new ListingResponse() { Listings = listings.ToList() };
         }
         
-        listing ??= await dbContext.Listings.FirstOrDefaultAsync();
+        listing ??= await listingRepository.GetFirstOrDefaultAsync(l => true);
         return new ListingResponse()
         {
             Listing = listing
@@ -37,10 +36,10 @@ public class ListingHandler
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ListingResponse> Handle(ListingCreate command, IListingRepository listingRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -70,17 +69,17 @@ public class ListingHandler
             ModifiedDate = DateTime.UtcNow
         };
 
-        dbContext.Listings.Add(listing);
-        await dbContext.SaveChangesAsync();
+        await listingRepository.AddAsync(listing);
+        await listingRepository.SaveChangesAsync();
 
         return new ListingResponse { Listing = listing };
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ListingResponse> Handle(ListingUpdate command, IListingRepository listingRepository, ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
         ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
 
@@ -99,7 +98,7 @@ public class ListingHandler
             };
         }
 
-        var listing = await dbContext.Listings.FindAsync(command.Id);
+        var listing = await listingRepository.GetByIdAsync(command.Id);
         if (listing == null)
         {
             return new ListingResponse { Listing = null };
@@ -110,22 +109,23 @@ public class ListingHandler
         listing.ModifiedBy = currentUserService.GetCurrentUserName();
         listing.ModifiedDate = DateTime.UtcNow;
 
-        await dbContext.SaveChangesAsync();
+        await listingRepository.UpdateAsync(listing);
+        await listingRepository.SaveChangesAsync();
 
         return new ListingResponse { Listing = listing };
     }
 
     [Transactional]
-    public async Task Handle(ListingDelete command, MarketplaceDbContext dbContext)
+    public async Task Handle(ListingDelete command, IListingRepository listingRepository)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
 
-        var listing = await dbContext.Listings.FindAsync(command.Id);
+        var listing = await listingRepository.GetByIdAsync(command.Id);
         if (listing != null)
         {
-            dbContext.Listings.Remove(listing);
-            await dbContext.SaveChangesAsync();
+            await listingRepository.DeleteAsync(listing);
+            await listingRepository.SaveChangesAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Marketplace.Data.Entities;
+using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +11,7 @@ namespace Marketplace.Core.Security
 {
     public interface ITokenService
     {
-        Task<JwtSecurityToken> GenerateJwtSecurityTokenAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, IConfiguration configuration);
+        Task<JwtSecurityToken> GenerateJwtSecurityTokenAsync(IAuthenticationRepository authenticationRepository, ApplicationUser applicationUser, IConfiguration configuration);
         string GenerateRefreshToken();
         ClaimsPrincipal? GetPrincipalFromExpiredToken(string token,
             TokenValidationParameters tokenValidationParameters, IConfiguration configuration, ILogger<ITokenService> logger);
