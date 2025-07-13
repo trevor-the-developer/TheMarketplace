@@ -72,6 +72,7 @@ public static class DatabaseResetService
             try
             {
                 // These are hardcoded table names from a predefined list, so they're safe
+#pragma warning disable EF1002 // Table names cannot be parameterized and are from a safe predefined list
                 await context.Database.ExecuteSqlRawAsync($"DELETE FROM [{table}]");
                 
                 // Reset identity columns if they exist
@@ -80,6 +81,7 @@ public static class DatabaseResetService
                     BEGIN
                         DBCC CHECKIDENT('[{table}]', RESEED, 0)
                     END");
+#pragma warning restore EF1002
             }
             catch (Exception ex)
             {
@@ -105,7 +107,9 @@ public static class DatabaseResetService
             try
             {
                 // These are hardcoded table names from a predefined list, so they're safe
+#pragma warning disable EF1002 // Table names cannot be parameterized and are from a safe predefined list
                 await context.Database.ExecuteSqlRawAsync($"IF OBJECT_ID('{table}', 'U') IS NOT NULL DELETE FROM [{table}]");
+#pragma warning restore EF1002
             }
             catch (Exception ex)
             {

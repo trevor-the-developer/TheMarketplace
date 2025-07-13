@@ -7,20 +7,22 @@ public static class DocumentEndpoints
 {
     public static void MapDocumentEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost(ApiConstants.ApiSlashDocumentCreate, async (DocumentCreate command, IMessageBus bus) =>
+        // POST /api/documents - Create new document
+        routes.MapPost(ApiConstants.ApiDocuments, async (DocumentCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<DocumentResponse>(command);
-            return Results.Ok(response);
+            return Results.Created($"/api/documents/{response.Document?.Id}", response);
         })
         .RequireAuthorization()
-        .WithTags("Document")
+        .WithTags("Documents")
         .WithName("Create Document")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut(ApiConstants.ApiSlashDocumentUpdate, async (int id, DocumentUpdate command, IMessageBus bus) =>
+        // PUT /api/documents/{id} - Update existing document
+        routes.MapPut(ApiConstants.ApiDocumentsById, async (int id, DocumentUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -28,10 +30,10 @@ public static class DocumentEndpoints
             }
 
             var response = await bus.InvokeAsync<DocumentResponse>(command);
-            return Results.Ok(response);
+            return response.Document == null ? Results.NotFound() : Results.Ok(response);
         })
         .RequireAuthorization()
-        .WithTags("Document")
+        .WithTags("Documents")
         .WithName("Update Document")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
@@ -39,20 +41,24 @@ public static class DocumentEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete(ApiConstants.ApiSlashDocumentDelete, async (int id, IMessageBus bus) =>
+        // DELETE /api/documents/{id} - Delete document
+        routes.MapDelete(ApiConstants.ApiDocumentsById, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new DocumentDelete { Id = id });
             return Results.NoContent();
         })
         .RequireAuthorization()
-        .WithTags("Document")
+        .WithTags("Documents")
         .WithName("Delete Document")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetDocument, async (DocumentRequest command, IMessageBus bus) =>
+        // GET /api/documents - Get all documents
+        routes.MapGet(ApiConstants.ApiDocuments, async (IMessageBus bus) =>
         {
+            var command = new DocumentRequest { AllDocuments = true };
             var response = await bus.InvokeAsync<DocumentResponse>(command);
 
             return response switch
@@ -62,15 +68,16 @@ public static class DocumentEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("Document")
-        .WithName("Get Document(s)")
+        .WithTags("Documents")
+        .WithName("Get All Documents")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetDocumentById, async (int documentId, DocumentRequest command, IMessageBus bus) =>
+        // GET /api/documents/{id} - Get document by ID
+        routes.MapGet(ApiConstants.ApiDocumentsById, async (int id, IMessageBus bus) =>
         {
-            command.DocumentId = documentId;
+            var command = new DocumentRequest { DocumentId = id };
             var response = await bus.InvokeAsync<DocumentResponse>(command);
 
             return response switch
@@ -80,28 +87,11 @@ public static class DocumentEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("Document")
+        .WithTags("Documents")
         .WithName("Get Document by Id")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
-        .Produces(StatusCodes.Status500InternalServerError);
-
-        routes.MapPost(ApiConstants.ApiSlashGetAllDocuments, async (DocumentRequest command, IMessageBus bus) =>
-        {
-            command.AllDocuments = true;
-            var response = await bus.InvokeAsync<DocumentResponse>(command);
-
-            return response switch
-            {
-                null => Results.NotFound(),
-                _ => Results.Ok(response)
-            };
-        })
-        .RequireAuthorization()
-        .WithTags("Document")
-        .WithName("Get all documents")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
     }
 }

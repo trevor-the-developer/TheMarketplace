@@ -7,31 +7,33 @@ public static class UserProfileEndpoints
 {
     public static void MapUserProfileEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost(ApiConstants.ApiSlashUserProfileCreate, async (UserProfileCreate command, IMessageBus bus) =>
+        // POST /api/user-profiles - Create new user profile
+        routes.MapPost(ApiConstants.ApiUserProfiles, async (UserProfileCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
-            return Results.Ok(response);
+            return Results.Created($"/api/user-profiles/{response.UserProfile?.ApplicationUserId}", response);
         })
         .RequireAuthorization()
-        .WithTags("UserProfile")
+        .WithTags("UserProfiles")
         .WithName("Create UserProfile")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut(ApiConstants.ApiSlashUserProfileUpdate, async (string applicationUserId, UserProfileUpdate command, IMessageBus bus) =>
+        // PUT /api/user-profiles/{id} - Update existing user profile
+        routes.MapPut(ApiConstants.ApiUserProfilesById, async (string id, UserProfileUpdate command, IMessageBus bus) =>
         {
-            if (applicationUserId != command.ApplicationUserId)
+            if (id != command.ApplicationUserId)
             {
                 return Results.BadRequest();
             }
 
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
-            return Results.Ok(response);
+            return response.UserProfile == null ? Results.NotFound() : Results.Ok(response);
         })
         .RequireAuthorization()
-        .WithTags("UserProfile")
+        .WithTags("UserProfiles")
         .WithName("Update UserProfile")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
@@ -39,20 +41,24 @@ public static class UserProfileEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete(ApiConstants.ApiSlashUserProfileDelete, async (string applicationUserId, IMessageBus bus) =>
+        // DELETE /api/user-profiles/{id} - Delete user profile
+        routes.MapDelete(ApiConstants.ApiUserProfilesById, async (string id, IMessageBus bus) =>
         {
-            await bus.InvokeAsync(new UserProfileDelete { ApplicationUserId = applicationUserId });
+            await bus.InvokeAsync(new UserProfileDelete { ApplicationUserId = id });
             return Results.NoContent();
         })
         .RequireAuthorization()
-        .WithTags("UserProfile")
+        .WithTags("UserProfiles")
         .WithName("Delete UserProfile")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetUserProfile, async (UserProfileRequest command, IMessageBus bus) =>
+        // GET /api/user-profiles - Get all user profiles
+        routes.MapGet(ApiConstants.ApiUserProfiles, async (IMessageBus bus) =>
         {
+            var command = new UserProfileRequest { AllUserProfiles = true };
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
 
             return response switch
@@ -62,15 +68,16 @@ public static class UserProfileEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("UserProfile")
-        .WithName("Get UserProfile(s)")
+        .WithTags("UserProfiles")
+        .WithName("Get All UserProfiles")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetUserProfileById, async (string applicationUserId, UserProfileRequest command, IMessageBus bus) =>
+        // GET /api/user-profiles/{id} - Get user profile by ID
+        routes.MapGet(ApiConstants.ApiUserProfilesById, async (string id, IMessageBus bus) =>
         {
-            command.ApplicationUserId = applicationUserId;
+            var command = new UserProfileRequest { ApplicationUserId = id };
             var response = await bus.InvokeAsync<UserProfileResponse>(command);
 
             return response switch
@@ -80,28 +87,11 @@ public static class UserProfileEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("UserProfile")
-        .WithName("Get UserProfile by UserId")
+        .WithTags("UserProfiles")
+        .WithName("Get UserProfile by Id")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
-        .Produces(StatusCodes.Status500InternalServerError);
-
-        routes.MapPost(ApiConstants.ApiSlashGetAllUserProfiles, async (UserProfileRequest command, IMessageBus bus) =>
-        {
-            command.AllUserProfiles = true;
-            var response = await bus.InvokeAsync<UserProfileResponse>(command);
-
-            return response switch
-            {
-                null => Results.NotFound(),
-                _ => Results.Ok(response)
-            };
-        })
-        .RequireAuthorization()
-        .WithTags("UserProfile")
-        .WithName("Get all user profiles")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
     }
 }

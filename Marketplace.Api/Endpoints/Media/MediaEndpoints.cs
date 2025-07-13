@@ -7,20 +7,22 @@ public static class MediaEndpoints
 {
     public static void MapMediaEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost(ApiConstants.ApiSlashMediaCreate, async (MediaCreate command, IMessageBus bus) =>
+        // POST /api/media - Create new media
+        routes.MapPost(ApiConstants.ApiMedia, async (MediaCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<MediaResponse>(command);
-            return Results.Ok(response);
+            return Results.Created($"/api/media/{response.Media?.Id}", response);
         })
         .RequireAuthorization()
         .WithTags("Media")
         .WithName("Create Media")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut(ApiConstants.ApiSlashMediaUpdate, async (int id, MediaUpdate command, IMessageBus bus) =>
+        // PUT /api/media/{id} - Update existing media
+        routes.MapPut(ApiConstants.ApiMediaById, async (int id, MediaUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -28,7 +30,7 @@ public static class MediaEndpoints
             }
 
             var response = await bus.InvokeAsync<MediaResponse>(command);
-            return Results.Ok(response);
+            return response.Media == null ? Results.NotFound() : Results.Ok(response);
         })
         .RequireAuthorization()
         .WithTags("Media")
@@ -39,7 +41,8 @@ public static class MediaEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete(ApiConstants.ApiSlashMediaDelete, async (int id, IMessageBus bus) =>
+        // DELETE /api/media/{id} - Delete media
+        routes.MapDelete(ApiConstants.ApiMediaById, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new MediaDelete { Id = id });
             return Results.NoContent();
@@ -49,10 +52,13 @@ public static class MediaEndpoints
         .WithName("Delete Media")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetMedia, async (MediaRequest command, IMessageBus bus) =>
+        // GET /api/media - Get all media
+        routes.MapGet(ApiConstants.ApiMedia, async (IMessageBus bus) =>
         {
+            var command = new MediaRequest { AllMedia = true };
             var response = await bus.InvokeAsync<MediaResponse>(command);
 
             return response switch
@@ -63,14 +69,15 @@ public static class MediaEndpoints
         })
         .RequireAuthorization()
         .WithTags("Media")
-        .WithName("Get Media(s)")
+        .WithName("Get All Media")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetMediaById, async (int mediaId, MediaRequest command, IMessageBus bus) =>
+        // GET /api/media/{id} - Get media by ID
+        routes.MapGet(ApiConstants.ApiMediaById, async (int id, IMessageBus bus) =>
         {
-            command.MediaId = mediaId;
+            var command = new MediaRequest { MediaId = id };
             var response = await bus.InvokeAsync<MediaResponse>(command);
 
             return response switch
@@ -84,24 +91,7 @@ public static class MediaEndpoints
         .WithName("Get Media by Id")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
-        .Produces(StatusCodes.Status500InternalServerError);
-
-        routes.MapPost(ApiConstants.ApiSlashGetAllMedia, async (MediaRequest command, IMessageBus bus) =>
-        {
-            command.AllMedia = true;
-            var response = await bus.InvokeAsync<MediaResponse>(command);
-
-            return response switch
-            {
-                null => Results.NotFound(),
-                _ => Results.Ok(response)
-            };
-        })
-        .RequireAuthorization()
-        .WithTags("Media")
-        .WithName("Get all media")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
     }
 }

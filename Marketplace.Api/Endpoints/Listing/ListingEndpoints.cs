@@ -8,20 +8,22 @@ public static class ListingEndpoints
 {
     public static void MapListingEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost(ApiConstants.ApiSlashListingCreate, async (ListingCreate command, IMessageBus bus) =>
+        // POST /api/listings - Create new listing
+        routes.MapPost(ApiConstants.ApiListings, async (ListingCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ListingResponse>(command);
-            return Results.Ok(response);
+            return Results.Created($"/api/listings/{response.Listing?.Id}", response);
         })
         .RequireAuthorization()
-        .WithTags("Listing")
+        .WithTags("Listings")
         .WithName("Create Listing")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut(ApiConstants.ApiSlashListingUpdate, async (int id, ListingUpdate command, IMessageBus bus) =>
+        // PUT /api/listings/{id} - Update existing listing
+        routes.MapPut(ApiConstants.ApiListingsById, async (int id, ListingUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -29,10 +31,10 @@ public static class ListingEndpoints
             }
 
             var response = await bus.InvokeAsync<ListingResponse>(command);
-            return Results.Ok(response);
+            return response.Listing == null ? Results.NotFound() : Results.Ok(response);
         })
         .RequireAuthorization()
-        .WithTags("Listing")
+        .WithTags("Listings")
         .WithName("Update Listing")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
@@ -40,68 +42,57 @@ public static class ListingEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete(ApiConstants.ApiSlashListingDelete, async (int id, IMessageBus bus) =>
+        // DELETE /api/listings/{id} - Delete listing
+        routes.MapDelete(ApiConstants.ApiListingsById, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new ListingDelete { Id = id });
             return Results.NoContent();
         })
         .RequireAuthorization()
-        .WithTags("Listing")
+        .WithTags("Listings")
         .WithName("Delete Listing")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
-        routes.MapPost(ApiConstants.ApiSlashGetListing, async (ListingRequest command, IMessageBus bus) =>
-            {
-                var response = await bus.InvokeAsync<ListingResponse>(command);
-
-                return response switch
-                {
-                    null => Results.Unauthorized(),
-                    _ => Results.Ok(response)
-                };
-            })
-            .RequireAuthorization()
-            .WithTags("Listing")
-            .WithName("Get Listing(s)")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost(ApiConstants.ApiSlashGetListingById, async (int listingId, ListingRequest command, IMessageBus bus) =>
-            {
-                command.ListingId = listingId;
-                var response = await bus.InvokeAsync<ListingResponse>(command);
+        // GET /api/listings - Get all listings
+        routes.MapGet(ApiConstants.ApiListings, async (IMessageBus bus) =>
+        {
+            var command = new ListingRequest { AllListings = true };
+            var response = await bus.InvokeAsync<ListingResponse>(command);
 
-                return response switch
-                {
-                    null => Results.Unauthorized(),
-                    _ => Results.Ok(response)
-                };
-            })
-            .RequireAuthorization()
-            .WithTags("Listing")
-            .WithName("Get Listing by Id")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status500InternalServerError);
+            return response switch
+            {
+                null => Results.NotFound(),
+                _ => Results.Ok(response)
+            };
+        })
+        .RequireAuthorization()
+        .WithTags("Listings")
+        .WithName("Get All Listings")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status500InternalServerError);
         
-        routes.MapPost(ApiConstants.ApiSlashGetAllListings, async (ListingRequest command, IMessageBus bus) =>
-            {
-                command.AllListings = true;
-                var response = await bus.InvokeAsync<ListingResponse>(command);
+        // GET /api/listings/{id} - Get listing by ID
+        routes.MapGet(ApiConstants.ApiListingsById, async (int id, IMessageBus bus) =>
+        {
+            var command = new ListingRequest { ListingId = id };
+            var response = await bus.InvokeAsync<ListingResponse>(command);
 
-                return response switch
-                {
-                    null => Results.Unauthorized(),
-                    _ => Results.Ok(response)
-                };
-            })
-            .RequireAuthorization()
-            .WithTags("Listing")
-            .WithName("Get all listings")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status500InternalServerError);
+            return response switch
+            {
+                null => Results.NotFound(),
+                _ => Results.Ok(response)
+            };
+        })
+        .RequireAuthorization()
+        .WithTags("Listings")
+        .WithName("Get Listing by Id")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status500InternalServerError);
     }
 }

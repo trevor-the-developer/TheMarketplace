@@ -7,20 +7,22 @@ public static class ProductEndpoints
 {
     public static void MapProductEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost(ApiConstants.ApiSlashProductCreate, async (ProductCreate command, IMessageBus bus) =>
+        // POST /api/products - Create new product
+        routes.MapPost(ApiConstants.ApiProducts, async (ProductCreate command, IMessageBus bus) =>
         {
             var response = await bus.InvokeAsync<ProductResponse>(command);
-            return Results.Ok(response);
+            return Results.Created($"/api/products/{response.Product?.Id}", response);
         })
         .RequireAuthorization()
-        .WithTags("Product")
+        .WithTags("Products")
         .WithName("Create Product")
-        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPut(ApiConstants.ApiSlashProductUpdate, async (int id, ProductUpdate command, IMessageBus bus) =>
+        // PUT /api/products/{id} - Update existing product
+        routes.MapPut(ApiConstants.ApiProductsById, async (int id, ProductUpdate command, IMessageBus bus) =>
         {
             if (id != command.Id)
             {
@@ -28,10 +30,10 @@ public static class ProductEndpoints
             }
 
             var response = await bus.InvokeAsync<ProductResponse>(command);
-            return Results.Ok(response);
+            return response.Product == null ? Results.NotFound() : Results.Ok(response);
         })
         .RequireAuthorization()
-        .WithTags("Product")
+        .WithTags("Products")
         .WithName("Update Product")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest)
@@ -39,20 +41,24 @@ public static class ProductEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapDelete(ApiConstants.ApiSlashProductDelete, async (int id, IMessageBus bus) =>
+        // DELETE /api/products/{id} - Delete product
+        routes.MapDelete(ApiConstants.ApiProductsById, async (int id, IMessageBus bus) =>
         {
             await bus.InvokeAsync(new ProductDelete { Id = id });
             return Results.NoContent();
         })
         .RequireAuthorization()
-        .WithTags("Product")
+        .WithTags("Products")
         .WithName("Delete Product")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetProduct, async (ProductRequest command, IMessageBus bus) =>
+        // GET /api/products - Get all products
+        routes.MapGet(ApiConstants.ApiProducts, async (IMessageBus bus) =>
         {
+            var command = new ProductRequest { AllProducts = true };
             var response = await bus.InvokeAsync<ProductResponse>(command);
 
             return response switch
@@ -62,15 +68,16 @@ public static class ProductEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("Product")
-        .WithName("Get Product(s)")
+        .WithTags("Products")
+        .WithName("Get All Products")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        routes.MapPost(ApiConstants.ApiSlashGetProductById, async (int productId, ProductRequest command, IMessageBus bus) =>
+        // GET /api/products/{id} - Get product by ID
+        routes.MapGet(ApiConstants.ApiProductsById, async (int id, IMessageBus bus) =>
         {
-            command.ProductId = productId;
+            var command = new ProductRequest { ProductId = id };
             var response = await bus.InvokeAsync<ProductResponse>(command);
 
             return response switch
@@ -80,28 +87,11 @@ public static class ProductEndpoints
             };
         })
         .RequireAuthorization()
-        .WithTags("Product")
+        .WithTags("Products")
         .WithName("Get Product by Id")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
-        .Produces(StatusCodes.Status500InternalServerError);
-
-        routes.MapPost(ApiConstants.ApiSlashGetAllProducts, async (ProductRequest command, IMessageBus bus) =>
-        {
-            command.AllProducts = true;
-            var response = await bus.InvokeAsync<ProductResponse>(command);
-
-            return response switch
-            {
-                null => Results.NotFound(),
-                _ => Results.Ok(response)
-            };
-        })
-        .RequireAuthorization()
-        .WithTags("Product")
-        .WithName("Get all products")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
     }
 }

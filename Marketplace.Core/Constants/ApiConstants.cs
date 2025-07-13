@@ -13,74 +13,42 @@ public static class ApiConstants
     public const string Login = "Login";    
     
     // endpoints - Auth-Authz
-    public const string ApiSlashLogin = "/api/login/";
-    public const string ApiSlashRegister = "/api/register/";
-    public const string ApiSlashRegisterStepTwo = "/api/register/step-two";
-    public const string ApiSlashConfirmEmail = "api/confirm_email/";
-    public const string ApiRefresh = "/api/refresh/";
-    public const string ApiSlashLogout = "/api/logout/";
+    public const string ApiSlashLogin = "/api/auth/login";
+    public const string ApiSlashRegister = "/api/auth/register";
+    public const string ApiSlashRegisterStepTwo = "/api/auth/register/step-two";
+    public const string ApiSlashConfirmEmail = "/api/auth/confirm-email";
+    public const string ApiRefresh = "/api/auth/refresh";
+    public const string ApiSlashLogout = "/api/auth/logout";
     
-    // endpoints -card
-    public const string ApiSlashCardCreate = "/api/card/create";
-    public const string ApiSlashCardDelete = "/api/card/delete/{id}";
-    public const string ApiSlashCardUpdate = "/api/card/update/{id}";
-    public const string ApiSlashGetCards = "/api/get/card";
-    public const string ApiSlashGetAllCards = "/api/get/card/all/";
-    public const string ApiSlashGetCardById = "/api/get/card/{cardId}";
+    // endpoints - cards
+    public const string ApiCards = "/api/cards";
+    public const string ApiCardsById = "/api/cards/{id}";
     
-    // endpoints - document
-    public const string ApiSlashDocumentCreate =  "/api/document/create";
-    public const string ApiSlashDocumentDelete = "/api/document/delete/{id}";
-    public const string ApiSlashDocumentUpdate = "/api/document/update/{id}";
-    public const string ApiSlashGetDocument = "/api/get/document/";
-    public const string ApiSlashGetDocumentById = "/api/get/document/{documentId}";
-    public const string ApiSlashGetAllDocuments =  "/api/get/documents/all";
+    // endpoints - documents
+    public const string ApiDocuments = "/api/documents";
+    public const string ApiDocumentsById = "/api/documents/{id}";
     
-    // endpoints - listing
-    public const string ApiSlashListingCreate = "/api/listing/create";
-    public const string ApiSlashListingDelete = "/api/listing/delete/{id}";
-    public const string ApiSlashListingUpdate = "/api/listing/update/{id}";
-    public const string ApiSlashGetListing = "/api/listing/get/listng/";
-    public const string ApiSlashGetListingById = "/api/get/listing/{listingId}";
-    public const string ApiSlashGetAllListings = "/api/get/listing/all";
+    // endpoints - listings
+    public const string ApiListings = "/api/listings";
+    public const string ApiListingsById = "/api/listings/{id}";
     
     // endpoints - media
-    public const string ApiSlashMediaCreate = "/api/media/create";
-    public const string ApiSlashMediaUpdate = "/api/media/update/{id}";
-    public const string ApiSlashMediaDelete = "/api/media/delete/{id}";
-    public const string ApiSlashGetMedia = "/api/get/media/";
-    public const string ApiSlashGetMediaById = "/api/get/media/{mediaId}";
-    public const string ApiSlashGetAllMedia = "/api/get/media/all";
+    public const string ApiMedia = "/api/media";
+    public const string ApiMediaById = "/api/media/{id}";
 
-    // endpoints - product
-    public const string ApiSlashProductCreate = "/api/product/create";
-    public const string ApiSlashProductUpdate =  "/api/product/update/{id}";
-    public const string ApiSlashProductDelete = "/api/product/delete/{id}";
-    public const string ApiSlashGetProduct = "/api/get/product/";
-    public const string ApiSlashGetProductById = "/api/get/product/{productId}";
-    public const string ApiSlashGetAllProducts =  "/api/get/products/all";
+    // endpoints - products
+    public const string ApiProducts = "/api/products";
+    public const string ApiProductsById = "/api/products/{id}";
     
-    // endpoint - product detail
-    public const string ApiSlashProductDetailCreate = "/api/productdetail/create";
-    public const string ApiSlashProductDetailUpdate =  "/api/productdetail/update/{id}";
-    public const string ApiSlashProductDetailDelete = "/api/productdetail/delete/{id}";
-    public const string ApiSlashGetProductDetail = "/api/get/productdetail/";
-    public const string ApiSlashGetProductDetailById = "/api/get/productdetail/{productDetailId}";
-    public const string ApiSlashGetAllProductDetails =  "/api/get/productdetail/all";
+    // endpoints - product details
+    public const string ApiProductDetails = "/api/product-details";
+    public const string ApiProductDetailsById = "/api/product-details/{id}";
     
-    // endpoint - tag
-    public const string ApiSlashTagCreate = "/api/tag/create";
-    public const string ApiSlashTagUpdate =  "/api/tag/update/{id}";
-    public const string ApiSlashTagDelete = "/api/tag/delete/{id}";
-    public const string ApiSlashGetTag = "/api/get/tag/";
-    public const string ApiSlashGetTagById = "/api/get/tag/{tagId}";
-    public const string ApiSlashGetAllTags =  "/api/get/tag/all";
+    // endpoints - tags
+    public const string ApiTags = "/api/tags";
+    public const string ApiTagsById = "/api/tags/{id}";
     
-    // endpoint - user profile
-    public const string ApiSlashUserProfileCreate = "/api/userprofile/create";
-    public const string ApiSlashUserProfileUpdate = "/api/userprofile/update/{applicationUserId}";
-    public const string ApiSlashUserProfileDelete = "/api/userprofile/delete/{applicationUserId}";
-    public const string ApiSlashGetUserProfile = "/api/get/userprofile/";
-    public const string ApiSlashGetUserProfileById = "/api/get/userprofile/{applicationUserId}";
-    public const string ApiSlashGetAllUserProfiles = "/api/get/userprofiles/all";
+    // endpoints - user profiles
+    public const string ApiUserProfiles = "/api/user-profiles";
+    public const string ApiUserProfilesById = "/api/user-profiles/{id}";
 }
