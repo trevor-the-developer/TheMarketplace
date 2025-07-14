@@ -15,7 +15,6 @@ public static class ApiConstants
     // endpoints - Auth-Authz
     public const string ApiSlashLogin = "/api/auth/login";
     public const string ApiSlashRegister = "/api/auth/register";
-    public const string ApiSlashRegisterStepTwo = "/api/auth/register/step-two";
     public const string ApiSlashConfirmEmail = "/api/auth/confirm-email";
     public const string ApiRefresh = "/api/auth/refresh";
     public const string ApiSlashLogout = "/api/auth/logout";

@@ -309,7 +309,8 @@ public class RegistrationTests
         Assert.NotNull(response);
         Assert.Equal(user.Id, response.UserId);
         Assert.Equal(user.Email, response.Email);
-        Assert.Equal("EmailConfirmed", response.ConfirmationCode);
+        Assert.Equal("RegistrationComplete", response.ConfirmationCode);
+        Assert.True(response.RegistrationCompleted);
         Assert.Null(response.ApiError);
     }
 
@@ -333,103 +334,6 @@ public class RegistrationTests
 
         // Assert
         Assert.NotNull(response);
-        Assert.NotNull(response.ApiError);
-        Assert.Equal(400, response.ApiError.StatusCode);
-        Assert.Equal("Email confirmation failed", response.ApiError.ErrorMessage);
-    }
-
-    #endregion
-
-    #region Registration Step Two Tests
-
-    [Fact]
-    public async Task RegisterStepTwo_Null_Command_Throws_ArgumentNullException()
-    {
-        // Arrange
-        var mockAuthRepository = new MockAuthenticationRepository();
-        var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var registerHandler = new RegisterHandler();
-
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await registerHandler.Handle(
-                (RegisterStepTwoRequest)null!,
-                mockAuthRepository.Object,
-                mockLogger.Object);
-        });
-    }
-
-    [Fact]
-    public async Task RegisterStepTwo_User_Not_Found_Returns_Error()
-    {
-        // Arrange
-        var command = RegistrationTestFactory.CreateRegisterStepTwoRequest();
-        var mockAuthRepository = new MockAuthenticationRepository();
-        mockAuthRepository.SetupUserNotFound();
-        var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var registerHandler = new RegisterHandler();
-
-        // Act
-        var response = await registerHandler.Handle(
-            command,
-            mockAuthRepository.Object,
-            mockLogger.Object);
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.False(response.RegistrationStepTwo);
-        Assert.NotNull(response.ApiError);
-        Assert.Equal(404, response.ApiError.StatusCode);
-        Assert.Equal(AuthConstants.UserDoesntExist, response.ApiError.ErrorMessage);
-    }
-
-    [Fact]
-    public async Task RegisterStepTwo_Success_Test()
-    {
-        // Arrange
-        var user = RegistrationTestFactory.CreateTestUser("test@example.com");
-        var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "valid-token", user.Email);
-
-        var mockAuthRepository = new MockAuthenticationRepository(user);
-        var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var registerHandler = new RegisterHandler();
-
-        // Act
-        var response = await registerHandler.Handle(
-            command,
-            mockAuthRepository.Object,
-            mockLogger.Object);
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.True(response.RegistrationStepTwo);
-        Assert.Equal(user.Id, response.UserId);
-        Assert.Equal("RegistrationComplete", response.ConfirmationCode);
-        Assert.Null(response.ApiError);
-    }
-
-    [Fact]
-    public async Task RegisterStepTwo_Confirm_Email_Failed_Returns_Error()
-    {
-        // Arrange
-        var user = RegistrationTestFactory.CreateTestUser("test@example.com");
-        var command = RegistrationTestFactory.CreateRegisterStepTwoRequest(user.Id, "invalid-token", user.Email);
-
-        var mockAuthRepository = new MockAuthenticationRepository(user);
-        mockAuthRepository.SetupConfirmEmailFailed();
-        var mockLogger = new Mock<ILogger<RegisterHandler>>();
-        var registerHandler = new RegisterHandler();
-
-        // Act
-        var response = await registerHandler.Handle(
-            command,
-            mockAuthRepository.Object,
-            mockLogger.Object);
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.False(response.RegistrationStepTwo);
         Assert.NotNull(response.ApiError);
         Assert.Equal(400, response.ApiError.StatusCode);
         Assert.Equal("Email confirmation failed", response.ApiError.ErrorMessage);

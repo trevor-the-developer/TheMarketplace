@@ -17,8 +17,6 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         private const string RegistrationSuccessfulForUser = "Registration successful for user";
         private const string RegistrationUnsuccessfulForUser = "Registration unsuccessful for user";
         private const string RegistrationFailed = "Registration failed";
-        private const string RegistrationStepTwoSuccessful = "Registration step two successful";
-        private const string RegistrationStepTwoFailed = "Registration step two failed";
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, IAuthenticationRepository authenticationRepository,
@@ -139,73 +137,19 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                         StackTrace: null)
                 };
             }
-
-            logger.LogInformation("Email confirmed for user {UserId}", command.UserId);
+            
+            // Complete registration in one step
+            user.EmailConfirmed = true;
+            await authenticationRepository.UpdateUserAsync(user);
+            
+            logger.LogInformation("Email confirmed and registration completed for user {UserId}", command.UserId);
             
             return new ConfirmEmailResponse
             {
                 UserId = user.Id,
                 Email = user.Email,
-                ConfirmationCode = "EmailConfirmed"
-            };
-        }
-        
-        [Transactional]
-        public async Task<RegisterStepTwoResponse> Handle(RegisterStepTwoRequest command,
-            IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger)
-        {
-            ArgumentNullException.ThrowIfNull(command, nameof(command));
-            ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
-            ArgumentNullException.ThrowIfNull(command.Email, nameof(command.Email));
-            ArgumentNullException.ThrowIfNull(command.Token, nameof(command.Token));
-            
-            logger.LogInformation("Registration step two handler called for user {UserId}", command.UserId);
-            
-            var user = await authenticationRepository.FindUserByIdAsync(command.UserId);
-            
-            if (user == null)
-            {
-                logger.LogError(AuthConstants.UserDoesntExist);
-                return new RegisterStepTwoResponse
-                {
-                    RegistrationStepTwo = false,
-                    ApiError = new Core.ApiError(
-                        HttpStatusCode: StatusCodes.Status404NotFound.ToString(),
-                        StatusCode: StatusCodes.Status404NotFound,
-                        ErrorMessage: AuthConstants.UserDoesntExist,
-                        StackTrace: null)
-                };
-            }
-            
-            // Verify the email confirmation token
-            var result = await authenticationRepository.ConfirmEmailAsync(user, command.Token);
-            
-            if (!result.Succeeded)
-            {
-                logger.LogError(RegistrationStepTwoFailed);
-                return new RegisterStepTwoResponse
-                {
-                    RegistrationStepTwo = false,
-                    ApiError = new Core.ApiError(
-                        HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                        StatusCode: StatusCodes.Status400BadRequest,
-                        ErrorMessage: "Email confirmation failed",
-                        StackTrace: null),
-                    Errors = result.Errors
-                };
-            }
-            
-            // Update user's email confirmation status
-            user.EmailConfirmed = true;
-            await authenticationRepository.UpdateUserAsync(user);
-            
-            logger.LogInformation(RegistrationStepTwoSuccessful);
-            
-            return new RegisterStepTwoResponse
-            {
-                UserId = user.Id,
-                RegistrationStepTwo = true,
-                ConfirmationCode = "RegistrationComplete"
+                ConfirmationCode = "RegistrationComplete",
+                RegistrationCompleted = true
             };
         }
 

@@ -29,10 +29,12 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 
 ### ✅ Completed Features
 - **Authentication System**
-  - User registration with email confirmation
-  - JWT token-based login/logout
+  - Complete user registration with email confirmation
+  - Age validation (13+ years required)
+  - Secure JWT token-based authentication
   - Token refresh and revocation with proper validation
   - Role-based authorisation
+  - Single-step registration flow with email verification
   
 - **Core Data Models**
   - Complete entity relationship mapping

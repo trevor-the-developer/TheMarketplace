@@ -71,19 +71,6 @@ public static class RegistrationTestFactory
         };
     }
 
-    /// <summary>
-    ///     Creates a RegisterStepTwoRequest for testing
-    /// </summary>
-    public static RegisterStepTwoRequest CreateRegisterStepTwoRequest(string? userId = null, string? token = null,
-        string? email = null)
-    {
-        return new RegisterStepTwoRequest
-        {
-            UserId = userId ?? Guid.NewGuid().ToString(),
-            Token = token ?? "test-token",
-            Email = email ?? "test@example.com"
-        };
-    }
 
     /// <summary>
     ///     Creates a successful RegisterStepOneResponse

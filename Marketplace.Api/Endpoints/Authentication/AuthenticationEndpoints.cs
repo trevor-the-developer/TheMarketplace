@@ -101,35 +101,6 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status500InternalServerError);
-            
-            // Registration step two endpoint
-            routes.MapPost(ApiConstants.ApiSlashRegisterStepTwo, async ([FromBody] RegisterStepTwoRequest command, IMessageBus bus) =>
-            {
-                var response = await bus.InvokeAsync<RegisterStepTwoResponse>(command);
-                
-                if (response.ApiError is not null)
-                {
-                    return Results.Problem(
-                        detail: response.ApiError?.ErrorMessage, 
-                        statusCode: response.ApiError?.StatusCode,
-                        type: response.ApiError?.HttpStatusCode,
-                        title: "Registration step two endpoint.");
-                }
-
-                if (response.RegistrationStepTwo.HasValue && response.RegistrationStepTwo.Value)
-                {
-                    return Results.Ok(response);
-                }
-
-                return Results.UnprocessableEntity(response);
-            })
-            .AllowAnonymous()
-            .WithTags(ApiConstants.Authentication)
-            .WithName("RegisterStepTwo")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status500InternalServerError);                
 
             // Refresh token endpoint
             routes.MapPost(ApiConstants.ApiRefresh, async (TokenRefreshRequest command, IMessageBus bus) =>

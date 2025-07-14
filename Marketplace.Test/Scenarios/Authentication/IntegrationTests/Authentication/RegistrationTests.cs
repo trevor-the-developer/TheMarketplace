@@ -141,7 +141,8 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         var confirmResult = await confirmResponse.ReadAsJsonAsync<ConfirmEmailResponse>();
 
         Assert.NotNull(confirmResult);
-        Assert.Equal("EmailConfirmed", confirmResult.ConfirmationCode);
+        Assert.Equal("RegistrationComplete", confirmResult.ConfirmationCode);
+        Assert.True(confirmResult.RegistrationCompleted);
         Assert.Null(confirmResult.ApiError);
     }
 
@@ -163,76 +164,6 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         });
     }
 
-    [Fact]
-    public async Task RegisterStepTwo_Success()
-    {
-        // First register a user
-        var registerRequest = RegistrationTestFactory.CreateValidRegisterRequest("steptwo@example.com");
-
-        var registerResponse = await Host.Scenario(_ =>
-        {
-            _.Post
-                .Json(registerRequest, JsonStyle.MinimalApi)
-                .ToUrl(ApiConstants.ApiSlashRegister);
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
-        });
-
-        // Work around Alba JSON parsing issues by reading as text and parsing manually
-        var responseText = await registerResponse.ReadAsTextAsync();
-
-        Assert.NotNull(responseText);
-        Assert.Contains("registrationStepOne", responseText);
-        Assert.Contains("true", responseText);
-        Assert.Contains("userId", responseText);
-        Assert.Contains("confirmationEmailLink", responseText);
-
-        // Extract confirmation link from the raw response text
-        var confirmLinkStart = responseText.IndexOf("confirmationEmailLink\":\"") + "confirmationEmailLink\":\"".Length;
-        var confirmLinkEnd = responseText.IndexOf("\"", confirmLinkStart);
-        var confirmationUrl = responseText.Substring(confirmLinkStart, confirmLinkEnd - confirmLinkStart);
-        Assert.NotNull(confirmationUrl);
-
-        var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
-        var query = HttpUtility.ParseQueryString(uri.Query);
-
-        var stepTwoRequest = new RegisterStepTwoRequest
-        {
-            UserId = query["userId"]!,
-            Token = query["token"]!,
-            Email = query["email"]!
-        };
-
-        var stepTwoResponse = await Host.Scenario(_ =>
-        {
-            _.Post
-                .Json(stepTwoRequest, JsonStyle.MinimalApi)
-                .ToUrl(ApiConstants.ApiSlashRegisterStepTwo);
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
-        });
-
-        var stepTwoResult = await stepTwoResponse.ReadAsJsonAsync<RegisterStepTwoResponse>();
-
-        Assert.NotNull(stepTwoResult);
-        Assert.True(stepTwoResult.RegistrationStepTwo);
-        Assert.Equal("RegistrationComplete", stepTwoResult.ConfirmationCode);
-        Assert.Null(stepTwoResult.ApiError);
-    }
-
-    [Fact]
-    public async Task RegisterStepTwo_Invalid_User_Returns_NotFound()
-    {
-        var stepTwoRequest =
-            RegistrationTestFactory.CreateRegisterStepTwoRequest("invalid-user-id", "invalid-token",
-                "invalid@example.com");
-
-        await Host.Scenario(_ =>
-        {
-            _.Post
-                .Json(stepTwoRequest, JsonStyle.MinimalApi)
-                .ToUrl(ApiConstants.ApiSlashRegisterStepTwo);
-            _.StatusCodeShouldBe(HttpStatusCode.NotFound);
-        });
-    }
 
     [Fact]
     public async Task FullRegistrationWorkflow_Success()
@@ -252,7 +183,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         Assert.NotNull(registrationResult);
         Assert.True(registrationResult.RegistrationStepOne);
 
-        // Step 2: Email Confirmation
+        // Step 2: Email Confirmation (completes registration)
         var confirmationUrl = registrationResult.ConfirmationEmailLink;
         Assert.NotNull(confirmationUrl);
 
@@ -268,27 +199,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
 
         var confirmResult = await confirmResponse.ReadAsJsonAsync<ConfirmEmailResponse>();
         Assert.NotNull(confirmResult);
-        Assert.Equal("EmailConfirmed", confirmResult.ConfirmationCode);
-
-        // Step 3: Registration Step Two
-        var stepTwoRequest = new RegisterStepTwoRequest
-        {
-            UserId = query["userId"]!,
-            Token = query["token"]!,
-            Email = query["email"]!
-        };
-
-        var stepTwoResponse = await Host.Scenario(_ =>
-        {
-            _.Post
-                .Json(stepTwoRequest, JsonStyle.MinimalApi)
-                .ToUrl(ApiConstants.ApiSlashRegisterStepTwo);
-            _.StatusCodeShouldBe(HttpStatusCode.OK);
-        });
-
-        var stepTwoResult = await stepTwoResponse.ReadAsJsonAsync<RegisterStepTwoResponse>();
-        Assert.NotNull(stepTwoResult);
-        Assert.True(stepTwoResult.RegistrationStepTwo);
-        Assert.Equal("RegistrationComplete", stepTwoResult.ConfirmationCode);
+        Assert.Equal("RegistrationComplete", confirmResult.ConfirmationCode);
+        Assert.True(confirmResult.RegistrationCompleted);
     }
 }
