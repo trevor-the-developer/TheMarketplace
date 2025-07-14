@@ -2,7 +2,7 @@
 
 ## Overview
 
-TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform designed for Triad employees. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
+TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
 
 ## Current Architecture
 
