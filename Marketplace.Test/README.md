@@ -3,10 +3,11 @@
 Comprehensive testing suite for TheMarketplace solution using modern .NET 8 testing frameworks and patterns.
 
 ## Current Status
-✅ **All 227 tests passing** - Complete test coverage across all modules with consistent results.
-✅ **Registration tests fixed** - Recent updates resolved compilation issues and aligned with current architecture.
-✅ **Legacy mocks removed** - Cleaned up unused enhanced mocks for better maintainability.
-✅ **Integration testing** - Alba framework provides robust end-to-end testing capabilities.
+✅ **All 229 tests passing** - Complete test coverage across all modules with consistent results.
+✅ **Database infrastructure robust** - Automated SQL Server container management with proper cleanup.
+✅ **Alba integration testing** - Modern end-to-end testing framework providing robust API testing capabilities.
+✅ **Authentication infrastructure** - Complete JWT token testing with proper user management.
+✅ **Test isolation** - Each test runs in a clean database state for reliable results.
 
 ## Test Architecture
 
@@ -81,23 +82,95 @@ Marketplace.Test/
 
 ## Infrastructure Features
 
-### Database Test Fixture
-- **Automated Container Management**: SQL Server container lifecycle management
-- **Migration Application**: Automatic database schema setup
-- **Data Cleanup**: Clean state between test runs
-- **Connection Management**: Proper connection string configuration
+### Database Test Fixture (`DatabaseTestFixture`)
+
+The `DatabaseTestFixture` class provides robust database management for integration tests:
+
+- **Automated Container Management**: 
+  - Checks if SQL Server container is running
+  - Starts container if needed using docker-compose
+  - Waits for SQL Server to be ready with health checks
+  - Proper container lifecycle management
+
+- **Database Setup**:
+  - Creates fresh database for each test session
+  - Applies EF Core migrations automatically
+  - Seeds test data with users, roles, and sample entities
+  - Handles database connection validation
+
+- **Connection Management**:
+  - Uses containerized SQL Server (port 1433)
+  - Connection string: `Server=127.0.0.1,1433;Database=Marketplace;User=sa;Password=P@ssw0rd!`
+  - Proper connection timeout and retry logic
+
+### Database Reset Service (`DatabaseResetService`)
+
+Provides clean database state between tests:
+
+- **Data Cleanup**: 
+  - Clears all tables in correct order to avoid FK violations
+  - Resets identity columns to start from 1
+  - Handles Wolverine message bus tables
+  - Preserves schema structure
+
+- **Seeding**:
+  - Creates default admin and demo users
+  - Seeds roles (Administrator, User)
+  - Creates sample data for all entities
+  - Maintains consistent test data across runs
+
+### Alba Integration Testing (`WebAppFixture`)
+
+Provides end-to-end HTTP testing capabilities:
+
+- **Host Setup**: Creates Alba test host with real application configuration
+- **Environment**: Uses Development environment for testing
+- **Oakton Integration**: Proper command-line processing setup
+- **Lifecycle Management**: Manages host creation and disposal
+- **Request Testing**: Full HTTP request/response cycle testing
 
 ### Authentication Infrastructure
-- **JWT Token Testing**: Complete token generation and validation
-- **Role-Based Testing**: Different user roles and permissions
-- **Refresh Token Testing**: Token refresh mechanism validation
-- **Mock Authentication**: Consistent authentication setup across tests
+
+#### JWT Token Testing
+- **Token Generation**: Creates valid JWT tokens for authenticated tests
+- **Token Validation**: Validates token structure and claims
+- **Refresh Tokens**: Tests token refresh mechanism
+- **Role Claims**: Proper role-based authorization testing
+
+#### Authentication Helpers (`AuthenticationHelper`)
+- **Admin Token**: `GetAdminTokenAsync()` - Gets admin JWT token
+- **Login Response**: `GetLoginResponse()` - Complete login flow testing
+- **Error Handling**: Proper error response validation
+- **Token Extraction**: Extracts and validates security tokens
 
 ### Test Data Management
-- **Factory Pattern**: Standardised test data creation
-- **Relationship Handling**: Proper foreign key relationships in test data
-- **Cleanup Strategies**: Efficient test data cleanup
-- **Isolation**: Tests don't interfere with each other
+
+#### Factory Pattern (`RegistrationTestFactory`)
+- **User Creation**: `CreateTestUser()` - Creates test ApplicationUser
+- **Registration Requests**: `CreateValidRegisterRequest()` - Valid registration data
+- **Invalid Data**: `CreateInvalidRegisterRequest()` - Tests validation
+- **Roles**: `CreateTestRole()` - Creates test IdentityRole
+- **Responses**: Factory methods for different response scenarios
+
+#### Mock Services
+- **`MockCurrentUserService`**: Provides consistent current user context
+- **`MockValidationService`**: Handles validation in unit tests
+- **`MockAuthenticationRepository`**: Isolated authentication testing
+- **`MockTokenService`**: JWT token operations for unit tests
+
+### Test Organization
+
+#### Scenario-Based Testing
+- **`ScenarioCollection`**: xUnit collection for shared fixtures
+- **`ScenarioContext`**: Base class providing Alba host access
+- **Module Organization**: Tests organized by domain (Authentication, Cards, etc.)
+- **Test Isolation**: Each test class inherits from appropriate base classes
+
+#### Database Reset Base Classes
+- **`DatabaseResetTestBase`**: Base class for tests requiring database reset
+- **`IAsyncLifetime`**: Proper async initialization and cleanup
+- **Automatic Reset**: Database reset before each test method
+- **Cleanup Hooks**: Override points for custom cleanup logic
 
 ## Running Tests
 
