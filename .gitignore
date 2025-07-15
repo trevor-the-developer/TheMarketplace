@@ -44,6 +44,11 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# User-specific files
+*.DotSettings.user
+Marketplace.Api.sln.DotSettings.user
+BACKEND_CONTEXT.md
+
 # MSBuild Binary and Structured Log
 *.binlog
 
