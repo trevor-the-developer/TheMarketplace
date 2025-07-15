@@ -7,6 +7,9 @@ public static class ApiConstants
     public const int DefaultSmtpPort = 1025;
     public const bool DefaultSmtpUseSsl= false;
     
+    // Frontend
+    public const string DefaultFrontendBaseUrl = "http://localhost:3000";
+    
     // Authentication
     public const string RegisterHandlerCalled = "Register handler called";
     public const string UserAlreadyExists = "User already exists";

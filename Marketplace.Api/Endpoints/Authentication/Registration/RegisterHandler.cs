@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine.Attributes;
 using Marketplace.Core.Validation;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Marketplace.Api.Endpoints.Authentication.Registration
 {
@@ -21,7 +22,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, IAuthenticationRepository authenticationRepository,
-            ILogger<RegisterHandler> logger, IValidationService validationService, IEmailService emailService)
+            ILogger<RegisterHandler> logger, IValidationService validationService, IEmailService emailService, IConfiguration configuration)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
             ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
@@ -78,9 +79,10 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
 
                 await AddUserToRoleAsync(authenticationRepository, logger, user, role);
 
-                // Generate email confirmation token and simple URL
+                // Generate email confirmation token and absolute URL
                 var token = await authenticationRepository.GenerateEmailConfirmationTokenAsync(user);
-                registrationResponse.ConfirmationEmailLink = $"/api/auth/confirm-email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
+                var frontendBaseUrl = configuration["FrontendSettings:BaseUrl"] ?? ApiConstants.DefaultFrontendBaseUrl;
+                registrationResponse.ConfirmationEmailLink = $"{frontendBaseUrl}/api/auth/confirm-email?userId={Uri.EscapeDataString(user.Id!)}\u0026token={Uri.EscapeDataString(token)}\u0026email={Uri.EscapeDataString(user.Email!)}";
 
                 // Send confirmation email
                 try

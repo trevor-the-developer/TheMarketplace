@@ -31,12 +31,14 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 
 ### ✅ Completed Features
 - **Authentication System**
-  - Complete user registration with email confirmation
-  - Age validation (13+ years required)
-  - Secure JWT token-based authentication
-  - Token refresh and revocation with proper validation
-  - Role-based authorisation
-  - Single-step registration flow with email verification
+  - **Enhanced User Registration**: Streamlined single-step registration with email confirmation
+  - **Email Confirmation**: Robust token-based email verification with MailHog integration
+  - **Configuration Management**: Frontend URL configuration with fallback to constants
+  - **Age Validation**: Enforced minimum age requirement (13+ years)
+  - **JWT Authentication**: Secure token-based authentication with refresh tokens
+  - **Token Management**: Proper token refresh and revocation with validation
+  - **Role-Based Authorization**: Complete role-based access control
+  - **Email Service**: MailKit implementation for reliable email delivery
   
 - **Core Data Models**
   - Complete entity relationship mapping
@@ -60,7 +62,16 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
   - Proper dependency injection configuration
   - ✅ **All tests passing (229 total)** - Recent fixes to registration tests and cleanup of legacy mocks
   
-### 🚧 Future Enhancements
+### ✅ Recent Improvements (January 2025)
+- **Registration Flow Enhancement**: Fixed and streamlined single-step registration process
+- **Email Confirmation**: Resolved email confirmation links to use correct frontend URLs
+- **Configuration Management**: Added `FrontendSettings.BaseUrl` configuration in appsettings
+- **Constants Enhancement**: Added `ApiConstants.DefaultFrontendBaseUrl` for consistent fallback
+- **Test Suite Fixes**: Updated all registration tests to work with new configuration pattern
+- **MailHog Integration**: Improved email testing workflow with proper URL routing
+- **Frontend Integration**: Email confirmation links now correctly point to frontend (http://localhost:3000)
+  
+### 🙧 Future Enhancements
 - Advanced search and filtering functionality
 - File upload and media handling optimisation
 - Real-time notifications
@@ -93,6 +104,142 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 4. **Access Swagger UI**
    - Navigate to: `https://localhost:5001/swagger`
    - Database connection: `Server=127.0.0.1,1433;User=sa;Password=P@ssw0rd!`
+
+5. **Start the Frontend** (Optional - for full registration testing)
+   ```bash
+   cd TheMarketplace.Frontend
+   npm install
+   npm run dev
+   ```
+   - Frontend will be available at: `http://localhost:3000`
+
+## Testing the Registration Flow
+
+### End-to-End Registration Testing
+
+The registration system includes email confirmation with MailHog integration for testing. Here's how to test the complete flow:
+
+#### Prerequisites
+- Backend API running on port 5212
+- Frontend running on port 3000 (optional, can test via API only)
+- MailHog running in Docker container (port 8025)
+
+#### Method 1: Full Frontend Testing (Recommended)
+
+1. **Start all services**:
+   ```bash
+   # Start database and MailHog
+   docker compose up -d
+   
+   # Start backend API
+   dotnet run --project Marketplace.Api
+   
+   # Start frontend (in separate terminal)
+   cd TheMarketplace.Frontend
+   npm run dev
+   ```
+
+2. **Register a new user**:
+   - Navigate to `http://localhost:3000/register`
+   - Fill out the registration form:
+     - First Name: `John`
+     - Last Name: `Doe`
+     - Email: `john.doe@example.com`
+     - Password: `SecurePass123!`
+     - Date of Birth: Any date making the user 13+ years old
+   - Click "Register"
+
+3. **Check registration response**:
+   - Should see success message
+   - User account created but not yet confirmed
+   - Confirmation email sent to MailHog
+
+4. **View confirmation email in MailHog**:
+   - Open `http://localhost:8025` in your browser
+   - Click on the latest email to `john.doe@example.com`
+   - Subject should be "Confirm your registration"
+   - Email contains a clickable confirmation link
+
+5. **Complete registration**:
+   - Click the confirmation link in the email
+   - Link format: `http://localhost:3000/api/auth/confirm-email?userId=...&token=...&email=...`
+   - Should see JSON response: `{"registrationCompleted": true, "confirmationCode": "RegistrationComplete"}`
+   - User account is now fully activated
+
+6. **Test login**:
+   - Navigate to `http://localhost:3000/login`
+   - Use the registered credentials
+   - Should successfully log in and receive JWT token
+
+#### Method 2: API-Only Testing (Backend Focus)
+
+1. **Register via API**:
+   ```bash
+   curl -X POST http://localhost:5212/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{
+       "firstName": "Jane",
+       "lastName": "Smith",
+       "email": "jane.smith@example.com",
+       "password": "SecurePass123!",
+       "dateOfBirth": "1990-01-01"
+     }'
+   ```
+
+2. **Check MailHog for confirmation email**:
+   - Visit `http://localhost:8025`
+   - Find email to `jane.smith@example.com`
+   - Copy the confirmation URL from the email
+
+3. **Confirm email via API**:
+   ```bash
+   # Extract userId, token, and email from the confirmation URL
+   curl "http://localhost:3000/api/auth/confirm-email?userId=<USER_ID>&token=<TOKEN>&email=jane.smith%40example.com"
+   ```
+
+4. **Test login**:
+   ```bash
+   curl -X POST http://localhost:5212/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "jane.smith@example.com",
+       "password": "SecurePass123!"
+     }'
+   ```
+
+#### Method 3: Swagger UI Testing
+
+1. **Access Swagger UI**:
+   - Navigate to `http://localhost:5212/swagger`
+
+2. **Test registration**:
+   - Find `POST /api/auth/register` endpoint
+   - Click "Try it out"
+   - Fill in the request body with user details
+   - Execute the request
+
+3. **Check MailHog**:
+   - Visit `http://localhost:8025` to view the confirmation email
+
+4. **Test email confirmation**:
+   - Find `GET /api/auth/confirm-email` endpoint in Swagger
+   - Enter the `userId`, `token`, and `email` parameters from the email
+   - Execute the request
+
+### Expected Behavior
+
+- **Registration Success**: Returns user ID and confirmation link
+- **Email Delivery**: Confirmation email appears in MailHog within seconds
+- **Email Content**: Contains clickable link pointing to frontend URL
+- **Confirmation Success**: Returns `{"registrationCompleted": true}`
+- **Login Success**: User can authenticate with confirmed credentials
+
+### Troubleshooting
+
+- **Email not appearing**: Check MailHog container is running (`docker ps`)
+- **Confirmation link fails**: Ensure frontend is running on port 3000
+- **Database errors**: Run migrations (`dotnet ef database update`)
+- **Port conflicts**: Check no other services are using ports 5212, 3000, or 8025
 
 ### Development Setup
 

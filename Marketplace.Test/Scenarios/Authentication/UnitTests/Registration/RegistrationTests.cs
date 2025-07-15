@@ -4,6 +4,7 @@ using Marketplace.Core.Constants;
 using Marketplace.Test.Factories;
 using Marketplace.Test.Mocks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -12,6 +13,13 @@ namespace Marketplace.Test.Scenarios.Authentication.UnitTests.Registration;
 
 public class RegistrationTests
 {
+    private static IConfiguration CreateMockConfiguration()
+    {
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["FrontendSettings:BaseUrl"]).Returns("http://localhost:3000");
+        return mockConfiguration.Object;
+    }
+    
     #region Registration Step One Tests
 
     [Fact]
@@ -81,7 +89,8 @@ public class RegistrationTests
                 mockAuthRepository.Object,
                 mockLogger.Object,
                 mockValidationService,
-                mockEmailService.Object);
+                mockEmailService.Object,
+                CreateMockConfiguration());
         });
     }
 
@@ -104,7 +113,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
@@ -132,7 +142,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
@@ -167,7 +178,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
@@ -199,7 +211,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
@@ -228,7 +241,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
@@ -259,7 +273,8 @@ public class RegistrationTests
                 mockAuthRepository.Object,
                 mockLogger.Object,
                 mockValidationService,
-                mockEmailService.Object);
+                mockEmailService.Object,
+                CreateMockConfiguration());
         });
     }
 
@@ -282,7 +297,8 @@ public class RegistrationTests
             mockAuthRepository.Object,
             mockLogger.Object,
             mockValidationService,
-            mockEmailService.Object);
+            mockEmailService.Object,
+            CreateMockConfiguration());
 
         // Assert
         Assert.NotNull(response);
