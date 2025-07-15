@@ -62,12 +62,6 @@ builder.Host.UseWolverine(opts =>
 
 #endregion
 
-#region DbContext
-
-// DbContext is already registered with Wolverine integration above
-
-#endregion
-
 #region Identity (Authentication and Authorisation)
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -276,7 +270,6 @@ if (!app.Environment.IsEnvironment("Testing"))
 
 #region Endpoints
 
-/* Endpoints */
 app.MapAuthenticationEndpoints();
 app.MapListingEndpoints();
 app.MapCardEndpoints();
