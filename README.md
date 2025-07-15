@@ -20,7 +20,9 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 - **ASP.NET Core Identity** - User authentication and authorisation
 - **JWT Authentication** - Secure token-based authentication with refresh tokens
 - **SQL Server 2022** - Primary database (containerised)
-- **AutoMapper** - Object-to-object mapping
+- **FluentValidation** - Input validation framework
+- **MailKit** - Email service implementation
+- **MailHog** - Email testing service (containerised)
 - **Swagger/OpenAPI** - API documentation and testing
 - **xUnit & Alba** - Unit and integration testing framework
 - **Docker & Docker Compose** - Containerisation for development
@@ -56,7 +58,7 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
   - Scenario-based testing with proper database isolation
   - CORS configuration
   - Proper dependency injection configuration
-  - ✅ **All tests passing (227 total)** - Recent fixes to registration tests and cleanup of legacy mocks
+  - ✅ **All tests passing (229 total)** - Recent fixes to registration tests and cleanup of legacy mocks
   
 ### 🚧 Future Enhancements
 - Advanced search and filtering functionality

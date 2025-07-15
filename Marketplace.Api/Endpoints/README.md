@@ -44,72 +44,65 @@ Wolverine provides automatic handler discovery that:
 ### Authentication Module
 - **POST /api/auth/login** - User authentication with JWT token generation
 - **POST /api/auth/register** - User registration with email confirmation
+- **GET /api/auth/confirm-email** - Email confirmation and account activation
 - **POST /api/auth/refresh** - JWT token refresh using refresh tokens
-- **POST /api/auth/revoke** - User logout and token revocation
+- **POST /api/auth/logout** - User logout and token revocation
 
 ### Listings Module
-- **POST /api/listing/create** - Create new listing
-- **PUT /api/listing/update/{id}** - Update existing listing
-- **DELETE /api/listing/delete/{id}** - Delete listing
-- **POST /api/listing/get** - Retrieve listings
-- **POST /api/listing/get/{id}** - Get specific listing by ID
-- **POST /api/listing/get/all** - Get all listings
+- **POST /api/listings** - Create new listing
+- **PUT /api/listings/{id}** - Update existing listing
+- **DELETE /api/listings/{id}** - Delete listing
+- **GET /api/listings** - Get all listings
+- **GET /api/listings/{id}** - Get specific listing by ID
 
 ### Cards Module
-- **POST /api/card/create** - Create new card
-- **PUT /api/card/update/{id}** - Update existing card
-- **DELETE /api/card/delete/{id}** - Delete card
-- **POST /api/card/get** - Retrieve cards
-- **POST /api/card/get/{id}** - Get specific card by ID
-- **POST /api/card/get/all** - Get all cards
+- **POST /api/cards** - Create new card
+- **PUT /api/cards/{id}** - Update existing card
+- **DELETE /api/cards/{id}** - Delete card
+- **GET /api/cards** - Get all cards
+- **GET /api/cards/{id}** - Get specific card by ID
 
 ### Products Module
-- **POST /api/product/create** - Create new product
-- **PUT /api/product/update/{id}** - Update existing product
-- **DELETE /api/product/delete/{id}** - Delete product
-- **POST /api/product/get** - Retrieve products
-- **POST /api/product/get/{id}** - Get specific product by ID
-- **POST /api/product/get/all** - Get all products
+- **POST /api/products** - Create new product
+- **PUT /api/products/{id}** - Update existing product
+- **DELETE /api/products/{id}** - Delete product
+- **GET /api/products** - Get all products
+- **GET /api/products/{id}** - Get specific product by ID
 
 ### Product Details Module
-- **POST /api/productdetail/create** - Create new product detail
-- **PUT /api/productdetail/update/{id}** - Update existing product detail
-- **DELETE /api/productdetail/delete/{id}** - Delete product detail
-- **POST /api/productdetail/get** - Retrieve product details
-- **POST /api/productdetail/get/{id}** - Get specific product detail by ID
-- **POST /api/productdetail/get/all** - Get all product details
+- **POST /api/product-details** - Create new product detail
+- **PUT /api/product-details/{id}** - Update existing product detail
+- **DELETE /api/product-details/{id}** - Delete product detail
+- **GET /api/product-details** - Get all product details
+- **GET /api/product-details/{id}** - Get specific product detail by ID
 
 ### Media Module
-- **POST /api/media/create** - Create new media
-- **PUT /api/media/update/{id}** - Update existing media
-- **DELETE /api/media/delete/{id}** - Delete media
-- **POST /api/media/get** - Retrieve media
-- **POST /api/media/get/{id}** - Get specific media by ID
-- **POST /api/media/get/all** - Get all media
+- **POST /api/media** - Create new media
+- **PUT /api/media/{id}** - Update existing media
+- **DELETE /api/media/{id}** - Delete media
+- **GET /api/media** - Get all media
+- **GET /api/media/{id}** - Get specific media by ID
 
 ### Documents Module
-- **POST /api/document/create** - Create new document
-- **PUT /api/document/update/{id}** - Update existing document
-- **DELETE /api/document/delete/{id}** - Delete document
-- **POST /api/document/get** - Retrieve documents
-- **POST /api/document/get/{id}** - Get specific document by ID
-- **POST /api/document/get/all** - Get all documents
+- **POST /api/documents** - Create new document
+- **PUT /api/documents/{id}** - Update existing document
+- **DELETE /api/documents/{id}** - Delete document
+- **GET /api/documents** - Get all documents
+- **GET /api/documents/{id}** - Get specific document by ID
 
 ### Tags Module
-- **POST /api/tag/create** - Create new tag
-- **PUT /api/tag/update/{id}** - Update existing tag
-- **DELETE /api/tag/delete/{id}** - Delete tag
-- **POST /api/tag/get** - Retrieve tags
-- **POST /api/tag/get/{id}** - Get specific tag by ID
-- **POST /api/tag/get/all** - Get all tags
+- **POST /api/tags** - Create new tag
+- **PUT /api/tags/{id}** - Update existing tag
+- **DELETE /api/tags/{id}** - Delete tag
+- **GET /api/tags** - Get all tags
+- **GET /api/tags/{id}** - Get specific tag by ID
 
 ### User Profiles Module
-- **POST /api/userprofile/create** - Create new user profile
-- **PUT /api/userprofile/update/{id}** - Update existing user profile
-- **DELETE /api/userprofile/delete/{id}** - Delete user profile
-- **POST /api/userprofile/get** - Retrieve user profiles
-- **POST /api/userprofile/get/{id}** - Get specific user profile by ID
-- **POST /api/userprofile/get/all** - Get all user profiles
+- **POST /api/user-profiles** - Create new user profile
+- **PUT /api/user-profiles/{id}** - Update existing user profile
+- **DELETE /api/user-profiles/{id}** - Delete user profile
+- **GET /api/user-profiles** - Get all user profiles
+- **GET /api/user-profiles/{id}** - Get specific user profile by ID
 
 ## Handler Pattern Example
 
