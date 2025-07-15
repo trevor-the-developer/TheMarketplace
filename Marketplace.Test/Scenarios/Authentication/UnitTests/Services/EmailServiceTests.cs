@@ -8,14 +8,14 @@ namespace Marketplace.Test.Scenarios.Authentication.UnitTests.Services;
 
 public class EmailServiceTests
 {
-    private readonly Mock<ILogger<EmailService>> _mockLogger;
     private readonly IConfiguration _configuration;
     private readonly EmailService _emailService;
+    private readonly Mock<ILogger<EmailService>> _mockLogger;
 
     public EmailServiceTests()
     {
         _mockLogger = new Mock<ILogger<EmailService>>();
-        
+
         // Create a real configuration with test values
         var configData = new Dictionary<string, string>
         {
@@ -25,11 +25,11 @@ public class EmailServiceTests
             ["EmailSettings:FromEmail"] = "admin@themarketplace.local",
             ["EmailSettings:FromName"] = "The Marketplace Admin"
         };
-        
+
         _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(configData!)
             .Build();
-        
+
         _emailService = new EmailService(_configuration, _mockLogger.Object);
     }
 

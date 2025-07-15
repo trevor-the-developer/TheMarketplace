@@ -1,10 +1,10 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.ProductDetail;
 
@@ -18,14 +18,12 @@ public class ProductDetailHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         Data.Entities.ProductDetail? productDetail = null;
-        
+
         if (command.ProductDetailId > 0)
-        {
             productDetail = await dbContext.ProductDetails
                 .Include(pd => pd.Media)
                 .Include(pd => pd.Documents)
                 .FirstOrDefaultAsync(pd => pd.Id == command.ProductDetailId);
-        }
 
         if (command.AllProductDetails)
         {
@@ -33,37 +31,34 @@ public class ProductDetailHandler
                 .Include(pd => pd.Media)
                 .Include(pd => pd.Documents)
                 .AsQueryable();
-            
+
             if (command.ProductId.HasValue)
-            {
                 productDetailsQuery = productDetailsQuery.Where(pd => pd.ProductId == command.ProductId);
-            }
-            
+
             var productDetails = await productDetailsQuery.ToListAsync();
-            return new ProductDetailResponse() { ProductDetails = productDetails };
+            return new ProductDetailResponse { ProductDetails = productDetails };
         }
 
         if (command.ProductId.HasValue && productDetail == null)
-        {
             productDetail = await dbContext.ProductDetails
                 .Include(pd => pd.Media)
                 .Include(pd => pd.Documents)
                 .FirstOrDefaultAsync(pd => pd.ProductId == command.ProductId);
-        }
 
         productDetail ??= await dbContext.ProductDetails
             .Include(pd => pd.Media)
             .Include(pd => pd.Documents)
             .FirstOrDefaultAsync();
-        
-        return new ProductDetailResponse()
+
+        return new ProductDetailResponse
         {
             ProductDetail = productDetail
         };
     }
 
     [Transactional]
-    public async Task<ProductDetailResponse> Handle(ProductDetailCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ProductDetailResponse> Handle(ProductDetailCreate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -73,17 +68,15 @@ public class ProductDetailHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new ProductDetailResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var productDetail = new Data.Entities.ProductDetail
@@ -104,7 +97,8 @@ public class ProductDetailHandler
     }
 
     [Transactional]
-    public async Task<ProductDetailResponse> Handle(ProductDetailUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ProductDetailResponse> Handle(ProductDetailUpdate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -114,23 +108,18 @@ public class ProductDetailHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new ProductDetailResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var productDetail = await dbContext.ProductDetails.FindAsync(command.Id);
-        if (productDetail == null)
-        {
-            return new ProductDetailResponse { ProductDetail = null };
-        }
+        if (productDetail == null) return new ProductDetailResponse { ProductDetail = null };
 
         productDetail.Title = command.Title;
         productDetail.Description = command.Description;

@@ -1,37 +1,37 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using FluentValidation;
 using Marketplace.Api.Endpoints.Authentication;
+using Marketplace.Api.Endpoints.Card;
+using Marketplace.Api.Endpoints.Document;
+using Marketplace.Api.Endpoints.Listing;
+using Marketplace.Api.Endpoints.Media;
+using Marketplace.Api.Endpoints.Product;
+using Marketplace.Api.Endpoints.ProductDetail;
+using Marketplace.Api.Endpoints.Tag;
+using Marketplace.Api.Endpoints.UserProfile;
+using Marketplace.Core.Helpers;
+using Marketplace.Core.Security;
+using Marketplace.Core.Services;
+using Marketplace.Core.Validation;
 using Marketplace.Data;
+using Marketplace.Data.Entities;
+using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Oakton;
 using Oakton.Resources;
-using System.Text;
-using Marketplace.Api.Endpoints.Card;
-using Marketplace.Api.Endpoints.Listing;
-using Marketplace.Api.Endpoints.Product;
-using Marketplace.Api.Endpoints.ProductDetail;
-using Marketplace.Api.Endpoints.Media;
-using Marketplace.Api.Endpoints.Document;
-using Marketplace.Api.Endpoints.Tag;
-using Marketplace.Api.Endpoints.UserProfile;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.SqlServer;
-using Marketplace.Core.Security;
-using Marketplace.Core.Helpers;
-using Marketplace.Data.Entities;
-using Marketplace.Data.Repositories;
-using Marketplace.Core.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Http;
-using FluentValidation;
 
 #region Host builder setup
 
@@ -65,60 +65,60 @@ builder.Host.UseWolverine(opts =>
 #region Identity (Authentication and Authorisation)
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.User.RequireUniqueEmail = true;
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    // for public facing may want to consider 2fa see: https://rb.gy/lgx8w1
-    options.SignIn.RequireConfirmedEmail = true;
-})
-.AddRoles<IdentityRole>()
-.AddDefaultTokenProviders()
-.AddEntityFrameworkStores<MarketplaceDbContext>();
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        // for public facing may want to consider 2fa see: https://rb.gy/lgx8w1
+        options.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddRoles<IdentityRole>()
+    .AddDefaultTokenProviders()
+    .AddEntityFrameworkStores<MarketplaceDbContext>();
 
 var secret = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
 
 // clear JWT mapping prior to adding authentication
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ClockSkew = new TimeSpan(0, 0, 5),
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-        NameClaimType = "name",
-        RoleClaimType = "role"
-    };
-    // handle the events raised by the bearer token
-    options.Events = new JwtBearerEvents
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
     {
-        OnChallenge = ctx => TokenHelper.LogAttempt(ctx.Request.Headers, "OnChallenge"),
-        OnTokenValidated = ctx => TokenHelper.LogAttempt(ctx.Request.Headers, "OnTokenValidated")
-    };
-})
-.AddCookie("Cookies");
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = new TimeSpan(0, 0, 5),
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            NameClaimType = "name",
+            RoleClaimType = "role"
+        };
+        // handle the events raised by the bearer token
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = ctx => TokenHelper.LogAttempt(ctx.Request.Headers, "OnChallenge"),
+            OnTokenValidated = ctx => TokenHelper.LogAttempt(ctx.Request.Headers, "OnTokenValidated")
+        };
+    })
+    .AddCookie("Cookies");
 
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder()
-    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-    .RequireAuthenticatedUser()
-    .Build());
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build());
 
 #endregion
 
@@ -146,11 +146,11 @@ builder.Services.AddSwaggerGen(option =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
-            new string[]{}
+            new string[] { }
         }
     });
 });
@@ -194,7 +194,7 @@ builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
 // Register FluentValidation services
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-builder.Services.AddScoped<Marketplace.Core.Validation.IValidationService, Marketplace.Core.Validation.ValidationService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
 
 // Add IUrlHelper support
 builder.Services.AddScoped<IUrlHelper>(factory =>
@@ -202,17 +202,15 @@ builder.Services.AddScoped<IUrlHelper>(factory =>
     var actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
     var urlHelperFactory = factory.GetRequiredService<IUrlHelperFactory>();
     var httpContextAccessor = factory.GetRequiredService<IHttpContextAccessor>();
-    
+
     // Create ActionContext with HttpContext if available
     var actionContext = actionContextAccessor.ActionContext;
     if (actionContext == null || actionContext.HttpContext == null)
-    {
         actionContext = new ActionContext
         {
             HttpContext = httpContextAccessor.HttpContext ?? new DefaultHttpContext()
         };
-    }
-    
+
     return urlHelperFactory.GetUrlHelper(actionContext);
 });
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -222,7 +220,7 @@ builder.Services.AddSingleton<TokenValidationParameters>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
     var secret = configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
-    
+
     return new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -262,12 +260,10 @@ app.UseCors("AllowAll");
 
 // Ensure the database is created (skip in testing environment)
 if (!app.Environment.IsEnvironment("Testing"))
-{
     using (var scope = app.Services.CreateScope())
     {
         await scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
     }
-}
 
 #region Endpoints
 

@@ -17,10 +17,10 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
             .WithOne(d => d.ProductDetail)
             .HasForeignKey(d => d.ProductDetailId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         // seed data
         builder.HasData(
-            new ProductDetail()
+            new ProductDetail
             {
                 Id = 1,
                 Title = "Sample Product Detail",
@@ -31,7 +31,7 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "John Doe"
             },
-            new ProductDetail()
+            new ProductDetail
             {
                 Id = 2,
                 Title = "Another Sample Product Detail",
@@ -42,7 +42,7 @@ public class ProductDetailConfiguration : IEntityTypeConfiguration<ProductDetail
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "Jane Smith"
             },
-            new ProductDetail()
+            new ProductDetail
             {
                 Id = 3,
                 Title = "Yet Another Sample Product Detail",

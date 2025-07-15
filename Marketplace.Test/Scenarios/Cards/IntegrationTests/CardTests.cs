@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.RegularExpressions;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
 using Xunit;
@@ -47,7 +46,10 @@ public class CardTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsync
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new { Id = 1, Title = "Updated Card", Description = "An updated card description.", ListingId = 1 })
+                .Json(new
+                {
+                    Id = 1, Title = "Updated Card", Description = "An updated card description.", ListingId = 1
+                })
                 .ToUrl("/api/cards/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });

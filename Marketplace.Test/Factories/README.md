@@ -1,8 +1,10 @@
 # Test Factories & Infrastructure
 
-Factory classes provide standardised object creation and lifecycle management for testing scenarios. The test infrastructure includes automated database setup, user authentication, and consistent test data generation.
+Factory classes provide standardised object creation and lifecycle management for testing scenarios. The test
+infrastructure includes automated database setup, user authentication, and consistent test data generation.
 
 ## Current Status
+
 ✅ **All factories working** - Test data creation is consistent and reliable across all test scenarios.
 ✅ **Database fixture stable** - Automated SQL Server container management with proper cleanup.
 ✅ **Authentication mocks updated** - Recent fixes aligned mock setups with current implementations.

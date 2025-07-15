@@ -12,18 +12,18 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.Property(t => t.Name).HasMaxLength(100).IsRequired();
         builder.Property(t => t.Description).HasMaxLength(500);
         builder.Property(t => t.IsEnabled);
-        
+
         // Self-referencing relationship for parent tags
         builder.HasMany(t => t.Tags)
             .WithOne()
             .HasForeignKey("TagId")
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         builder.ToTable("Tags");
-        
+
         // seed data
         builder.HasData(
-            new Tag()
+            new Tag
             {
                 Id = 1,
                 Name = "Technology",
@@ -34,7 +34,7 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "System"
             },
-            new Tag()
+            new Tag
             {
                 Id = 2,
                 Name = "Gaming",
@@ -45,7 +45,7 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "System"
             },
-            new Tag()
+            new Tag
             {
                 Id = 3,
                 Name = "Education",

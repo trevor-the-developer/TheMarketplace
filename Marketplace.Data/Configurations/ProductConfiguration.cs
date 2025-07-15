@@ -21,10 +21,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasOne(p => p.ProductDetail)
             .WithOne(pd => pd.Product)
             .HasForeignKey<ProductDetail>(pd => pd.ProductId);
-        
+
         // seed data
         builder.HasData(
-            new Product()
+            new Product
             {
                 Id = 1,
                 Title = "Sample Product",
@@ -40,7 +40,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "Sample User"
             },
-            new Product()
+            new Product
             {
                 Id = 2,
                 Title = "Another Sample Product",
@@ -56,7 +56,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 ModifiedDate = DateTime.Now,
                 ModifiedBy = "Another Sample User"
             },
-            new Product()
+            new Product
             {
                 Id = 3,
                 Title = "Third Sample Product",

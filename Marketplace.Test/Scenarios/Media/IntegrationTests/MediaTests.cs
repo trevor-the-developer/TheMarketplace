@@ -28,9 +28,9 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "New Media", 
+                .Json(new
+                {
+                    Title = "New Media",
                     Description = "A new media description.",
                     FilePath = "/path/to/file.mp4",
                     DirectoryPath = "/path/to/",
@@ -55,9 +55,9 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Media to Update", 
+                .Json(new
+                {
+                    Title = "Media to Update",
                     Description = "A media that will be updated.",
                     FilePath = "/path/to/original.mp4",
                     DirectoryPath = "/path/to/original/",
@@ -76,10 +76,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new 
-                { 
-                    Id = int.Parse(mediaId), 
-                    Title = "Updated Media", 
+                .Json(new
+                {
+                    Id = int.Parse(mediaId),
+                    Title = "Updated Media",
                     Description = "An updated media description.",
                     FilePath = "/path/to/updated.mp4",
                     DirectoryPath = "/path/to/updated/",
@@ -99,14 +99,14 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     public async Task DeleteMedia_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         var createResponse = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Media to Delete", 
+                .Json(new
+                {
+                    Title = "Media to Delete",
                     Description = "A media that will be deleted.",
                     FilePath = "/path/to/delete.mp4",
                     DirectoryPath = "/path/to/delete/",
@@ -120,7 +120,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var createResponseText = await createResponse.ReadAsTextAsync();
         var mediaIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
         var mediaId = mediaIdMatch.Success ? mediaIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
-        
+
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);

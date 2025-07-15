@@ -28,9 +28,9 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Product for Detail", 
+                .Json(new
+                {
+                    Title = "Product for Detail",
                     Description = "A product that needs a detail.",
                     ProductType = "Test Type",
                     Category = "Test Category",
@@ -44,15 +44,16 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
 
         var productResponseText = await productResponse.ReadAsTextAsync();
         var productIdMatch = Regex.Match(productResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productId = productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 4; // fallback to 4 if not found
+        var productId =
+            productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 4; // fallback to 4 if not found
 
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "New Product Detail", 
+                .Json(new
+                {
+                    Title = "New Product Detail",
                     Description = "A new product detail description.",
                     ProductId = productId
                 })
@@ -74,9 +75,9 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Product for Detail Update", 
+                .Json(new
+                {
+                    Title = "Product for Detail Update",
                     Description = "A product that needs a detail for update.",
                     ProductType = "Update Type",
                     Category = "Update Category",
@@ -90,15 +91,16 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
 
         var productResponseText = await productResponse.ReadAsTextAsync();
         var productIdMatch = Regex.Match(productResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productId = productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 5; // fallback to 5 if not found
+        var productId =
+            productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 5; // fallback to 5 if not found
 
         var createResponse = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Product Detail to Update", 
+                .Json(new
+                {
+                    Title = "Product Detail to Update",
                     Description = "A product detail that will be updated.",
                     ProductId = productId
                 })
@@ -108,16 +110,17 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
 
         var createResponseText = await createResponse.ReadAsTextAsync();
         var productDetailIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productDetailId = productDetailIdMatch.Success ? productDetailIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
+        var productDetailId =
+            productDetailIdMatch.Success ? productDetailIdMatch.Groups[1].Value : "1"; // fallback to 1 if not found
 
         var response = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new 
-                { 
-                    Id = int.Parse(productDetailId), 
-                    Title = "Updated Product Detail", 
+                .Json(new
+                {
+                    Id = int.Parse(productDetailId),
+                    Title = "Updated Product Detail",
                     Description = "An updated product detail description.",
                     ProductId = productId
                 })
@@ -139,9 +142,9 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Product for Detail Delete", 
+                .Json(new
+                {
+                    Title = "Product for Detail Delete",
                     Description = "A product that needs a detail for delete.",
                     ProductType = "Delete Type",
                     Category = "Delete Category",
@@ -155,15 +158,16 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
 
         var productResponseText = await productResponse.ReadAsTextAsync();
         var productIdMatch = Regex.Match(productResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productId = productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 6; // fallback to 6 if not found
+        var productId =
+            productIdMatch.Success ? int.Parse(productIdMatch.Groups[1].Value) : 6; // fallback to 6 if not found
 
         var createResponse = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "Product Detail to Delete", 
+                .Json(new
+                {
+                    Title = "Product Detail to Delete",
                     Description = "A product detail that will be deleted.",
                     ProductId = productId
                 })
@@ -173,7 +177,8 @@ public class ProductDetailTests(WebAppFixture fixture) : ScenarioContext(fixture
 
         var createResponseText = await createResponse.ReadAsTextAsync();
         var productDetailIdMatch = Regex.Match(createResponseText, @"""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
-        var productDetailId = productDetailIdMatch.Success ? productDetailIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
+        var productDetailId =
+            productDetailIdMatch.Success ? productDetailIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
 
         await Host.Scenario(_ =>
         {

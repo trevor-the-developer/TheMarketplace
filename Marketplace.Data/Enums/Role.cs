@@ -1,8 +1,7 @@
-﻿namespace Marketplace.Data.Enums
+﻿namespace Marketplace.Data.Enums;
+
+public enum Role
 {
-    public enum Role
-    {
-        Adminstrator,
-        User
-    }
+    Adminstrator,
+    User
 }

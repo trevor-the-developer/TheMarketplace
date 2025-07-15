@@ -21,6 +21,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
     {
         await Task.CompletedTask;
     }
+
     [Fact]
     public async Task RegisterStepOne_Success()
     {

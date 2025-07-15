@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.RegularExpressions;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
 using Xunit;
@@ -28,9 +27,9 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Title = "New Product", 
+                .Json(new
+                {
+                    Title = "New Product",
                     Description = "A new product description.",
                     ProductType = "Test Type",
                     Category = "Test Category",
@@ -56,10 +55,10 @@ public class ProductTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new 
-                { 
-                    Id = 1, 
-                    Title = "Updated Product", 
+                .Json(new
+                {
+                    Id = 1,
+                    Title = "Updated Product",
                     Description = "An updated product description.",
                     ProductType = "Updated Type",
                     Category = "Updated Category",

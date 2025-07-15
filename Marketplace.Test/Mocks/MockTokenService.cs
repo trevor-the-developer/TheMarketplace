@@ -3,7 +3,6 @@ using Marketplace.Core.Security;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Moq;

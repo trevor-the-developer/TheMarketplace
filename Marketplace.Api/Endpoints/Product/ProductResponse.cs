@@ -1,4 +1,3 @@
-using Marketplace.Data.Entities;
 using Marketplace.Core;
 
 namespace Marketplace.Api.Endpoints.Product;

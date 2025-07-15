@@ -1,8 +1,10 @@
 # Entity Type Configurations
 
-Configuration classes provide a clean separation of concerns by isolating entity configuration logic from the main DbContext class. This pattern promotes maintainable, testable code that follows SOLID principles.
+Configuration classes provide a clean separation of concerns by isolating entity configuration logic from the main
+DbContext class. This pattern promotes maintainable, testable code that follows SOLID principles.
 
 ## Current Status
+
 ✅ **All configurations tested** - Entity mappings are validated through automated tests.
 ✅ **Seed data working** - Initial roles and users are properly seeded in the database.
 ✅ **Relationships validated** - All foreign key relationships are correctly configured.
@@ -50,12 +52,14 @@ public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
 ## Configuration Types
 
 ### Entity Mapping
+
 - **Property Configuration**: Data types, lengths, required fields
 - **Relationships**: Foreign keys, navigation properties
 - **Indexes**: Performance optimisation for queries
 - **Constraints**: Unique constraints, check constraints
 
 ### Seed Data
+
 - **Initial Data**: Default roles, settings, lookup values
 - **Test Data**: Development and testing scenarios
 - **Reference Data**: Static data required for application functionality

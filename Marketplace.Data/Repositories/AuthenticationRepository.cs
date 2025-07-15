@@ -1,13 +1,13 @@
+using System.Security.Claims;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace Marketplace.Data.Repositories;
 
 public class AuthenticationRepository : IAuthenticationRepository
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public AuthenticationRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {

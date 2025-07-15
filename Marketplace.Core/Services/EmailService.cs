@@ -1,4 +1,3 @@
-using MailKit;
 using Marketplace.Core.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -9,18 +8,18 @@ namespace Marketplace.Core.Services;
 
 public class EmailService : IEmailService
 {
-    private readonly string _smtpHost;
-    private readonly int _smtpPort;
     private readonly string _fromEmail;
     private readonly string _fromName;
-    private readonly bool _useSsl;
     private readonly ILogger<EmailService> _logger;
+    private readonly string _smtpHost;
+    private readonly int _smtpPort;
+    private readonly bool _useSsl;
 
     public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
     {
         _smtpHost = configuration["EmailSettings:SmtpHost"] ?? ApiConstants.DefaultSmtpHost;
-        _smtpPort = configuration.GetValue<int>("EmailSettings:SmtpPort", ApiConstants.DefaultSmtpPort);
-        _useSsl = configuration.GetValue<bool>("EmailSettings:SmtpUseSSL", ApiConstants.DefaultSmtpUseSsl);
+        _smtpPort = configuration.GetValue("EmailSettings:SmtpPort", ApiConstants.DefaultSmtpPort);
+        _useSsl = configuration.GetValue("EmailSettings:SmtpUseSSL", ApiConstants.DefaultSmtpUseSsl);
         _fromEmail = configuration["EmailSettings:FromEmail"] ?? "admin@themarketplace.local";
         _fromName = configuration["EmailSettings:FromName"] ?? "The Marketplace Admin";
         _logger = logger;
@@ -30,10 +29,10 @@ public class EmailService : IEmailService
     {
         ArgumentNullException.ThrowIfNull(emailAddress);
         ArgumentNullException.ThrowIfNull(confirmationLink);
-        
+
         if (string.IsNullOrWhiteSpace(emailAddress))
             throw new ArgumentException("Email address cannot be empty", nameof(emailAddress));
-        
+
         if (string.IsNullOrWhiteSpace(confirmationLink))
             throw new ArgumentException("Confirmation link cannot be empty", nameof(confirmationLink));
 

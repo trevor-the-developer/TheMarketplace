@@ -1,9 +1,7 @@
 using Marketplace.Api.Endpoints.Card;
-using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -12,8 +10,8 @@ namespace Marketplace.Test.Scenarios.Cards.UnitTests;
 
 public class CardHandlerTests
 {
-    private readonly MockCurrentUserService _currentUserService;
     private readonly Mock<ICardRepository> _cardRepositoryMock;
+    private readonly MockCurrentUserService _currentUserService;
     private readonly CardHandler _handler;
     private readonly Mock<ILogger<CardHandler>> _loggerMock;
     private readonly MockValidationService _validationService;
@@ -68,7 +66,8 @@ public class CardHandlerTests
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(createCommand, _cardRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _cardRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Card);
@@ -106,7 +105,8 @@ public class CardHandlerTests
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(updateCommand, _cardRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(updateCommand, _cardRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Card);

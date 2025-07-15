@@ -22,12 +22,12 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
             .HasForeignKey(p => p.CardId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.ToTable("Cards");
-        
+
         // seed data
         builder.HasData(
-            new List<Card>()
+            new List<Card>
             {
-                new Card()
+                new()
                 {
                     Id = 1,
                     Title = "Sample Card",
@@ -36,7 +36,7 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
                     Colour = "Blue",
                     ListingId = 1
                 },
-                new Card()
+                new()
                 {
                     Id = 2,
                     Title = "Another Card",
@@ -45,7 +45,7 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
                     Colour = "Red",
                     ListingId = 1
                 },
-                new Card()
+                new()
                 {
                     Id = 3,
                     Title = "Third Card",

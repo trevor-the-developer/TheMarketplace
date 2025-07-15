@@ -12,12 +12,12 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
             .WithOne(c => c.Listing)
             .HasForeignKey(c => c.ListingId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         // seed data: sample data
         builder.HasData(
-            new List<Listing>()
+            new List<Listing>
             {
-                new Listing()
+                new()
                 {
                     Id = 1,
                     Title = "Sample Listing",

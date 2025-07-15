@@ -1,7 +1,6 @@
 using System.Net;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
-using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
 using Marketplace.Test.Mocks;
 using Microsoft.Extensions.Configuration;
@@ -408,11 +407,12 @@ public class LoginHandlerTests
         var authRepository = new MockAuthenticationRepository(user);
         var configuration = new Mock<IConfiguration>();
         var tokenService = new MockTokenService();
-        
+
         // Setup validation service to return validation errors
         var validationErrors = new List<string> { "Email is required", "Password must be at least 6 characters long" };
-        var validationService = new MockValidationService(new MockValidationServiceOptions { ValidationErrors = validationErrors });
-        
+        var validationService = new MockValidationService(new MockValidationServiceOptions
+            { ValidationErrors = validationErrors });
+
         var logger = new Mock<ILogger<LoginHandler>>();
         var loginHandler = new LoginHandler();
 

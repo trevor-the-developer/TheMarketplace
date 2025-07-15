@@ -1,8 +1,10 @@
 # API Endpoints Structure
 
-Endpoints are organised in domain-specific modules to ensure clean separation of concerns and maintainable code architecture. Each endpoint module implements the mediator pattern using WolverineFx for command/query processing.
+Endpoints are organised in domain-specific modules to ensure clean separation of concerns and maintainable code
+architecture. Each endpoint module implements the mediator pattern using WolverineFx for command/query processing.
 
 ## Current Status
+
 ✅ **All endpoints tested and functional** - Complete CRUD operations implemented and verified.
 ✅ **Authentication working** - JWT-based authentication with refresh tokens fully operational.
 ✅ **Swagger documentation** - All endpoints documented with proper request/response models.
@@ -30,10 +32,15 @@ Endpoints/
 ## Mediator Pattern Implementation
 
 ### Command/Query Processing
-Each endpoint processes requests through dedicated handler classes using the [Mediator Pattern](https://en.wikipedia.org/wiki/Mediator_pattern) via [WolverineFx](https://wolverine.netlify.app/tutorials/mediator.html).
+
+Each endpoint processes requests through dedicated handler classes using
+the [Mediator Pattern](https://en.wikipedia.org/wiki/Mediator_pattern)
+via [WolverineFx](https://wolverine.netlify.app/tutorials/mediator.html).
 
 ### Handler Discovery
+
 Wolverine provides automatic handler discovery that:
+
 - Finds candidate message handler methods at startup
 - Correlates handlers by message type (Command/Query)
 - Builds connective code at runtime for message processing
@@ -42,6 +49,7 @@ Wolverine provides automatic handler discovery that:
 ## Current Endpoints
 
 ### Authentication Module
+
 - **POST /api/auth/login** - User authentication with JWT token generation
 - **POST /api/auth/register** - User registration with email confirmation
 - **GET /api/auth/confirm-email** - Email confirmation and account activation
@@ -49,6 +57,7 @@ Wolverine provides automatic handler discovery that:
 - **POST /api/auth/logout** - User logout and token revocation
 
 ### Listings Module
+
 - **POST /api/listings** - Create new listing
 - **PUT /api/listings/{id}** - Update existing listing
 - **DELETE /api/listings/{id}** - Delete listing
@@ -56,6 +65,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/listings/{id}** - Get specific listing by ID
 
 ### Cards Module
+
 - **POST /api/cards** - Create new card
 - **PUT /api/cards/{id}** - Update existing card
 - **DELETE /api/cards/{id}** - Delete card
@@ -63,6 +73,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/cards/{id}** - Get specific card by ID
 
 ### Products Module
+
 - **POST /api/products** - Create new product
 - **PUT /api/products/{id}** - Update existing product
 - **DELETE /api/products/{id}** - Delete product
@@ -70,6 +81,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/products/{id}** - Get specific product by ID
 
 ### Product Details Module
+
 - **POST /api/product-details** - Create new product detail
 - **PUT /api/product-details/{id}** - Update existing product detail
 - **DELETE /api/product-details/{id}** - Delete product detail
@@ -77,6 +89,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/product-details/{id}** - Get specific product detail by ID
 
 ### Media Module
+
 - **POST /api/media** - Create new media
 - **PUT /api/media/{id}** - Update existing media
 - **DELETE /api/media/{id}** - Delete media
@@ -84,6 +97,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/media/{id}** - Get specific media by ID
 
 ### Documents Module
+
 - **POST /api/documents** - Create new document
 - **PUT /api/documents/{id}** - Update existing document
 - **DELETE /api/documents/{id}** - Delete document
@@ -91,6 +105,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/documents/{id}** - Get specific document by ID
 
 ### Tags Module
+
 - **POST /api/tags** - Create new tag
 - **PUT /api/tags/{id}** - Update existing tag
 - **DELETE /api/tags/{id}** - Delete tag
@@ -98,6 +113,7 @@ Wolverine provides automatic handler discovery that:
 - **GET /api/tags/{id}** - Get specific tag by ID
 
 ### User Profiles Module
+
 - **POST /api/user-profiles** - Create new user profile
 - **PUT /api/user-profiles/{id}** - Update existing user profile
 - **DELETE /api/user-profiles/{id}** - Delete user profile

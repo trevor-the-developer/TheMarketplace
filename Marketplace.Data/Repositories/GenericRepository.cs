@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Marketplace.Data.Repositories;
 
 /// <summary>
-/// Generic repository implementation providing common CRUD operations
+///     Generic repository implementation providing common CRUD operations
 /// </summary>
 /// <typeparam name="TEntity">Entity type that inherits from BaseEntity</typeparam>
 public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
@@ -27,10 +27,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public async Task<TEntity?> GetByIdAsync(int id, params Expression<Func<TEntity, object>>[] includes)
     {
         IQueryable<TEntity> query = _dbSet;
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
+        foreach (var include in includes) query = query.Include(include);
         return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -42,10 +39,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
     {
         IQueryable<TEntity> query = _dbSet;
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
+        foreach (var include in includes) query = query.Include(include);
         return await query.ToListAsync();
     }
 
@@ -54,13 +48,11 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return await _dbSet.FirstOrDefaultAsync(predicate);
     }
 
-    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
+    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+        params Expression<Func<TEntity, object>>[] includes)
     {
         IQueryable<TEntity> query = _dbSet;
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
+        foreach (var include in includes) query = query.Include(include);
         return await query.FirstOrDefaultAsync(predicate);
     }
 
@@ -69,13 +61,11 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
+    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate,
+        params Expression<Func<TEntity, object>>[] includes)
     {
         IQueryable<TEntity> query = _dbSet;
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
+        foreach (var include in includes) query = query.Include(include);
         return await query.Where(predicate).ToListAsync();
     }
 
@@ -114,20 +104,14 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
 
     public Task<IEnumerable<TEntity>> UpdateRangeAsync(IEnumerable<TEntity> entities)
     {
-        foreach (var entity in entities)
-        {
-            _context.Entry(entity).State = EntityState.Modified;
-        }
+        foreach (var entity in entities) _context.Entry(entity).State = EntityState.Modified;
         return Task.FromResult(entities);
     }
 
     public async Task DeleteAsync(int id)
     {
         var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-        }
+        if (entity != null) _dbSet.Remove(entity);
     }
 
     public Task DeleteAsync(TEntity entity)

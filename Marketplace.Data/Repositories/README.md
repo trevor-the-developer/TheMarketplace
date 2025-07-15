@@ -1,8 +1,11 @@
 # Repository Pattern Implementation
 
-Repository classes provide data access abstraction and align with API endpoints and business operations. The repository pattern works in conjunction with the WolverineFx mediator pattern to provide clean separation between data access and business logic.
+Repository classes provide data access abstraction and align with API endpoints and business operations. The repository
+pattern works in conjunction with the WolverineFx mediator pattern to provide clean separation between data access and
+business logic.
 
 ## Current Status
+
 ✅ **All repositories tested** - Data access operations are thoroughly tested and reliable.
 ✅ **Authentication repository updated** - Recent fixes aligned with current handler implementations.
 ✅ **Generic repository pattern** - Consistent CRUD operations across all entities.
@@ -17,6 +20,7 @@ Repository classes provide data access abstraction and align with API endpoints 
 ## Repository Classes
 
 ### Core Repositories
+
 - **GenericRepository** - Base class providing common CRUD operations for all entities
 - **ListingRepository** - Manages listing-related data operations and queries
 - **CardRepository** - Handles card-specific data operations and filtering
@@ -26,6 +30,7 @@ Repository classes provide data access abstraction and align with API endpoints 
 - **MediaRepository** - Handles media files and image operations
 
 ### Authentication & Authorisation
+
 - **AuthenticationRepository** - Manages user authentication, registration, and token operations
 
 ## Usage Pattern

@@ -1,9 +1,7 @@
 using Marketplace.Api.Endpoints.Product;
-using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -13,10 +11,10 @@ namespace Marketplace.Test.Scenarios.Products.UnitTests;
 public class ProductHandlerTests
 {
     private readonly MockCurrentUserService _currentUserService;
-    private readonly Mock<IProductRepository> _productRepositoryMock;
-    private readonly Mock<IProductDetailRepository> _productDetailRepositoryMock;
     private readonly ProductHandler _handler;
     private readonly Mock<ILogger<ProductHandler>> _loggerMock;
+    private readonly Mock<IProductDetailRepository> _productDetailRepositoryMock;
+    private readonly Mock<IProductRepository> _productRepositoryMock;
     private readonly MockValidationService _validationService;
 
     public ProductHandlerTests()
@@ -71,12 +69,17 @@ public class ProductHandlerTests
         };
 
         _productRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>()))
-            .ReturnsAsync((Product p) => { p.Id = 1; return p; });
+            .ReturnsAsync((Product p) =>
+            {
+                p.Id = 1;
+                return p;
+            });
         _productRepositoryMock.Setup(r => r.SaveChangesAsync())
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(createCommand, _productRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _productRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Product);
@@ -124,7 +127,8 @@ public class ProductHandlerTests
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(updateCommand, _productRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(updateCommand, _productRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Product);

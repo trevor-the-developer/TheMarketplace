@@ -17,7 +17,7 @@ public static class AuthConstants
     public const string Unauthorised = "Unauthorised";
     public const string UserAlreadyExists = "User already exists";
     public const string RegistrationFailed = "Registration failed";
-    
+
     // Jwt
     public const string RevokeFailed = "Revoke failed";
     public const string JwtNotPresent = "JWT not present";
@@ -25,7 +25,7 @@ public static class AuthConstants
     public const string JwtSettingsKey = "JwtSettings:Key";
     public const string JwtSettingsIssuer = "JwtSettings:Issuer";
     public const string JwtSettingsAudience = "JwtSettings:Audience";
-    
+
     // Token
     public const string TokenRefreshRequest = "Token refresh request";
     public const string RefreshSucceeded = "Refresh succeeded";

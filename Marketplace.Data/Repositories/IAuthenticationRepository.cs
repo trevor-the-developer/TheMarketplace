@@ -1,6 +1,6 @@
+using System.Security.Claims;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace Marketplace.Data.Repositories;
 

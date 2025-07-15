@@ -27,12 +27,12 @@ public static class DatabaseResetService
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
 
-        // Delete all data but keep the schema
-        await ClearAllDataAsync(context);
-        
-        // Re-seed the database with fresh data
-        await SeedDatabaseAsync(context);
-            
+            // Delete all data but keep the schema
+            await ClearAllDataAsync(context);
+
+            // Re-seed the database with fresh data
+            await SeedDatabaseAsync(context);
+
             Console.WriteLine("Database reset completed successfully.");
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ public static class DatabaseResetService
         var tablesToClear = new[]
         {
             "AspNetUserClaims",
-            "AspNetUserLogins", 
+            "AspNetUserLogins",
             "AspNetUserRoles",
             "AspNetUserTokens",
             "AspNetRoleClaims",
@@ -68,13 +68,13 @@ public static class DatabaseResetService
         };
 
         foreach (var table in tablesToClear)
-        {
             try
             {
                 // These are hardcoded table names from a predefined list, so they're safe
-#pragma warning disable EF1002 // Table names cannot be parameterized and are from a safe predefined list
+#pragma warning disable EF1002
+                // Table names cannot be parameterized and are from a safe predefined list
                 await context.Database.ExecuteSqlRawAsync($"DELETE FROM [{table}]");
-                
+
                 // Reset identity columns if they exist
                 await context.Database.ExecuteSqlRawAsync($@"
                     IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID('[{table}]'))
@@ -88,7 +88,6 @@ public static class DatabaseResetService
                 Console.WriteLine($"Warning: Could not clear table {table}: {ex.Message}");
                 // Continue with other tables
             }
-        }
 
         // Clear Wolverine tables if they exist
         var wolverineTables = new[]
@@ -103,12 +102,13 @@ public static class DatabaseResetService
         };
 
         foreach (var table in wolverineTables)
-        {
             try
             {
                 // These are hardcoded table names from a predefined list, so they're safe
-#pragma warning disable EF1002 // Table names cannot be parameterized and are from a safe predefined list
-                await context.Database.ExecuteSqlRawAsync($"IF OBJECT_ID('{table}', 'U') IS NOT NULL DELETE FROM [{table}]");
+#pragma warning disable EF1002
+                // Table names cannot be parameterized and are from a safe predefined list
+                await context.Database.ExecuteSqlRawAsync(
+                    $"IF OBJECT_ID('{table}', 'U') IS NOT NULL DELETE FROM [{table}]");
 #pragma warning restore EF1002
             }
             catch (Exception ex)
@@ -116,10 +116,10 @@ public static class DatabaseResetService
                 Console.WriteLine($"Warning: Could not clear Wolverine table {table}: {ex.Message}");
                 // Continue with other tables
             }
-        }
 
         // Re-enable foreign key constraints
-        await context.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'");
+        await context.Database.ExecuteSqlRawAsync(
+            "EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'");
     }
 
     private static async Task SeedDatabaseAsync(MarketplaceDbContext context)
@@ -127,8 +127,11 @@ public static class DatabaseResetService
         // Add roles
         context.Roles.AddRange(new List<IdentityRole>
         {
-            new() {Id = "00917cdb-f5b0-4c84-9172-ff5b72ff8500", Name = "Administrator", NormalizedName = "ADMINISTRATOR"},
-            new() {Id = "e23ba8c8-b3ae-4e81-b468-c269c6e35cf2", Name = "User", NormalizedName = "USER"}
+            new()
+            {
+                Id = "00917cdb-f5b0-4c84-9172-ff5b72ff8500", Name = "Administrator", NormalizedName = "ADMINISTRATOR"
+            },
+            new() { Id = "e23ba8c8-b3ae-4e81-b468-c269c6e35cf2", Name = "User", NormalizedName = "USER" }
         });
 
         // Add users
@@ -182,7 +185,7 @@ public static class DatabaseResetService
         {
             new()
             {
-                Title = "Sample Listing", 
+                Title = "Sample Listing",
                 Description = "Sample listing for testing",
                 CreatedBy = "admin@localhost",
                 CreatedDate = DateTime.UtcNow,
@@ -192,7 +195,7 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample cards for testing
         context.Cards.AddRange(new List<Card>
         {
@@ -223,7 +226,7 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample products for testing
         context.Products.AddRange(new List<Product>
         {
@@ -258,7 +261,7 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample tags for testing
         context.Tags.AddRange(new List<Tag>
         {
@@ -285,7 +288,7 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample product details for testing
         context.ProductDetails.AddRange(new List<ProductDetail>
         {
@@ -312,7 +315,7 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample documents for testing
         context.Documents.AddRange(new List<Document>
         {
@@ -343,11 +346,11 @@ public static class DatabaseResetService
         });
 
         await context.SaveChangesAsync();
-        
+
         // Add sample files for testing
         context.Files.AddRange(new List<Media>
         {
-            new Media()
+            new()
             {
                 Title = "Sample File",
                 Description = "Sample file for testing",
@@ -356,7 +359,7 @@ public static class DatabaseResetService
                 MediaType = "video",
                 ProductDetailId = 1
             },
-            new Media()
+            new()
             {
                 Title = "Sample File 2",
                 Description = "Second sample file for testing",

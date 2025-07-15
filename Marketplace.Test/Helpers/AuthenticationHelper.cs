@@ -1,4 +1,3 @@
-using System.Net;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
@@ -35,13 +34,12 @@ public static class AuthenticationHelper
         });
 
         var jsonString = await loginResponse.ReadAsTextAsync();
-        
+
         // Check if login was successful
         if (loginResponse.Context.Response.StatusCode != 200)
-        {
-            throw new InvalidOperationException($"Login failed with status {loginResponse.Context.Response.StatusCode}: {jsonString}");
-        }
-        
+            throw new InvalidOperationException(
+                $"Login failed with status {loginResponse.Context.Response.StatusCode}: {jsonString}");
+
         var loginResult = JsonConvert.DeserializeObject<LoginResponse>(jsonString);
 
         if (loginResult == null) throw new InvalidOperationException("Failed to get login response");

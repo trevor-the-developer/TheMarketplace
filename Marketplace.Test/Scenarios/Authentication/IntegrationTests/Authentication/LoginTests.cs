@@ -20,6 +20,7 @@ public class LoginTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         await Task.CompletedTask;
     }
+
     [Fact]
     public async Task Login_Success()
     {

@@ -18,6 +18,7 @@ public class ListingTests(WebAppFixture fixture) : ScenarioContext(fixture), IAs
     {
         await Task.CompletedTask;
     }
+
     [Fact]
     public async Task CreateListing_Success()
     {

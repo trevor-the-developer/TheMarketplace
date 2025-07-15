@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Marketplace.Core.Services;
 
@@ -26,7 +26,7 @@ public class CurrentUserService : ICurrentUserService
     {
         var email = GetCurrentUserEmail();
         var userId = GetCurrentUserId();
-        
+
         // Return email if available, otherwise userId, otherwise "System"
         return email ?? userId ?? "System";
     }

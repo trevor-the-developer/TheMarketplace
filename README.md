@@ -2,11 +2,14 @@
 
 ## Overview
 
-TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform. The system provides a structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain **Products** with detailed information.
+TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade platform. The system provides a
+structured approach to marketplace operations using a hierarchical model: **Listings** contain **Cards**, which contain
+**Products** with detailed information.
 
 ## Current Architecture
 
 ### Core Components
+
 - **Listings**: Top-level collections that organise trading items
 - **Cards**: Visual containers within listings that group related products
 - **Products**: Individual items/services with detailed specifications
@@ -14,6 +17,7 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 - **User Management**: JWT-based authentication with role-based access
 
 ### Technology Stack
+
 - **.NET 8** - Modern C# runtime with minimal API architecture
 - **[WolverineFx](https://github.com/JasperFx/wolverine)** - Message bus for CQRS pattern implementation
 - **Entity Framework Core 8** - Data access layer with Code First approach
@@ -30,39 +34,42 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 ## Current Implementation Status
 
 ### ✅ Completed Features
+
 - **Authentication System**
-  - **Enhanced User Registration**: Streamlined single-step registration with email confirmation
-  - **Email Confirmation**: Robust token-based email verification with MailHog integration
-  - **Configuration Management**: Frontend URL configuration with fallback to constants
-  - **Age Validation**: Enforced minimum age requirement (13+ years)
-  - **JWT Authentication**: Secure token-based authentication with refresh tokens
-  - **Token Management**: Proper token refresh and revocation with validation
-  - **Role-Based Authorization**: Complete role-based access control
-  - **Email Service**: MailKit implementation for reliable email delivery
-  
+    - **Enhanced User Registration**: Streamlined single-step registration with email confirmation
+    - **Email Confirmation**: Robust token-based email verification with MailHog integration
+    - **Configuration Management**: Frontend URL configuration with fallback to constants
+    - **Age Validation**: Enforced minimum age requirement (13+ years)
+    - **JWT Authentication**: Secure token-based authentication with refresh tokens
+    - **Token Management**: Proper token refresh and revocation with validation
+    - **Role-Based Authorization**: Complete role-based access control
+    - **Email Service**: MailKit implementation for reliable email delivery
+
 - **Core Data Models**
-  - Complete entity relationship mapping
-  - Base entity with audit fields
-  - User profiles and roles
-  - Media and document support
-  
+    - Complete entity relationship mapping
+    - Base entity with audit fields
+    - User profiles and roles
+    - Media and document support
+
 - **API Endpoints**
-  - Complete CRUD operations for all entities (Listings, Cards, Products, ProductDetails, Media, Documents, Tags, UserProfiles)
-  - Authentication endpoints (login, register, token management)
-  - Comprehensive endpoint coverage with proper HTTP verbs
-  - Swagger documentation with security schemes
-  
+    - Complete CRUD operations for all entities (Listings, Cards, Products, ProductDetails, Media, Documents, Tags,
+      UserProfiles)
+    - Authentication endpoints (login, register, token management)
+    - Comprehensive endpoint coverage with proper HTTP verbs
+    - Swagger documentation with security schemes
+
 - **Infrastructure**
-  - Docker containerisation for SQL Server with proper volume management
-  - EF Core migrations setup with .NET 8 compatibility
-  - Automated database initialisation for tests
-  - Comprehensive test structure with Alba integration testing
-  - Scenario-based testing with proper database isolation
-  - CORS configuration
-  - Proper dependency injection configuration
-  - ✅ **All tests passing (229 total)** - Recent fixes to registration tests and cleanup of legacy mocks
-  
+    - Docker containerisation for SQL Server with proper volume management
+    - EF Core migrations setup with .NET 8 compatibility
+    - Automated database initialisation for tests
+    - Comprehensive test structure with Alba integration testing
+    - Scenario-based testing with proper database isolation
+    - CORS configuration
+    - Proper dependency injection configuration
+    - ✅ **All tests passing (229 total)** - Recent fixes to registration tests and cleanup of legacy mocks
+
 ### ✅ Recent Improvements (January 2025)
+
 - **Registration Flow Enhancement**: Fixed and streamlined single-step registration process
 - **Email Confirmation**: Resolved email confirmation links to use correct frontend URLs
 - **Configuration Management**: Added `FrontendSettings.BaseUrl` configuration in appsettings
@@ -70,8 +77,9 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 - **Test Suite Fixes**: Updated all registration tests to work with new configuration pattern
 - **MailHog Integration**: Improved email testing workflow with proper URL routing
 - **Frontend Integration**: Email confirmation links now correctly point to frontend (http://localhost:3000)
-  
+
 ### 🙧 Future Enhancements
+
 - Advanced search and filtering functionality
 - File upload and media handling optimisation
 - Real-time notifications
@@ -80,6 +88,7 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
 ## Getting Started
 
 ### Prerequisites
+
 - .NET 8 SDK
 - Docker Desktop
 - SQL Server Management Studio (optional)
@@ -102,8 +111,8 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
    ```
 
 4. **Access Swagger UI**
-   - Navigate to: `https://localhost:5001/swagger`
-   - Database connection: `Server=127.0.0.1,1433;User=sa;Password=P@ssw0rd!`
+    - Navigate to: `https://localhost:5001/swagger`
+    - Database connection: `Server=127.0.0.1,1433;User=sa;Password=P@ssw0rd!`
 
 5. **Start the Frontend** (Optional - for full registration testing)
    ```bash
@@ -111,15 +120,17 @@ TheMarketplace is a .NET 8 web API backend for a community-based buy/sell/trade 
    npm install
    npm run dev
    ```
-   - Frontend will be available at: `http://localhost:3000`
+    - Frontend will be available at: `http://localhost:3000`
 
 ## Testing the Registration Flow
 
 ### End-to-End Registration Testing
 
-The registration system includes email confirmation with MailHog integration for testing. Here's how to test the complete flow:
+The registration system includes email confirmation with MailHog integration for testing. Here's how to test the
+complete flow:
 
 #### Prerequisites
+
 - Backend API running on port 5212
 - Frontend running on port 3000 (optional, can test via API only)
 - MailHog running in Docker container (port 8025)
@@ -140,36 +151,36 @@ The registration system includes email confirmation with MailHog integration for
    ```
 
 2. **Register a new user**:
-   - Navigate to `http://localhost:3000/register`
-   - Fill out the registration form:
-     - First Name: `John`
-     - Last Name: `Doe`
-     - Email: `john.doe@example.com`
-     - Password: `SecurePass123!`
-     - Date of Birth: Any date making the user 13+ years old
-   - Click "Register"
+    - Navigate to `http://localhost:3000/register`
+    - Fill out the registration form:
+        - First Name: `John`
+        - Last Name: `Doe`
+        - Email: `john.doe@example.com`
+        - Password: `SecurePass123!`
+        - Date of Birth: Any date making the user 13+ years old
+    - Click "Register"
 
 3. **Check registration response**:
-   - Should see success message
-   - User account created but not yet confirmed
-   - Confirmation email sent to MailHog
+    - Should see success message
+    - User account created but not yet confirmed
+    - Confirmation email sent to MailHog
 
 4. **View confirmation email in MailHog**:
-   - Open `http://localhost:8025` in your browser
-   - Click on the latest email to `john.doe@example.com`
-   - Subject should be "Confirm your registration"
-   - Email contains a clickable confirmation link
+    - Open `http://localhost:8025` in your browser
+    - Click on the latest email to `john.doe@example.com`
+    - Subject should be "Confirm your registration"
+    - Email contains a clickable confirmation link
 
 5. **Complete registration**:
-   - Click the confirmation link in the email
-   - Link format: `http://localhost:3000/api/auth/confirm-email?userId=...&token=...&email=...`
-   - Should see JSON response: `{"registrationCompleted": true, "confirmationCode": "RegistrationComplete"}`
-   - User account is now fully activated
+    - Click the confirmation link in the email
+    - Link format: `http://localhost:3000/api/auth/confirm-email?userId=...&token=...&email=...`
+    - Should see JSON response: `{"registrationCompleted": true, "confirmationCode": "RegistrationComplete"}`
+    - User account is now fully activated
 
 6. **Test login**:
-   - Navigate to `http://localhost:3000/login`
-   - Use the registered credentials
-   - Should successfully log in and receive JWT token
+    - Navigate to `http://localhost:3000/login`
+    - Use the registered credentials
+    - Should successfully log in and receive JWT token
 
 #### Method 2: API-Only Testing (Backend Focus)
 
@@ -187,9 +198,9 @@ The registration system includes email confirmation with MailHog integration for
    ```
 
 2. **Check MailHog for confirmation email**:
-   - Visit `http://localhost:8025`
-   - Find email to `jane.smith@example.com`
-   - Copy the confirmation URL from the email
+    - Visit `http://localhost:8025`
+    - Find email to `jane.smith@example.com`
+    - Copy the confirmation URL from the email
 
 3. **Confirm email via API**:
    ```bash
@@ -210,21 +221,21 @@ The registration system includes email confirmation with MailHog integration for
 #### Method 3: Swagger UI Testing
 
 1. **Access Swagger UI**:
-   - Navigate to `http://localhost:5212/swagger`
+    - Navigate to `http://localhost:5212/swagger`
 
 2. **Test registration**:
-   - Find `POST /api/auth/register` endpoint
-   - Click "Try it out"
-   - Fill in the request body with user details
-   - Execute the request
+    - Find `POST /api/auth/register` endpoint
+    - Click "Try it out"
+    - Fill in the request body with user details
+    - Execute the request
 
 3. **Check MailHog**:
-   - Visit `http://localhost:8025` to view the confirmation email
+    - Visit `http://localhost:8025` to view the confirmation email
 
 4. **Test email confirmation**:
-   - Find `GET /api/auth/confirm-email` endpoint in Swagger
-   - Enter the `userId`, `token`, and `email` parameters from the email
-   - Execute the request
+    - Find `GET /api/auth/confirm-email` endpoint in Swagger
+    - Enter the `userId`, `token`, and `email` parameters from the email
+    - Execute the request
 
 ### Expected Behavior
 
@@ -253,6 +264,7 @@ The solution follows a clean architecture pattern with four main projects:
 ## Future Roadmap
 
 ### Phase 1: Core Marketplace Features (Q2 2025)
+
 - **Priority: High**
 - ✅ Complete CRUD operations for all entities (COMPLETED)
 - File upload and media handling optimisation
@@ -262,6 +274,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Performance optimisation and caching
 
 ### Phase 2: Enhanced User Experience (Q3 2025)
+
 - **Priority: High**
 - Advanced search with filters and sorting
 - Real-time notifications (SignalR)
@@ -271,6 +284,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Mobile-responsive web interface
 
 ### Phase 3: Business Features (Q4 2025)
+
 - **Priority: Medium**
 - Payment integration (Stripe/PayPal)
 - Rating and review system
@@ -280,6 +294,7 @@ The solution follows a clean architecture pattern with four main projects:
 - API rate limiting and monitoring
 
 ### Phase 4: Advanced Features (Q1 2026)
+
 - **Priority: Medium**
 - AI-powered product recommendations
 - Automated content moderation
@@ -289,6 +304,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Integration with external marketplaces
 
 ### Phase 5: Scale & Optimise (2026)
+
 - **Priority: Low**
 - Microservices architecture migration
 - Redis caching implementation
@@ -300,6 +316,7 @@ The solution follows a clean architecture pattern with four main projects:
 ## Development Guidelines
 
 ### Code Organisation
+
 - Follow SOLID principles and clean architecture
 - Use the mediator pattern via WolverineFx
 - Implement comprehensive unit and integration tests
@@ -307,6 +324,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Follow conventional commits for version control
 
 ### Security Considerations
+
 - JWT tokens with refresh mechanism
 - Input validation and sanitisation
 - SQL injection prevention via EF Core
@@ -314,6 +332,7 @@ The solution follows a clean architecture pattern with four main projects:
 - Role-based access control
 
 ### Performance Guidelines
+
 - Use async/await for all database operations
 - Implement pagination for large data sets
 - Consider caching strategies for frequently accessed data
@@ -322,12 +341,14 @@ The solution follows a clean architecture pattern with four main projects:
 ## Contributing
 
 For detailed development instructions, navigate to individual project README.md files:
+
 - `Marketplace.Api/README.md` - API development guidelines and technology stack
 - `Marketplace.Core/README.md` - Business logic, validation, and domain services
 - `Marketplace.Data/README.md` - Database, migrations, and repository patterns
 - `Marketplace.Test/README.md` - Testing strategies, factories, and infrastructure
 
 ### Additional Documentation
+
 - `Marketplace.Api/Endpoints/README.md` - Complete endpoint reference and patterns
 - `Marketplace.Data/Configurations/README.md` - Entity configuration patterns
 - `Marketplace.Data/Repositories/README.md` - Repository implementation details
@@ -349,6 +370,7 @@ docker compose logs -f
 ```
 
 **Database Connection Details:**
+
 - Server: `127.0.0.1,1433`
 - Authentication: SQL Server Authentication
 - Username: `sa`

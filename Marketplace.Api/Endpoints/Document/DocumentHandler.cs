@@ -1,10 +1,10 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.Document;
 
@@ -18,46 +18,39 @@ public class DocumentHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         Data.Entities.Document? document = null;
-        
+
         if (command.DocumentId > 0)
-        {
             document = await dbContext.Documents
                 .FirstOrDefaultAsync(d => d.Id == command.DocumentId);
-        }
 
         if (command.AllDocuments)
         {
             var documentsQuery = dbContext.Documents.AsQueryable();
-            
+
             if (command.ProductDetailId.HasValue)
-            {
                 documentsQuery = documentsQuery.Where(d => d.ProductDetailId == command.ProductDetailId);
-            }
 
             if (!string.IsNullOrEmpty(command.DocumentType))
-            {
                 documentsQuery = documentsQuery.Where(d => d.DocumentType == command.DocumentType);
-            }
-            
+
             var documents = await documentsQuery.ToListAsync();
-            return new DocumentResponse() { Documents = documents };
+            return new DocumentResponse { Documents = documents };
         }
 
         if (command.ProductDetailId.HasValue && document == null)
-        {
             document = await dbContext.Documents
                 .FirstOrDefaultAsync(d => d.ProductDetailId == command.ProductDetailId);
-        }
 
         document ??= await dbContext.Documents.FirstOrDefaultAsync();
-        return new DocumentResponse()
+        return new DocumentResponse
         {
             Document = document
         };
     }
 
     [Transactional]
-    public async Task<DocumentResponse> Handle(DocumentCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<DocumentResponse> Handle(DocumentCreate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -67,17 +60,15 @@ public class DocumentHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new DocumentResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var document = new Data.Entities.Document
@@ -101,7 +92,8 @@ public class DocumentHandler
     }
 
     [Transactional]
-    public async Task<DocumentResponse> Handle(DocumentUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<DocumentResponse> Handle(DocumentUpdate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -111,23 +103,18 @@ public class DocumentHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new DocumentResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var document = await dbContext.Documents.FindAsync(command.Id);
-        if (document == null)
-        {
-            return new DocumentResponse { Document = null };
-        }
+        if (document == null) return new DocumentResponse { Document = null };
 
         document.Title = command.Title;
         document.Description = command.Description;

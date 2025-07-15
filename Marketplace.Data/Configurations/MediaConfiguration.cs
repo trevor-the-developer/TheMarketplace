@@ -12,7 +12,7 @@ public class MediaConfiguration : IEntityTypeConfiguration<Media>
             .WithMany(pd => pd.Media)
             .HasForeignKey(m => m.ProductDetailId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         // seed data
         builder.HasData(
             new Media

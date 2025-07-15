@@ -1,9 +1,9 @@
-using Marketplace.Data.Repositories;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data.Repositories;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.Listing;
 
@@ -17,26 +17,24 @@ public class ListingHandler
         ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
 
         Data.Entities.Listing? listing = null;
-        if (command.ListingId > 0)
-        {
-            listing = await listingRepository.GetByIdAsync(command.ListingId);
-        }
-        
+        if (command.ListingId > 0) listing = await listingRepository.GetByIdAsync(command.ListingId);
+
         if (command.AllListings)
         {
             var listings = await listingRepository.GetAllAsync();
-            return new ListingResponse() { Listings = listings.ToList() };
+            return new ListingResponse { Listings = listings.ToList() };
         }
-        
+
         listing ??= await listingRepository.GetFirstOrDefaultAsync(l => true);
-        return new ListingResponse()
+        return new ListingResponse
         {
             Listing = listing
         };
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingCreate command, IListingRepository listingRepository, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ListingResponse> Handle(ListingCreate command, IListingRepository listingRepository,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
@@ -46,17 +44,15 @@ public class ListingHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new ListingResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var listing = new Data.Entities.Listing
@@ -76,7 +72,8 @@ public class ListingHandler
     }
 
     [Transactional]
-    public async Task<ListingResponse> Handle(ListingUpdate command, IListingRepository listingRepository, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<ListingResponse> Handle(ListingUpdate command, IListingRepository listingRepository,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
@@ -86,23 +83,18 @@ public class ListingHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new ListingResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var listing = await listingRepository.GetByIdAsync(command.Id);
-        if (listing == null)
-        {
-            return new ListingResponse { Listing = null };
-        }
+        if (listing == null) return new ListingResponse { Listing = null };
 
         listing.Title = command.Title;
         listing.Description = command.Description;

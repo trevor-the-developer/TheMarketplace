@@ -1,10 +1,10 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.Media;
 
@@ -18,46 +18,39 @@ public class MediaHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         Data.Entities.Media? media = null;
-        
+
         if (command.MediaId > 0)
-        {
             media = await dbContext.Files
                 .FirstOrDefaultAsync(m => m.Id == command.MediaId);
-        }
 
         if (command.AllMedia)
         {
             var mediaQuery = dbContext.Files.AsQueryable();
-            
+
             if (command.ProductDetailId.HasValue)
-            {
                 mediaQuery = mediaQuery.Where(m => m.ProductDetailId == command.ProductDetailId);
-            }
 
             if (!string.IsNullOrEmpty(command.MediaType))
-            {
                 mediaQuery = mediaQuery.Where(m => m.MediaType == command.MediaType);
-            }
-            
+
             var mediaList = await mediaQuery.ToListAsync();
-            return new MediaResponse() { MediaList = mediaList };
+            return new MediaResponse { MediaList = mediaList };
         }
 
         if (command.ProductDetailId.HasValue && media == null)
-        {
             media = await dbContext.Files
                 .FirstOrDefaultAsync(m => m.ProductDetailId == command.ProductDetailId);
-        }
 
         media ??= await dbContext.Files.FirstOrDefaultAsync();
-        return new MediaResponse()
+        return new MediaResponse
         {
             Media = media
         };
     }
 
     [Transactional]
-    public async Task<MediaResponse> Handle(MediaCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<MediaResponse> Handle(MediaCreate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -67,17 +60,15 @@ public class MediaHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new MediaResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var media = new Data.Entities.Media
@@ -101,7 +92,8 @@ public class MediaHandler
     }
 
     [Transactional]
-    public async Task<MediaResponse> Handle(MediaUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<MediaResponse> Handle(MediaUpdate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -111,23 +103,18 @@ public class MediaHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new MediaResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var media = await dbContext.Files.FindAsync(command.Id);
-        if (media == null)
-        {
-            return new MediaResponse { Media = null };
-        }
+        if (media == null) return new MediaResponse { Media = null };
 
         media.Title = command.Title;
         media.Description = command.Description;

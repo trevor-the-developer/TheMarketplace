@@ -1,10 +1,10 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.UserProfile;
 
@@ -18,60 +18,51 @@ public class UserProfileHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         Data.Entities.UserProfile? userProfile = null;
-        
+
         if (command.UserProfileId > 0)
-        {
             userProfile = await dbContext.Profiles
                 .Include(up => up.ApplicationUser)
                 .FirstOrDefaultAsync(up => up.Id == command.UserProfileId);
-        }
 
         if (command.AllUserProfiles)
         {
             var userProfilesQuery = dbContext.Profiles
                 .Include(up => up.ApplicationUser)
                 .AsQueryable();
-            
+
             if (!string.IsNullOrEmpty(command.ApplicationUserId))
-            {
                 userProfilesQuery = userProfilesQuery.Where(up => up.ApplicationUserId == command.ApplicationUserId);
-            }
 
             if (!string.IsNullOrEmpty(command.DisplayName))
-            {
                 userProfilesQuery = userProfilesQuery.Where(up => up.DisplayName.Contains(command.DisplayName));
-            }
-            
+
             var userProfiles = await userProfilesQuery.ToListAsync();
-            return new UserProfileResponse() { UserProfiles = userProfiles };
+            return new UserProfileResponse { UserProfiles = userProfiles };
         }
 
         if (!string.IsNullOrEmpty(command.ApplicationUserId) && userProfile == null)
-        {
             userProfile = await dbContext.Profiles
                 .Include(up => up.ApplicationUser)
                 .FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
-        }
 
         if (!string.IsNullOrEmpty(command.DisplayName) && userProfile == null)
-        {
             userProfile = await dbContext.Profiles
                 .Include(up => up.ApplicationUser)
                 .FirstOrDefaultAsync(up => up.DisplayName == command.DisplayName);
-        }
 
         userProfile ??= await dbContext.Profiles
             .Include(up => up.ApplicationUser)
             .FirstOrDefaultAsync();
-        
-        return new UserProfileResponse()
+
+        return new UserProfileResponse
         {
             UserProfile = userProfile
         };
     }
 
     [Transactional]
-    public async Task<UserProfileResponse> Handle(UserProfileCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<UserProfileResponse> Handle(UserProfileCreate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -81,17 +72,15 @@ public class UserProfileHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new UserProfileResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var userProfile = new Data.Entities.UserProfile
@@ -113,7 +102,8 @@ public class UserProfileHandler
     }
 
     [Transactional]
-    public async Task<UserProfileResponse> Handle(UserProfileUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<UserProfileResponse> Handle(UserProfileUpdate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -123,23 +113,19 @@ public class UserProfileHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new UserProfileResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
-        var userProfile = await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
-        if (userProfile == null)
-        {
-            return new UserProfileResponse { UserProfile = null };
-        }
+        var userProfile =
+            await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
+        if (userProfile == null) return new UserProfileResponse { UserProfile = null };
 
         userProfile.DisplayName = command.DisplayName;
         userProfile.Bio = command.Bio;
@@ -159,7 +145,8 @@ public class UserProfileHandler
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
-        var userProfile = await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
+        var userProfile =
+            await dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == command.ApplicationUserId);
         if (userProfile != null)
         {
             dbContext.Profiles.Remove(userProfile);

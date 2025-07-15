@@ -1,6 +1,5 @@
 using Marketplace.Api.Endpoints.Media;
 using Marketplace.Data;
-using Marketplace.Data.Entities;
 using Marketplace.Test.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

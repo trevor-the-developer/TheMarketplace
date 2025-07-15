@@ -1,40 +1,31 @@
-﻿using System.Net;
-using Marketplace.Api.Endpoints.Authentication.Login;
+﻿using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Wolverine;
 
-namespace Marketplace.Api.Endpoints.Authentication
+namespace Marketplace.Api.Endpoints.Authentication;
+
+public static class AuthenticationEndpoints
 {
-    public static class AuthenticationEndpoints
+    public static void MapAuthenticationEndpoints(this IEndpointRouteBuilder routes)
     {
-        public static void MapAuthenticationEndpoints(this IEndpointRouteBuilder routes)
-        {
-            // Login endpoint
-            routes.MapPost(ApiConstants.ApiSlashLogin, async (LoginRequest command, IMessageBus bus) =>
-                {
-                    var response = await bus.InvokeAsync<LoginResponse>(command);
+        // Login endpoint
+        routes.MapPost(ApiConstants.ApiSlashLogin, async (LoginRequest command, IMessageBus bus) =>
+            {
+                var response = await bus.InvokeAsync<LoginResponse>(command);
 
-                    if (response.ApiError is not null)
-                    {
-                        return Results.Problem(
-                            detail: response.ApiError?.ErrorMessage, 
-                            statusCode: response.ApiError?.StatusCode,
-                            type: response.ApiError?.HttpStatusCode,
-                            title: "Login endpoint.");
-                    }
+                if (response.ApiError is not null)
+                    return Results.Problem(
+                        response.ApiError?.ErrorMessage,
+                        statusCode: response.ApiError?.StatusCode,
+                        type: response.ApiError?.HttpStatusCode,
+                        title: "Login endpoint.");
 
-                    if (response.Succeeded.HasValue && response.Succeeded.Value)
-                    {
-                        return Results.Ok(response);
-                    }
+                if (response.Succeeded.HasValue && response.Succeeded.Value) return Results.Ok(response);
 
-                    return Results.UnprocessableEntity(response);
-                })
+                return Results.UnprocessableEntity(response);
+            })
             .AllowAnonymous()
             .WithTags(ApiConstants.Authentication)
             .WithName(ApiConstants.Login)
@@ -42,28 +33,21 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
 
-            // Registration endpoint
-            routes.MapPost(ApiConstants.ApiSlashRegister, async (RegisterRequest command, IMessageBus bus) =>
+        // Registration endpoint
+        routes.MapPost(ApiConstants.ApiSlashRegister, async (RegisterRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<RegisterStepOneResponse>(command);
                 if (!response.RegistrationStepOne.HasValue && !response.RegistrationStepOne!.Value)
-                {
                     return Results.BadRequest();
-                }
 
-                if(response.ApiError != null)
-                {
+                if (response.ApiError != null)
                     return Results.Problem(
-                        detail: response.ApiError?.ErrorMessage, 
+                        response.ApiError?.ErrorMessage,
                         statusCode: response.ApiError?.StatusCode,
                         type: response.ApiError?.HttpStatusCode,
                         title: "Registration endpoint.");
-                }
 
-                if (response.Errors!.Any())
-                {
-                    return Results.BadRequest(new { errors = response.Errors });
-                }
+                if (response.Errors!.Any()) return Results.BadRequest(new { errors = response.Errors });
 
                 return Results.Ok(response);
             })
@@ -73,28 +57,24 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status500InternalServerError);
-            
-            // Email confirmation endpoint
-            routes.MapGet(ApiConstants.ApiSlashConfirmEmail, async ([AsParameters] ConfirmEmailRequest command, IMessageBus bus) =>
-            {
-                var response = await bus.InvokeAsync<ConfirmEmailResponse>(command);
-                
-                if (response.ApiError is not null)
-                {
-                    return Results.Problem(
-                        detail: response.ApiError?.ErrorMessage, 
-                        statusCode: response.ApiError?.StatusCode,
-                        type: response.ApiError?.HttpStatusCode,
-                        title: "Login endpoint.");
-                }
 
-                if (!string.IsNullOrEmpty(response.ConfirmationCode))
+        // Email confirmation endpoint
+        routes.MapGet(ApiConstants.ApiSlashConfirmEmail,
+                async ([AsParameters] ConfirmEmailRequest command, IMessageBus bus) =>
                 {
-                    return Results.Ok(response);
-                }
+                    var response = await bus.InvokeAsync<ConfirmEmailResponse>(command);
 
-                return Results.UnprocessableEntity(response);                
-            })
+                    if (response.ApiError is not null)
+                        return Results.Problem(
+                            response.ApiError?.ErrorMessage,
+                            statusCode: response.ApiError?.StatusCode,
+                            type: response.ApiError?.HttpStatusCode,
+                            title: "Login endpoint.");
+
+                    if (!string.IsNullOrEmpty(response.ConfirmationCode)) return Results.Ok(response);
+
+                    return Results.UnprocessableEntity(response);
+                })
             .AllowAnonymous()
             .WithTags(ApiConstants.Authentication)
             .WithName(ApiConstants.ConfirmEmail)
@@ -102,31 +82,21 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status500InternalServerError);
 
-            // Refresh token endpoint
-            routes.MapPost(ApiConstants.ApiRefresh, async (TokenRefreshRequest command, IMessageBus bus) =>
+        // Refresh token endpoint
+        routes.MapPost(ApiConstants.ApiRefresh, async (TokenRefreshRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<TokenResponse>(command);
 
-                if (!response.Succeeded!.Value && response.ApiError == null)
-                {
-                    return Results.BadRequest();
-                }
+                if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
                 if (response.ApiError != null)
                 {
-                    if (response.ApiError.StatusCode == 401)
-                    {
-                        return Results.Unauthorized();
-                    }
-                    else
-                    {
-                        return Results.Problem(response.ApiError?.ErrorMessage);
-                    }
+                    if (response.ApiError.StatusCode == 401) return Results.Unauthorized();
+
+                    return Results.Problem(response.ApiError?.ErrorMessage);
                 }
-                else
-                {
-                    return Results.Ok(response);
-                }
+
+                return Results.Ok(response);
             })
             .RequireAuthorization()
             .WithTags(ApiConstants.Authentication)
@@ -135,20 +105,14 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
 
-            // Revoke token endpoint
-            routes.MapPost(ApiConstants.ApiSlashLogout, async (TokenRevokeRequest command, IMessageBus bus) =>
+        // Revoke token endpoint
+        routes.MapPost(ApiConstants.ApiSlashLogout, async (TokenRevokeRequest command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<TokenResponse>(command);
 
-                if (!response.Succeeded!.Value && response.ApiError == null)
-                {
-                    return Results.BadRequest();
-                }
+                if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
-                if (response.ApiError is not null)
-                {
-                    return Results.Problem(response.ApiError?.ErrorMessage);
-                }
+                if (response.ApiError is not null) return Results.Problem(response.ApiError?.ErrorMessage);
 
                 return Results.Ok(response);
             })
@@ -157,6 +121,5 @@ namespace Marketplace.Api.Endpoints.Authentication
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
-        }
     }
 }

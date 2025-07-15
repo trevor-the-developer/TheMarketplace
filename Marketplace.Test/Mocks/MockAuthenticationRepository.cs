@@ -43,10 +43,10 @@ public class MockAuthenticationRepository : Mock<IAuthenticationRepository>
         {
             Setup(x => x.GetRolesAsync(user))
                 .ReturnsAsync(new List<string> { Role.User.ToString() });
-            
+
             Setup(x => x.GetClaimsAsync(user))
                 .ReturnsAsync(new List<Claim> { new(JwtRegisteredClaimNames.Name, user.Email ?? string.Empty) });
-            
+
             Setup(x => x.FindUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync(user);
         }
@@ -68,26 +68,18 @@ public class MockAuthenticationRepository : Mock<IAuthenticationRepository>
         }
 
         if (invalidPassword)
-        {
             Setup(x => x.CheckPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
                 .ReturnsAsync(false);
-        }
         else
-        {
             Setup(x => x.CheckPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-        }
 
         if (updateAsyncFailed)
-        {
             Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(IdentityResult.Failed());
-        }
         else
-        {
             Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(IdentityResult.Success);
-        }
     }
 
     public void SetupCreateUserFailed(List<IdentityError> errors)

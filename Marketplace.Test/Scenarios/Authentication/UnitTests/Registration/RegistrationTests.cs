@@ -19,7 +19,7 @@ public class RegistrationTests
         mockConfiguration.Setup(c => c["FrontendSettings:BaseUrl"]).Returns("http://localhost:3000");
         return mockConfiguration.Object;
     }
-    
+
     #region Registration Step One Tests
 
     [Fact]
@@ -326,7 +326,7 @@ public class RegistrationTests
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
             await registerHandler.Handle(
-                (ConfirmEmailRequest)null!,
+                null!,
                 mockAuthRepository.Object,
                 mockLogger.Object);
         });

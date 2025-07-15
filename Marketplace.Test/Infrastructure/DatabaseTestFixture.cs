@@ -35,7 +35,7 @@ public class DatabaseTestFixture : IAsyncLifetime
             Console.WriteLine("Database exists, running migrations...");
             await RunMigrationsAsync();
             Console.WriteLine("Database test fixture initialization complete.");
-            
+
             _isInitialized = true;
         }
         finally
@@ -183,7 +183,7 @@ public class DatabaseTestFixture : IAsyncLifetime
 
                 await using var command = new SqlCommand("SELECT 1", connection);
                 await command.ExecuteScalarAsync(cts.Token);
-                
+
                 Console.WriteLine("SQL Server is ready!");
                 return; // SQL Server is ready
             }

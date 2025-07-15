@@ -1,10 +1,10 @@
-using Marketplace.Data;
-using Microsoft.EntityFrameworkCore;
-using Wolverine.Attributes;
+using Marketplace.Core;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
-using Marketplace.Core;
+using Marketplace.Data;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Wolverine.Attributes;
 
 namespace Marketplace.Api.Endpoints.Tag;
 
@@ -18,46 +18,37 @@ public class TagHandler
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
         Data.Entities.Tag? tag = null;
-        
+
         if (command.TagId > 0)
-        {
             tag = await dbContext.Tags
                 .FirstOrDefaultAsync(t => t.Id == command.TagId);
-        }
 
         if (command.AllTags)
         {
             var tagsQuery = dbContext.Tags.AsQueryable();
-            
-            if (!string.IsNullOrEmpty(command.Name))
-            {
-                tagsQuery = tagsQuery.Where(t => t.Name!.Contains(command.Name));
-            }
 
-            if (command.IsEnabled.HasValue)
-            {
-                tagsQuery = tagsQuery.Where(t => t.IsEnabled == command.IsEnabled);
-            }
-            
+            if (!string.IsNullOrEmpty(command.Name)) tagsQuery = tagsQuery.Where(t => t.Name!.Contains(command.Name));
+
+            if (command.IsEnabled.HasValue) tagsQuery = tagsQuery.Where(t => t.IsEnabled == command.IsEnabled);
+
             var tags = await tagsQuery.ToListAsync();
-            return new TagResponse() { Tags = tags };
+            return new TagResponse { Tags = tags };
         }
 
         if (!string.IsNullOrEmpty(command.Name) && tag == null)
-        {
             tag = await dbContext.Tags
                 .FirstOrDefaultAsync(t => t.Name == command.Name);
-        }
 
         tag ??= await dbContext.Tags.FirstOrDefaultAsync();
-        return new TagResponse()
+        return new TagResponse
         {
             Tag = tag
         };
     }
 
     [Transactional]
-    public async Task<TagResponse> Handle(TagCreate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<TagResponse> Handle(TagCreate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -67,17 +58,15 @@ public class TagHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new TagResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var currentUser = currentUserService.GetCurrentUserName();
         var tag = new Data.Entities.Tag
@@ -98,7 +87,8 @@ public class TagHandler
     }
 
     [Transactional]
-    public async Task<TagResponse> Handle(TagUpdate command, MarketplaceDbContext dbContext, ICurrentUserService currentUserService, IValidationService validationService)
+    public async Task<TagResponse> Handle(TagUpdate command, MarketplaceDbContext dbContext,
+        ICurrentUserService currentUserService, IValidationService validationService)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
@@ -108,23 +98,18 @@ public class TagHandler
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
         if (validationErrors.Count != 0)
-        {
             return new TagResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
-        }
 
         var tag = await dbContext.Tags.FindAsync(command.Id);
-        if (tag == null)
-        {
-            return new TagResponse { Tag = null };
-        }
+        if (tag == null) return new TagResponse { Tag = null };
 
         tag.Name = command.Name;
         tag.Description = command.Description;

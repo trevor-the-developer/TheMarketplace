@@ -1,9 +1,7 @@
 using Marketplace.Api.Endpoints.Listing;
-using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -13,8 +11,8 @@ namespace Marketplace.Test.Scenarios.Listings.UnitTests;
 public class ListingHandlerTests
 {
     private readonly MockCurrentUserService _currentUserService;
-    private readonly Mock<IListingRepository> _listingRepositoryMock;
     private readonly ListingHandler _handler;
+    private readonly Mock<IListingRepository> _listingRepositoryMock;
     private readonly Mock<ILogger<ListingHandler>> _loggerMock;
     private readonly MockValidationService _validationService;
 
@@ -50,12 +48,17 @@ public class ListingHandlerTests
         };
 
         _listingRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Listing>()))
-            .ReturnsAsync((Listing l) => { l.Id = 1; return l; });
+            .ReturnsAsync((Listing l) =>
+            {
+                l.Id = 1;
+                return l;
+            });
         _listingRepositoryMock.Setup(r => r.SaveChangesAsync())
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(createCommand, _listingRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _listingRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);
@@ -95,7 +98,8 @@ public class ListingHandlerTests
             .ReturnsAsync(1);
 
         // Act
-        var response = await _handler.Handle(updateCommand, _listingRepositoryMock.Object, _currentUserService, _validationService);
+        var response = await _handler.Handle(updateCommand, _listingRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Listing);

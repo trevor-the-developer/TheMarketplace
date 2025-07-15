@@ -28,9 +28,9 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Name = "New Tag", 
+                .Json(new
+                {
+                    Name = "New Tag",
                     Description = "A new tag description.",
                     IsEnabled = true
                 })
@@ -52,7 +52,10 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new { Id = 1, Name = "Updated Tag", Description = "An updated tag description.", IsEnabled = false })
+                .Json(new
+                {
+                    Id = 1, Name = "Updated Tag", Description = "An updated tag description.", IsEnabled = false
+                })
                 .ToUrl("/api/tags/1");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
         });
@@ -71,9 +74,9 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    Name = "Tag to Delete", 
+                .Json(new
+                {
+                    Name = "Tag to Delete",
                     Description = "A tag that will be deleted.",
                     IsEnabled = true
                 })
@@ -83,7 +86,8 @@ public class TagTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncL
 
         var createResponseText = await createResponse.ReadAsTextAsync();
         // Look for the tag ID in the nested structure: {"tag":{"id":1,...},...}
-        var tagIdMatch = Regex.Match(createResponseText, @"""tag""\s*:\s*\{[^}]*""id""\s*:\s*(\d+)", RegexOptions.IgnoreCase);
+        var tagIdMatch = Regex.Match(createResponseText, @"""tag""\s*:\s*\{[^}]*""id""\s*:\s*(\d+)",
+            RegexOptions.IgnoreCase);
         var tagId = tagIdMatch.Success ? tagIdMatch.Groups[1].Value : "2"; // fallback to 2 if not found
 
         await Host.Scenario(_ =>

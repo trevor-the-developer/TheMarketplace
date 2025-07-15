@@ -1,12 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
-using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Security;
 using Marketplace.Core.Validation;
-using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -18,7 +15,7 @@ public class LoginHandler
     private const string LoginRequest = "Login request.";
 
     [Transactional]
-    public async Task<LoginResponse> Handle(LoginRequest command, IAuthenticationRepository authenticationRepository, 
+    public async Task<LoginResponse> Handle(LoginRequest command, IAuthenticationRepository authenticationRepository,
         IConfiguration configuration, ITokenService tokenService, IValidationService validationService,
         ILogger<LoginHandler> logger)
     {
@@ -28,7 +25,7 @@ public class LoginHandler
         ArgumentNullException.ThrowIfNull(tokenService, nameof(tokenService));
         ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
         ArgumentNullException.ThrowIfNull(logger, nameof(logger));
-        
+
         logger.LogInformation(LoginRequest);
 
         // Validate input
@@ -38,11 +35,11 @@ public class LoginHandler
             logger.LogError("Login request validation failed: {Errors}", string.Join(", ", validationErrors));
             return new LoginResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status400BadRequest.ToString(),
-                    StatusCode: StatusCodes.Status400BadRequest,
-                    ErrorMessage: "Validation failed",
-                    StackTrace: JsonConvert.SerializeObject(validationErrors)
+                ApiError = new ApiError(
+                    StatusCodes.Status400BadRequest.ToString(),
+                    StatusCodes.Status400BadRequest,
+                    "Validation failed",
+                    JsonConvert.SerializeObject(validationErrors)
                 )
             };
         }
@@ -54,11 +51,11 @@ public class LoginHandler
             logger.LogError(AuthConstants.UserDoesntExist);
             return new LoginResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status401Unauthorized.ToString(),
-                    StatusCode: StatusCodes.Status401Unauthorized,
-                    ErrorMessage: AuthConstants.UserDoesntExist, 
-                    StackTrace: null
+                ApiError = new ApiError(
+                    StatusCodes.Status401Unauthorized.ToString(),
+                    StatusCodes.Status401Unauthorized,
+                    AuthConstants.UserDoesntExist,
+                    null
                 )
             };
         }
@@ -69,11 +66,11 @@ public class LoginHandler
             logger.LogError(AuthConstants.InvalidEmailPassword);
             return new LoginResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status401Unauthorized.ToString(),
-                    StatusCode: StatusCodes.Status401Unauthorized,
-                    ErrorMessage: AuthConstants.InvalidEmailPassword, 
-                    StackTrace: null
+                ApiError = new ApiError(
+                    StatusCodes.Status401Unauthorized.ToString(),
+                    StatusCodes.Status401Unauthorized,
+                    AuthConstants.InvalidEmailPassword,
+                    null
                 )
             };
         }
@@ -83,11 +80,11 @@ public class LoginHandler
             logger.LogError(AuthConstants.UserEmailNotConfirmed);
             return new LoginResponse
             {
-                ApiError = new Core.ApiError(
-                    HttpStatusCode: StatusCodes.Status401Unauthorized.ToString(),
-                    StatusCode: StatusCodes.Status401Unauthorized,
-                    ErrorMessage: AuthConstants.UserEmailNotConfirmed, 
-                    StackTrace: null
+                ApiError = new ApiError(
+                    StatusCodes.Status401Unauthorized.ToString(),
+                    StatusCodes.Status401Unauthorized,
+                    AuthConstants.UserEmailNotConfirmed,
+                    null
                 )
             };
         }
@@ -115,11 +112,11 @@ public class LoginHandler
         else
         {
             logger.LogError(AuthConstants.LoginFailed);
-            loginResponse.ApiError = new Core.ApiError(
-                HttpStatusCode: StatusCodes.Status500InternalServerError.ToString(),
-                StatusCode: StatusCodes.Status500InternalServerError,
-                ErrorMessage: AuthConstants.LoginFailed,
-                StackTrace: JsonConvert.SerializeObject(updateResult.Errors)
+            loginResponse.ApiError = new ApiError(
+                StatusCodes.Status500InternalServerError.ToString(),
+                StatusCodes.Status500InternalServerError,
+                AuthConstants.LoginFailed,
+                JsonConvert.SerializeObject(updateResult.Errors)
             );
         }
 

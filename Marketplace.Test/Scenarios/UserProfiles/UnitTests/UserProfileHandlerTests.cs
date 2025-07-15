@@ -82,7 +82,7 @@ public class UserProfileHandlerTests : IDisposable
         };
 
         // Act
-        var existingUserProfile = new Marketplace.Data.Entities.UserProfile
+        var existingUserProfile = new UserProfile
         {
             Id = 1,
             DisplayName = "Original User",
@@ -113,7 +113,7 @@ public class UserProfileHandlerTests : IDisposable
         var deleteCommand = new UserProfileDelete { ApplicationUserId = "test-user-id-12345" };
 
         // Act
-        var existingUserProfile = new Marketplace.Data.Entities.UserProfile
+        var existingUserProfile = new UserProfile
         {
             Id = 1,
             DisplayName = "User to Delete",
@@ -131,7 +131,9 @@ public class UserProfileHandlerTests : IDisposable
         await _handler.Handle(deleteCommand, _dbContext);
 
         // Assert
-        var userProfile = await _dbContext.Profiles.FirstOrDefaultAsync(up => up.ApplicationUserId == deleteCommand.ApplicationUserId);
+        var userProfile =
+            await _dbContext.Profiles.FirstOrDefaultAsync(up =>
+                up.ApplicationUserId == deleteCommand.ApplicationUserId);
         Assert.Null(userProfile);
     }
 }

@@ -3,13 +3,13 @@ using Xunit;
 namespace Marketplace.Test.Infrastructure;
 
 /// <summary>
-/// Base class for tests that need database reset functionality.
-/// This provides methods to reset the database state before/after tests.
+///     Base class for tests that need database reset functionality.
+///     This provides methods to reset the database state before/after tests.
 /// </summary>
 public abstract class DatabaseResetTestBase : IAsyncLifetime
 {
     /// <summary>
-    /// Called before each test method. Override to add custom initialization.
+    ///     Called before each test method. Override to add custom initialization.
     /// </summary>
     public virtual async Task InitializeAsync()
     {
@@ -17,7 +17,7 @@ public abstract class DatabaseResetTestBase : IAsyncLifetime
     }
 
     /// <summary>
-    /// Called after each test method. Override to add custom cleanup.
+    ///     Called after each test method. Override to add custom cleanup.
     /// </summary>
     public virtual async Task DisposeAsync()
     {
@@ -27,7 +27,7 @@ public abstract class DatabaseResetTestBase : IAsyncLifetime
     }
 
     /// <summary>
-    /// Reset the database to a clean state with fresh seed data.
+    ///     Reset the database to a clean state with fresh seed data.
     /// </summary>
     protected static async Task ResetDatabaseAsync()
     {

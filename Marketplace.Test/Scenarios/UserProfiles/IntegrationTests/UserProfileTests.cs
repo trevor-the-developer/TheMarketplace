@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.RegularExpressions;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
 using Xunit;
@@ -28,9 +27,9 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    DisplayName = "New User Profile", 
+                .Json(new
+                {
+                    DisplayName = "New User Profile",
                     Bio = "A new user profile bio.",
                     SocialMedia = "newuser@social.com",
                     ApplicationUserId = "69a38a69-e24d-4c7f-bdf2-c7bc2222cbe7"
@@ -54,9 +53,9 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    DisplayName = "User Profile to Update", 
+                .Json(new
+                {
+                    DisplayName = "User Profile to Update",
                     Bio = "A user profile that will be updated.",
                     SocialMedia = "update@social.com",
                     ApplicationUserId = applicationUserId
@@ -73,9 +72,9 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
         {
             _.WithBearerToken(token);
             _.Put
-                .Json(new 
-                { 
-                    DisplayName = "Updated User Profile", 
+                .Json(new
+                {
+                    DisplayName = "Updated User Profile",
                     Bio = "An updated user profile bio.",
                     SocialMedia = "updated@social.com",
                     ApplicationUserId = applicationUserId
@@ -99,9 +98,9 @@ public class UserProfileTests(WebAppFixture fixture) : ScenarioContext(fixture),
         {
             _.WithBearerToken(token);
             _.Post
-                .Json(new 
-                { 
-                    DisplayName = "User Profile to Delete", 
+                .Json(new
+                {
+                    DisplayName = "User Profile to Delete",
                     Bio = "A user profile that will be deleted.",
                     SocialMedia = "delete@social.com",
                     ApplicationUserId = applicationUserId
