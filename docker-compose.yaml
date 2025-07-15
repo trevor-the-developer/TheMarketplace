@@ -11,4 +11,14 @@ services:
             MSSQL_PID: 'developer'
         ports:
             - "1433:1433"
-             
+    
+    mailhog:
+        container_name: marketplace-mailhog
+        hostname: marketplace-mailhog
+        image: mailhog/mailhog:latest
+        ports:
+            - "1025:1025"  # SMTP server port
+            - "8025:8025"  # Web UI port
+        environment:
+            MH_STORAGE: memory
+        restart: unless-stopped
