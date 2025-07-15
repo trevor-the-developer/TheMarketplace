@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Marketplace.Data;
+using Marketplace.Test.Helpers;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +14,8 @@ public class DatabaseTestFixture : IAsyncLifetime
     private const string ContainerName = "marketplace-db";
     private const string DatabaseName = "Marketplace";
 
-    private const string ConnectionString =
-        "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
-
     private static readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
-    private static bool _isInitialized = false;
+    private static bool _isInitialized;
 
     public async Task InitializeAsync()
     {
@@ -52,24 +50,25 @@ public class DatabaseTestFixture : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    private async Task<bool> TryConnectToSqlServerAsync()
+    private static async Task<bool> TryConnectToSqlServerAsync()
     {
         try
         {
-            using var connection = new SqlConnection(ConnectionString);
+            await using var connection = DatabaseConnectionHelper.CreateConnection(DatabaseName);
             await connection.OpenAsync();
-            using var command = new SqlCommand("SELECT 1", connection);
+            await using var command = new SqlCommand("SELECT 1", connection);
             await command.ExecuteScalarAsync();
             return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to connect to SQL Server: {ex.Message}");
+            Console.WriteLine($"Connection string used: {DatabaseConnectionHelper.GetMarketplaceConnectionString()}");
             return false;
         }
     }
 
-    private async Task EnsureDockerContainerIsRunningAsync()
+    private static async Task EnsureDockerContainerIsRunningAsync()
     {
         // First, try to connect directly to SQL Server
         // If it works, we don't need to do anything with Docker
@@ -110,7 +109,7 @@ public class DatabaseTestFixture : IAsyncLifetime
         await WaitForSqlServerAsync();
     }
 
-    private async Task StartDockerContainerAsync()
+    private static async Task StartDockerContainerAsync()
     {
         // Check if container exists but is stopped
         var existsProcess = new Process
@@ -167,9 +166,9 @@ public class DatabaseTestFixture : IAsyncLifetime
         }
     }
 
-    private async Task WaitForSqlServerAsync()
+    private static async Task WaitForSqlServerAsync()
     {
-        var maxAttempts = 15; // Reduced from 30 to be more reasonable
+        const int maxAttempts = 15;
         var attempt = 0;
         var lastError = string.Empty;
 
@@ -177,37 +176,21 @@ public class DatabaseTestFixture : IAsyncLifetime
         {
             try
             {
-                var testProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "docker",
-                        Arguments =
-                            $"exec {ContainerName} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q \"SELECT 1\"",
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
+                // Use .NET connection instead of sqlcmd since that's what actually works
+                await using var connection = DatabaseConnectionHelper.CreateConnection("master");
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await connection.OpenAsync(cts.Token);
 
-                testProcess.Start();
-                await testProcess.WaitForExitAsync();
-
-                if (testProcess.ExitCode == 0)
-                {
-                    Console.WriteLine("SQL Server is ready!");
-                    return; // SQL Server is ready
-                }
-
-                lastError = await testProcess.StandardError.ReadToEndAsync();
-                Console.WriteLine($"SQL Server not ready (attempt {attempt + 1}/{maxAttempts}): {lastError}");
+                await using var command = new SqlCommand("SELECT 1", connection);
+                await command.ExecuteScalarAsync(cts.Token);
+                
+                Console.WriteLine("SQL Server is ready!");
+                return; // SQL Server is ready
             }
             catch (Exception ex)
             {
                 lastError = ex.Message;
-                Console.WriteLine(
-                    $"Exception waiting for SQL Server (attempt {attempt + 1}/{maxAttempts}): {ex.Message}");
+                Console.WriteLine($"SQL Server not ready (attempt {attempt + 1}/{maxAttempts}): {lastError}");
             }
 
             attempt++;
@@ -218,20 +201,19 @@ public class DatabaseTestFixture : IAsyncLifetime
             $"SQL Server container did not start within expected time. Last error: {lastError}");
     }
 
-    private async Task EnsureDatabaseExistsAsync()
+    private static async Task EnsureDatabaseExistsAsync()
     {
         try
         {
-            // Use .NET connection to create database instead of docker exec
-            var masterConnectionString =
-                "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
-            using var connection = new SqlConnection(masterConnectionString);
+            await using var connection = DatabaseConnectionHelper.CreateConnection("master");
             await connection.OpenAsync();
 
-            var createDbSql = $@"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '{DatabaseName}') 
-                                CREATE DATABASE {DatabaseName}";
+            const string createDbSql = $"""
+                                        IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '{DatabaseName}') 
+                                                                        CREATE DATABASE {DatabaseName}
+                                        """;
 
-            using var command = new SqlCommand(createDbSql, connection);
+            await using var command = new SqlCommand(createDbSql, connection);
             await command.ExecuteNonQueryAsync();
 
             Console.WriteLine($"Database {DatabaseName} is ready.");
@@ -242,17 +224,17 @@ public class DatabaseTestFixture : IAsyncLifetime
         }
     }
 
-    private async Task RunMigrationsAsync()
+    private static async Task RunMigrationsAsync()
     {
         try
         {
             // Create a temporary service provider to run migrations
             var services = new ServiceCollection();
             services.AddDbContext<MarketplaceDbContext>(options =>
-                options.UseSqlServer(ConnectionString));
+                options.UseSqlServer(DatabaseConnectionHelper.GetMarketplaceConnectionString()));
             services.AddLogging(builder => builder.AddConsole());
 
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
 
@@ -270,7 +252,7 @@ public class DatabaseTestFixture : IAsyncLifetime
         }
     }
 
-    private async Task RunMigrationsViaCliAsync()
+    private static async Task RunMigrationsViaCliAsync()
     {
         try
         {
@@ -294,15 +276,11 @@ public class DatabaseTestFixture : IAsyncLifetime
             {
                 var error = await migrateProcess.StandardError.ReadToEndAsync();
                 Console.WriteLine($"Migration warning (might be expected): {error}");
-
-                // Even if migrations fail, we can continue - the tests might still work
-                // with the basic database structure
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to run migrations via CLI: {ex.Message}");
-            // Continue anyway - tests might still work
         }
     }
 }
