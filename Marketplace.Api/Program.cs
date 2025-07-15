@@ -179,6 +179,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Register Repositories
 builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();

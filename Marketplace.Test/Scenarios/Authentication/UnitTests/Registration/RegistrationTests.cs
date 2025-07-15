@@ -69,6 +69,7 @@ public class RegistrationTests
         var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
 
         var registerHandler = new RegisterHandler();
 
@@ -79,7 +80,8 @@ public class RegistrationTests
                 null!,
                 mockAuthRepository.Object,
                 mockLogger.Object,
-                mockValidationService);
+                mockValidationService,
+                mockEmailService.Object);
         });
     }
 
@@ -93,6 +95,7 @@ public class RegistrationTests
         var mockAuthRepository = new MockAuthenticationRepository(existingUser);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act
@@ -100,13 +103,15 @@ public class RegistrationTests
             command,
             mockAuthRepository.Object,
             mockLogger.Object,
-            mockValidationService);
+            mockValidationService,
+            mockEmailService.Object);
 
         // Assert
         Assert.NotNull(response);
         Assert.False(response.RegistrationStepOne);
         Assert.NotNull(response.ApiError);
         Assert.Equal(500, response.ApiError.StatusCode);
+        mockEmailService.VerifyNoEmailSent();
     }
 
     [Fact]
@@ -118,6 +123,7 @@ public class RegistrationTests
         var mockAuthRepository = new MockAuthenticationRepository();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act
@@ -125,7 +131,8 @@ public class RegistrationTests
             command,
             mockAuthRepository.Object,
             mockLogger.Object,
-            mockValidationService);
+            mockValidationService,
+            mockEmailService.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -133,6 +140,8 @@ public class RegistrationTests
         Assert.NotNull(response.UserId);
         Assert.NotNull(response.ConfirmationEmailLink);
         Assert.Null(response.ApiError);
+        Assert.Single(mockEmailService.EmailsSent);
+        Assert.Equal("new@example.com", mockEmailService.EmailsSent.First().Email);
     }
 
     [Fact]
@@ -149,6 +158,7 @@ public class RegistrationTests
         mockAuthRepository.SetupCreateUserFailed(customErrors);
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act
@@ -156,7 +166,8 @@ public class RegistrationTests
             command,
             mockAuthRepository.Object,
             mockLogger.Object,
-            mockValidationService);
+            mockValidationService,
+            mockEmailService.Object);
 
         // Assert
         Assert.NotNull(response);
@@ -166,6 +177,7 @@ public class RegistrationTests
         Assert.NotNull(response.Errors);
         Assert.Single(response.Errors);
         Assert.Equal("PasswordTooShort", response.Errors.First().Code);
+        mockEmailService.VerifyNoEmailSent();
     }
 
     [Fact]
@@ -178,6 +190,7 @@ public class RegistrationTests
         mockAuthRepository.SetupCreateRoleFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act
@@ -185,13 +198,15 @@ public class RegistrationTests
             command,
             mockAuthRepository.Object,
             mockLogger.Object,
-            mockValidationService);
+            mockValidationService,
+            mockEmailService.Object);
 
         // Assert
         Assert.NotNull(response);
         Assert.True(response.RegistrationStepOne); // User creation succeeded
         Assert.NotNull(response.UserId);
         Assert.NotNull(response.ConfirmationEmailLink);
+        Assert.Single(mockEmailService.EmailsSent);
     }
 
     [Fact]
@@ -204,6 +219,7 @@ public class RegistrationTests
         mockAuthRepository.SetupAddToRoleFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act
@@ -211,13 +227,15 @@ public class RegistrationTests
             command,
             mockAuthRepository.Object,
             mockLogger.Object,
-            mockValidationService);
+            mockValidationService,
+            mockEmailService.Object);
 
         // Assert
         Assert.NotNull(response);
         Assert.True(response.RegistrationStepOne); // Overall registration succeeded
         Assert.NotNull(response.UserId);
         Assert.NotNull(response.ConfirmationEmailLink);
+        Assert.Single(mockEmailService.EmailsSent);
     }
 
     [Fact]
@@ -230,6 +248,7 @@ public class RegistrationTests
         mockAuthRepository.SetupGenerateEmailTokenFailed();
         var mockLogger = new Mock<ILogger<RegisterHandler>>();
         var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
         var registerHandler = new RegisterHandler();
 
         // Act & Assert
@@ -239,8 +258,40 @@ public class RegistrationTests
                 command,
                 mockAuthRepository.Object,
                 mockLogger.Object,
-                mockValidationService);
+                mockValidationService,
+                mockEmailService.Object);
         });
+    }
+
+    [Fact]
+    public async Task Registration_Step_One_Email_Service_Failure_Returns_Error()
+    {
+        // Arrange
+        var command = RegistrationTestFactory.CreateValidRegisterRequest("new@example.com");
+
+        var mockAuthRepository = new MockAuthenticationRepository();
+        var mockLogger = new Mock<ILogger<RegisterHandler>>();
+        var mockValidationService = new MockValidationService();
+        var mockEmailService = new MockEmailService();
+        mockEmailService.SetupSendEmailFailure();
+        var registerHandler = new RegisterHandler();
+
+        // Act
+        var response = await registerHandler.Handle(
+            command,
+            mockAuthRepository.Object,
+            mockLogger.Object,
+            mockValidationService,
+            mockEmailService.Object);
+
+        // Assert
+        Assert.NotNull(response);
+        Assert.True(response.RegistrationStepOne); // User creation succeeded
+        Assert.NotNull(response.UserId);
+        Assert.NotNull(response.ConfirmationEmailLink);
+        Assert.NotNull(response.ApiError); // Email failure should set error
+        Assert.Equal(500, response.ApiError.StatusCode);
+        Assert.Equal("Failed to send confirmation email", response.ApiError.ErrorMessage);
     }
 
     #endregion

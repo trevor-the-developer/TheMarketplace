@@ -2,7 +2,12 @@ namespace Marketplace.Core.Constants;
 
 public static class ApiConstants
 {
-    // Api constants
+    // Email Service
+    public const string DefaultSmtpHost = "localhost";
+    public const int DefaultSmtpPort = 1025;
+    public const bool DefaultSmtpUseSsl= false;
+    
+    // Authentication
     public const string RegisterHandlerCalled = "Register handler called";
     public const string UserAlreadyExists = "User already exists";
     public const string Revoke = "Revoke";

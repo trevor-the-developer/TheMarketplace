@@ -1,5 +1,6 @@
 using Marketplace.Core;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Services;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Repositories;
@@ -20,7 +21,7 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
         
         [Transactional]
         public async Task<RegisterStepOneResponse> Handle(RegisterRequest command, IAuthenticationRepository authenticationRepository,
-            ILogger<RegisterHandler> logger, IValidationService validationService)
+            ILogger<RegisterHandler> logger, IValidationService validationService, IEmailService emailService)
         {
             ArgumentNullException.ThrowIfNull(command, nameof(command));
             ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
@@ -80,6 +81,22 @@ namespace Marketplace.Api.Endpoints.Authentication.Registration
                 // Generate email confirmation token and simple URL
                 var token = await authenticationRepository.GenerateEmailConfirmationTokenAsync(user);
                 registrationResponse.ConfirmationEmailLink = $"/api/auth/confirm-email?userId={Uri.EscapeDataString(user.Id!)}&token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
+
+                // Send confirmation email
+                try
+                {
+                    await emailService.SendConfirmationEmailAsync(user.Email!, registrationResponse.ConfirmationEmailLink);
+                    logger.LogInformation("Confirmation email sent to {Email}", user.Email);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
+                    registrationResponse.ApiError = new Core.ApiError(
+                        HttpStatusCode: StatusCodes.Status500InternalServerError.ToString(),
+                        StatusCode: StatusCodes.Status500InternalServerError,
+                        ErrorMessage: "Failed to send confirmation email",
+                        StackTrace: null);
+                }
             }
             else
             {
