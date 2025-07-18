@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Text.Json;
 using FluentValidation;
 using Marketplace.Api.Endpoints.Authentication;
 using Marketplace.Api.Endpoints.Card;
@@ -164,6 +165,13 @@ builder.Host.UseResourceSetupOnStartup();
 
 builder.Services.AddResourceSetupOnStartup();
 builder.Services.AddMvcCore(); // for JSON formatters
+
+// Configure JSON serialization options
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.WriteIndented = true;
+});
 
 builder.Services.AddHttpContextAccessor();
 
