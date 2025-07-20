@@ -47,9 +47,9 @@ public static class AuthenticationEndpoints
                         type: response.ApiError?.HttpStatusCode,
                         title: "Registration endpoint.");
 
-                if (response.Errors!.Any()) return Results.BadRequest(new { errors = response.Errors });
-
-                return Results.Ok(response);
+                return response.Errors!.Any() 
+                    ? Results.BadRequest(new { errors = response.Errors }) 
+                    : Results.Ok(response);
             })
             .AllowAnonymous()
             .WithTags(ApiConstants.Authentication)
@@ -71,9 +71,9 @@ public static class AuthenticationEndpoints
                             type: response.ApiError?.HttpStatusCode,
                             title: "Login endpoint.");
 
-                    if (!string.IsNullOrEmpty(response.ConfirmationCode)) return Results.Ok(response);
-
-                    return Results.UnprocessableEntity(response);
+                    return !string.IsNullOrEmpty(response.ConfirmationCode) 
+                        ? Results.Ok(response) 
+                        : Results.UnprocessableEntity(response);
                 })
             .AllowAnonymous()
             .WithTags(ApiConstants.Authentication)
@@ -89,14 +89,10 @@ public static class AuthenticationEndpoints
 
                 if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
-                if (response.ApiError != null)
-                {
-                    if (response.ApiError.StatusCode == 401) return Results.Unauthorized();
-
-                    return Results.Problem(response.ApiError?.ErrorMessage);
-                }
-
-                return Results.Ok(response);
+                if (response.ApiError == null) return Results.Ok(response);
+                return response.ApiError.StatusCode == 401 
+                    ? Results.Unauthorized() 
+                    : Results.Problem(response.ApiError?.ErrorMessage);
             })
             .RequireAuthorization()
             .WithTags(ApiConstants.Authentication)
@@ -112,9 +108,9 @@ public static class AuthenticationEndpoints
 
                 if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
-                if (response.ApiError is not null) return Results.Problem(response.ApiError?.ErrorMessage);
-
-                return Results.Ok(response);
+                return response.ApiError is not null 
+                    ? Results.Problem(response.ApiError?.ErrorMessage) 
+                    : Results.Ok(response);
             })
             .WithTags(ApiConstants.Authentication)
             .WithName(ApiConstants.Revoke)

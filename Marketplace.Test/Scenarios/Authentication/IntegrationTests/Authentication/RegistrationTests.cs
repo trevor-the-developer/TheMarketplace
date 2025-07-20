@@ -116,7 +116,9 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
         Assert.Contains("confirmationEmailLink", responseText);
 
         // Extract confirmation link from the raw response text
-        var confirmLinkStart = responseText.IndexOf("confirmationEmailLink\":\"") + "confirmationEmailLink\":\"".Length;
+        var confirmLinkSearchString = "confirmationEmailLink\":";
+        var confirmLinkStartIndex = responseText.IndexOf(confirmLinkSearchString);
+        var confirmLinkStart = responseText.IndexOf("\"", confirmLinkStartIndex + confirmLinkSearchString.Length) + 1;
         var confirmLinkEnd = responseText.IndexOf("\"", confirmLinkStart);
         var confirmationUrl = responseText.Substring(confirmLinkStart, confirmLinkEnd - confirmLinkStart);
         Assert.NotNull(confirmationUrl);
@@ -131,7 +133,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
             Token = query["token"],
             Email = query["email"]
         };
-
+        
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(
@@ -190,7 +192,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
 
         var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
         var query = HttpUtility.ParseQueryString(uri.Query);
-
+        
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(

@@ -268,10 +268,10 @@ app.UseCors("AllowAll");
 
 // Ensure the database is created (skip in testing environment)
 if (!app.Environment.IsEnvironment("Testing"))
-    using (var scope = app.Services.CreateScope())
-    {
-        await scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
-    }
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>().Database.EnsureCreatedAsync();
+}
 
 #region Endpoints
 

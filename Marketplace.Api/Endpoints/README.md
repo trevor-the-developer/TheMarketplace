@@ -6,8 +6,11 @@ architecture. Each endpoint module implements the mediator pattern using Wolveri
 ## Current Status
 
 ✅ **All endpoints tested and functional** - Complete CRUD operations implemented and verified.
+
 ✅ **Authentication working** - JWT-based authentication with refresh tokens fully operational.
+
 ✅ **Swagger documentation** - All endpoints documented with proper request/response models.
+
 
 ## Organisation Pattern
 
