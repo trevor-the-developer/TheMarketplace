@@ -1,4 +1,6 @@
 using Marketplace.Api.Endpoints.Authentication.Token;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Token;
 using Marketplace.Test.Data;
 using Xunit;
 

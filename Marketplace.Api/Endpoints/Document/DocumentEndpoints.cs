@@ -1,4 +1,9 @@
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Document;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Document;

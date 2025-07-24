@@ -1,7 +1,10 @@
 using System.Net;
+using System.Threading.Tasks;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Token;
 using Marketplace.Test.Data;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;

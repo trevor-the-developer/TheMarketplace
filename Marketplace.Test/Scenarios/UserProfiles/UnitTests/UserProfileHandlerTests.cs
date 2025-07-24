@@ -1,4 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.UserProfile;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.UserProfile;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Test.Mocks;

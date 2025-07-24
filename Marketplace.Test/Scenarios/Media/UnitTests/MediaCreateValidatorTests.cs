@@ -1,5 +1,8 @@
 using FluentValidation.TestHelper;
 using Marketplace.Api.Endpoints.Media;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Media;
+using Marketplace.Core.Validators;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Media.UnitTests;

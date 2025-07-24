@@ -1,3 +1,5 @@
+using System;
+
 namespace Marketplace.Test.Helpers;
 
 public static class StringHelper

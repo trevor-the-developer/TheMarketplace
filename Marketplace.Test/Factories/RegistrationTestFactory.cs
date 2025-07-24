@@ -1,7 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Marketplace.Api.Endpoints.Authentication.Registration;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Registration;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
-using RegisterStepOneResponse = Marketplace.Api.Endpoints.Authentication.Registration.RegisterStepOneResponse;
+using RegisterStepOneResponse = Marketplace.Core.Models.Registration.RegisterStepOneResponse;
 
 namespace Marketplace.Test.Factories;
 

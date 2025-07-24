@@ -1,5 +1,8 @@
 using FluentValidation.TestHelper;
 using Marketplace.Api.Endpoints.Tag;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Tag;
+using Marketplace.Core.Validators;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Tags.UnitTests;

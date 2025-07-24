@@ -1,4 +1,6 @@
 using Marketplace.Api.Endpoints.Authentication.Login;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Login;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Authentication.UnitTests.Login;

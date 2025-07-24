@@ -1,6 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Registration;
 using Marketplace.Test.Factories;
 using Marketplace.Test.Mocks;
 using Microsoft.AspNetCore.Identity;

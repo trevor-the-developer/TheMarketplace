@@ -1,3 +1,4 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
@@ -13,6 +14,7 @@ using Marketplace.Api.Endpoints.Tag;
 using Marketplace.Api.Endpoints.UserProfile;
 using Marketplace.Core.Helpers;
 using Marketplace.Core.Interfaces;
+using Marketplace.Core.Models;
 using Marketplace.Core.Security;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
@@ -23,11 +25,16 @@ using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Oakton;
@@ -44,7 +51,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.ApplyOaktonExtensions();
 
 var connectionString = builder.Configuration.GetConnectionString("MarketplaceDbConnection");
-
+// Configure S3
+builder.Services.Configure<S3Configuration>(
+    builder.Configuration.GetSection("S3Configuration"));
 #endregion
 
 #region Wolverine
@@ -82,7 +91,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<MarketplaceDbContext>();
 
-var secret = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
+var jwtSecret = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
 
 // clear JWT mapping prior to adding authentication
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -104,7 +113,7 @@ builder.Services.AddAuthentication(options =>
             ClockSkew = new TimeSpan(0, 0, 5),
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
             NameClaimType = "name",
             RoleClaimType = "role"
         };
@@ -215,7 +224,7 @@ builder.Services.AddScoped<IUrlHelper>(factory =>
 
     // Create ActionContext with HttpContext if available
     var actionContext = actionContextAccessor.ActionContext;
-    if (actionContext == null || actionContext.HttpContext == null)
+    if (actionContext?.HttpContext == null)
         actionContext = new ActionContext
         {
             HttpContext = httpContextAccessor.HttpContext ?? new DefaultHttpContext()
@@ -229,7 +238,7 @@ builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddSingleton<TokenValidationParameters>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
-    var secret = configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
+    var tokenValidationJwtSecret = configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
 
     return new TokenValidationParameters
     {
@@ -239,12 +248,15 @@ builder.Services.AddSingleton<TokenValidationParameters>(provider =>
         ValidateIssuerSigningKey = true,
         ValidAudience = configuration["JwtSettings:Audience"],
         ValidIssuer = configuration["JwtSettings:Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenValidationJwtSecret)),
         NameClaimType = "name",
         RoleClaimType = "role",
         ClockSkew = TimeSpan.Zero
     };
 });
+
+// Register S3 Service
+builder.Services.AddScoped<IS3MediaService, S3MediaService>();
 
 #endregion
 

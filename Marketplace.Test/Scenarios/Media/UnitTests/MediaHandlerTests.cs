@@ -1,4 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Media;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Media;
 using Marketplace.Data.Interfaces;
 using Marketplace.Test.Mocks;
 using Microsoft.Extensions.Logging;

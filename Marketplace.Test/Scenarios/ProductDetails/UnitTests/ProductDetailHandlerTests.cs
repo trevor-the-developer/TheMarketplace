@@ -1,4 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.ProductDetail;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.ProductDetail;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Test.Mocks;

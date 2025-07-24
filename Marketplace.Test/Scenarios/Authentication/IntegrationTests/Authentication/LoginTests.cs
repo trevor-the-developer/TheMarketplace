@@ -1,7 +1,10 @@
 using System.Net;
+using System.Threading.Tasks;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Login;
 using Marketplace.Test.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;

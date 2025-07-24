@@ -1,4 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Threading.Tasks;
 using Marketplace.Core.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

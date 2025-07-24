@@ -1,7 +1,13 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.UserProfile;
 using Marketplace.Core.Validation;
 using Marketplace.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Wolverine.Attributes;

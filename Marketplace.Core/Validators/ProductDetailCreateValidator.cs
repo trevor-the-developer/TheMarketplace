@@ -1,0 +1,23 @@
+using FluentValidation;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.ProductDetail;
+
+namespace Marketplace.Core.Validators;
+
+public class ProductDetailCreateValidator : AbstractValidator<ProductDetailCreate>
+{
+    public ProductDetailCreateValidator()
+    {
+        RuleFor(x => x.Title)
+            .NotEmpty().WithMessage("Title is required")
+            .MaximumLength(100).WithMessage("Title must not exceed 100 characters");
+
+        RuleFor(x => x.Description)
+            .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
+            .When(x => !string.IsNullOrEmpty(x.Description));
+
+        RuleFor(x => x.ProductId)
+            .GreaterThan(0).WithMessage("ProductId must be greater than 0")
+            .When(x => x.ProductId.HasValue);
+    }
+}

@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Authentication.Login;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Login;
 using Marketplace.Test.Data;
 using Marketplace.Test.Mocks;
 using Microsoft.Extensions.Configuration;

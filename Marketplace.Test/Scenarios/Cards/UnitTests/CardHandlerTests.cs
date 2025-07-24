@@ -1,4 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Card;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Card;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
 using Marketplace.Test.Mocks;

@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Marketplace.Core.Interfaces;
 
 public interface IEmailService

@@ -1,8 +1,12 @@
+using System;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using Alba;
 using Marketplace.Api.Endpoints.Authentication.Registration;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Registration;
 using Marketplace.Test.Factories;
 using Marketplace.Test.Infrastructure;
 using Xunit;

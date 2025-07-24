@@ -1,5 +1,8 @@
 using FluentValidation.TestHelper;
 using Marketplace.Api.Endpoints.Card;
+using Marketplace.Core.Models;
+using Marketplace.Core.Models.Card;
+using Marketplace.Core.Validators;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Cards.UnitTests;
