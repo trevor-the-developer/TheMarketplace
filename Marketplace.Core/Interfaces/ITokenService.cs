@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Marketplace.Core.Security;
+namespace Marketplace.Core.Interfaces;
 
 public interface ITokenService
 {

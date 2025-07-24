@@ -1,4 +1,4 @@
-namespace Marketplace.Core.Services;
+namespace Marketplace.Core.Interfaces;
 
 public interface ICurrentUserService
 {

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Marketplace.Core.Security;
+using Marketplace.Core.Interfaces;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
 using Marketplace.Test.Data;

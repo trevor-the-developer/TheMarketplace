@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
-using Marketplace.Core.Security;
+using Marketplace.Core.Interfaces;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
 using Newtonsoft.Json;

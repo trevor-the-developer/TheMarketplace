@@ -1,6 +1,7 @@
 using System.Net;
 using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Interfaces;
 using Marketplace.Core.Security;
 using Marketplace.Test.Data;
 using Marketplace.Test.Mocks;

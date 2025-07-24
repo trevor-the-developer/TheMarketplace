@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
-using Marketplace.Core.Security;
+using Marketplace.Core.Interfaces;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;

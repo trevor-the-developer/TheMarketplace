@@ -12,6 +12,7 @@ using Marketplace.Api.Endpoints.ProductDetail;
 using Marketplace.Api.Endpoints.Tag;
 using Marketplace.Api.Endpoints.UserProfile;
 using Marketplace.Core.Helpers;
+using Marketplace.Core.Interfaces;
 using Marketplace.Core.Security;
 using Marketplace.Core.Services;
 using Marketplace.Core.Validation;

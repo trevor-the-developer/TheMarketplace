@@ -1,4 +1,5 @@
 using Marketplace.Core.Constants;
+using Marketplace.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;

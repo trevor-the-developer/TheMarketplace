@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Marketplace.Core.Constants;
+using Marketplace.Core.Interfaces;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
 using Microsoft.Extensions.Configuration;

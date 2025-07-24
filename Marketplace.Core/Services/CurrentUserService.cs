@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Marketplace.Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 
 namespace Marketplace.Core.Services;

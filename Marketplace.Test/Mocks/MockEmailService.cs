@@ -1,4 +1,4 @@
-using Marketplace.Core.Services;
+using Marketplace.Core.Interfaces;
 using Moq;
 
 namespace Marketplace.Test.Mocks;

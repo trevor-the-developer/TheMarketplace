@@ -1,19 +1,18 @@
 using Marketplace.Api.Endpoints.Media;
-using Marketplace.Data;
+using Marketplace.Data.Interfaces;
 using Marketplace.Test.Mocks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Media.UnitTests;
 
-public class MediaHandlerTests : IDisposable
+public class MediaHandlerTests
 {
     private readonly MockCurrentUserService _currentUserService;
-    private readonly MarketplaceDbContext _dbContext;
     private readonly MediaHandler _handler;
     private readonly Mock<ILogger<MediaHandler>> _loggerMock;
+    private readonly Mock<IMediaRepository> _mediaRepositoryMock;
     private readonly MockValidationService _validationService;
 
     public MediaHandlerTests()
@@ -21,17 +20,8 @@ public class MediaHandlerTests : IDisposable
         _loggerMock = new Mock<ILogger<MediaHandler>>();
         _currentUserService = new MockCurrentUserService();
         _validationService = new MockValidationService();
+        _mediaRepositoryMock = new Mock<IMediaRepository>();
         _handler = new MediaHandler();
-
-        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _dbContext = new MarketplaceDbContext(options);
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
     }
 
     [Fact]
@@ -60,8 +50,27 @@ public class MediaHandlerTests : IDisposable
             ProductDetailId = 1
         };
 
+        var expectedMedia = new Marketplace.Data.Entities.Media
+        {
+            Id = 1,
+            Title = "Test Media",
+            Description = "Test Description",
+            FilePath = "/path/to/file.mp4",
+            DirectoryPath = "/path/to/",
+            MediaType = "Video",
+            ProductDetailId = 1,
+            ModifiedBy = "TestUser",
+            ModifiedDate = DateTime.Now
+        };
+
+        _mediaRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Marketplace.Data.Entities.Media>()))
+            .ReturnsAsync(expectedMedia);
+        _mediaRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
         // Act
-        var response = await _handler.Handle(createCommand, _dbContext, _currentUserService, _validationService);
+        var response = await _handler.Handle(createCommand, _mediaRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Media);
@@ -85,7 +94,6 @@ public class MediaHandlerTests : IDisposable
             ProductDetailId = 1
         };
 
-        // Act
         var existingMedia = new Marketplace.Data.Entities.Media
         {
             Id = 1,
@@ -100,10 +108,18 @@ public class MediaHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Files.Add(existingMedia);
-        await _dbContext.SaveChangesAsync();
 
-        var response = await _handler.Handle(updateCommand, _dbContext, _currentUserService, _validationService);
+        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(existingMedia);
+        _mediaRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Marketplace.Data.Entities.Media>()))
+            .ReturnsAsync(existingMedia);
+        _mediaRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+
+        var response = await _handler.Handle(updateCommand, _mediaRepositoryMock.Object, _currentUserService,
+            _validationService);
 
         // Assert
         Assert.NotNull(response.Media);
@@ -118,7 +134,6 @@ public class MediaHandlerTests : IDisposable
         // Arrange
         var deleteCommand = new MediaDelete { Id = 1 };
 
-        // Act
         var existingMedia = new Marketplace.Data.Entities.Media
         {
             Id = 1,
@@ -133,13 +148,19 @@ public class MediaHandlerTests : IDisposable
             ModifiedBy = "TestUser",
             ModifiedDate = DateTime.UtcNow
         };
-        _dbContext.Files.Add(existingMedia);
-        await _dbContext.SaveChangesAsync();
 
-        await _handler.Handle(deleteCommand, _dbContext);
+        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1))
+            .ReturnsAsync(existingMedia);
+        _mediaRepositoryMock.Setup(x => x.DeleteAsync(1))
+            .Returns(Task.CompletedTask);
+        _mediaRepositoryMock.Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _handler.Handle(deleteCommand, _mediaRepositoryMock.Object);
 
         // Assert
-        var media = await _dbContext.Files.FindAsync(deleteCommand.Id);
-        Assert.Null(media);
+        _mediaRepositoryMock.Verify(x => x.DeleteAsync(1), Times.Once);
+        _mediaRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 }
