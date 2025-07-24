@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Marketplace.Core.Constants;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

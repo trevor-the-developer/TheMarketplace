@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Marketplace.Data.Entities;
 
-namespace Marketplace.Data.Repositories;
+namespace Marketplace.Data.Interfaces;
 
 /// <summary>
 ///     Generic repository interface providing common CRUD operations for all entities

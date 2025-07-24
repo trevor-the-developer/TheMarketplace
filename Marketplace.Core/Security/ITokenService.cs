@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

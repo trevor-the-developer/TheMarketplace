@@ -4,6 +4,7 @@ using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Security;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

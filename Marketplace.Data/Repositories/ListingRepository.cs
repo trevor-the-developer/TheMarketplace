@@ -1,4 +1,5 @@
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 
 namespace Marketplace.Data.Repositories;
 

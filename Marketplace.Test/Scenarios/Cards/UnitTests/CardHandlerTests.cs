@@ -1,5 +1,6 @@
 using Marketplace.Api.Endpoints.Card;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Mocks;
 using Microsoft.Extensions.Logging;

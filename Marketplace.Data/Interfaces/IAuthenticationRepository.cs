@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Marketplace.Data.Repositories;
+namespace Marketplace.Data.Interfaces;
 
 public interface IAuthenticationRepository
 {

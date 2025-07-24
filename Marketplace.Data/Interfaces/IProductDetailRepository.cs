@@ -1,6 +1,6 @@
 using Marketplace.Data.Entities;
 
-namespace Marketplace.Data.Repositories;
+namespace Marketplace.Data.Interfaces;
 
 public interface IProductDetailRepository : IGenericRepository<ProductDetail>
 {

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Enums;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
 using Microsoft.AspNetCore.Identity;

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Marketplace.Data.Repositories;

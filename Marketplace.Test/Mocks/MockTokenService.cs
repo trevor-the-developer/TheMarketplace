@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Marketplace.Core.Security;
 using Marketplace.Data.Entities;
+using Marketplace.Data.Interfaces;
 using Marketplace.Data.Repositories;
 using Marketplace.Test.Data;
 using Microsoft.Extensions.Logging;
