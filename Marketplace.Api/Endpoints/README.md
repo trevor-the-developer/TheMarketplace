@@ -11,7 +11,6 @@ architecture. Each endpoint module implements the mediator pattern using Wolveri
 
 ✅ **Swagger documentation** - All endpoints documented with proper request/response models.
 
-
 ## Organisation Pattern
 
 ```

@@ -47,8 +47,8 @@ public static class AuthenticationEndpoints
                         type: response.ApiError?.HttpStatusCode,
                         title: "Registration endpoint.");
 
-                return response.Errors!.Any() 
-                    ? Results.BadRequest(new { errors = response.Errors }) 
+                return response.Errors!.Any()
+                    ? Results.BadRequest(new { errors = response.Errors })
                     : Results.Ok(response);
             })
             .AllowAnonymous()
@@ -71,8 +71,8 @@ public static class AuthenticationEndpoints
                             type: response.ApiError?.HttpStatusCode,
                             title: "Login endpoint.");
 
-                    return !string.IsNullOrEmpty(response.ConfirmationCode) 
-                        ? Results.Ok(response) 
+                    return !string.IsNullOrEmpty(response.ConfirmationCode)
+                        ? Results.Ok(response)
                         : Results.UnprocessableEntity(response);
                 })
             .AllowAnonymous()
@@ -90,8 +90,8 @@ public static class AuthenticationEndpoints
                 if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
                 if (response.ApiError == null) return Results.Ok(response);
-                return response.ApiError.StatusCode == 401 
-                    ? Results.Unauthorized() 
+                return response.ApiError.StatusCode == 401
+                    ? Results.Unauthorized()
                     : Results.Problem(response.ApiError?.ErrorMessage);
             })
             .RequireAuthorization()
@@ -108,8 +108,8 @@ public static class AuthenticationEndpoints
 
                 if (!response.Succeeded!.Value && response.ApiError == null) return Results.BadRequest();
 
-                return response.ApiError is not null 
-                    ? Results.Problem(response.ApiError?.ErrorMessage) 
+                return response.ApiError is not null
+                    ? Results.Problem(response.ApiError?.ErrorMessage)
                     : Results.Ok(response);
             })
             .WithTags(ApiConstants.Authentication)

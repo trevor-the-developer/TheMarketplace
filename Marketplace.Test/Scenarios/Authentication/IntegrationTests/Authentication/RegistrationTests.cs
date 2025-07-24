@@ -133,7 +133,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
             Token = query["token"],
             Email = query["email"]
         };
-        
+
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(
@@ -192,7 +192,7 @@ public class RegistrationTests(WebAppFixture fixture) : ScenarioContext(fixture)
 
         var uri = new Uri(confirmationUrl.StartsWith("http") ? confirmationUrl : $"https://localhost{confirmationUrl}");
         var query = HttpUtility.ParseQueryString(uri.Query);
-        
+
         var confirmResponse = await Host.Scenario(_ =>
         {
             _.Get.Url(

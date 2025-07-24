@@ -4,7 +4,6 @@ using Marketplace.Core.Constants;
 using Marketplace.Core.Security;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Marketplace.Data.Repositories;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 

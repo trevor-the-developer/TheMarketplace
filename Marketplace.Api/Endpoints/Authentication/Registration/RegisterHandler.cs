@@ -4,7 +4,6 @@ using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
-using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
