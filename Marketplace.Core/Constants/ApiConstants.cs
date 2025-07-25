@@ -41,7 +41,15 @@ public static class ApiConstants
 
     // endpoints - media
     public const string ApiMedia = "/api/media";
-    public const string ApiMediaById = "/api/media/{id}";
+    public const string ApiAllMedia = "/api/media";
+    public const string ApiMediaCreate = "/api/media";
+    public const string ApiMediaUpload = "/api/media/upload";
+    public const string ApiMediaDownload = "/api/media/download";
+    public const string ApiMediaUpdateById = "/api/media/{id}";
+    public const string ApiGetMediaById = "/api/media/{id}";
+    public const string ApiMediaDeleteById = "/api/media/{id}";
+    public const string ApiMediaByIdUrl = "/api/media/{id}/url";
+    public const string ApiMediaByProductDetailId = "/api/media/product/{ApiMediaByProductDetailId}";
 
     // endpoints - products
     public const string ApiProducts = "/api/products";

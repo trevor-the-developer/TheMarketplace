@@ -17,12 +17,12 @@ public static class MediaEndpoints
     public static void MapMediaEndpoints(this IEndpointRouteBuilder routes)
     {
         // POST /api/media - Create new media (metadata only)
-        routes.MapPost(ApiConstants.ApiMedia, async (MediaCreate command, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiMediaCreate, async (MediaCreate command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<MediaResponse>(command);
                 return response.ApiError != null 
                     ? Results.BadRequest(response)
-                    : Results.Created($"/api/media/{response.Media?.Id}", response);
+                    : Results.Created($"{ApiConstants.ApiMedia}/{response.Media?.Id}", response);
             })
             .RequireAuthorization()
             .WithTags("Media")
@@ -33,11 +33,11 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // POST /api/media/upload - Create media with file upload
-        routes.MapPost($"{ApiConstants.ApiMedia}/upload", async ([FromForm] MediaCreateRequest request, IMessageBus bus) =>
+        routes.MapPost(ApiConstants.ApiMediaUpload, async ([FromForm] MediaCreateRequest request, IMessageBus bus) =>
             {
                 var command = new MediaCreateWithFile
                 {
-                    Title = request.Title,
+                    Title = request.Title ?? string.Empty,
                     Description = request.Description,
                     MediaType = request.MediaType,
                     ProductDetailId = request.ProductDetailId,
@@ -50,7 +50,7 @@ public static class MediaEndpoints
                 
                 return response.ApiError != null
                     ? Results.BadRequest(response)
-                    : Results.Created($"/api/media/{response.Media!.Id}", response);
+                    : Results.Created($"{ApiConstants.ApiMedia}/{response.Media!.Id}", response);
             })
             .RequireAuthorization()
             .DisableAntiforgery()
@@ -63,7 +63,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // PUT /api/media/{id} - Update existing media
-        routes.MapPut(ApiConstants.ApiMediaById, async (int id, MediaUpdate command, IMessageBus bus) =>
+        routes.MapPut(ApiConstants.ApiMediaUpdateById, async (int id, MediaUpdate command, IMessageBus bus) =>
             {
                 if (id != command.Id) 
                 {
@@ -104,7 +104,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // DELETE /api/media/{id} - Delete media (includes S3 file deletion)
-        routes.MapDelete(ApiConstants.ApiMediaById, async (int id, IMessageBus bus) =>
+        routes.MapDelete(ApiConstants.ApiMediaDeleteById, async (int id, IMessageBus bus) =>
             {
                 await bus.InvokeAsync(new MediaDelete { Id = id });
                 return Results.NoContent();
@@ -118,7 +118,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media - Get all media
-        routes.MapGet(ApiConstants.ApiMedia, async (IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiAllMedia, async (IMessageBus bus) =>
             {
                 var command = new MediaRequest { AllMedia = true };
                 var response = await bus.InvokeAsync<MediaResponse>(command);
@@ -147,7 +147,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media/{id} - Get media by ID
-        routes.MapGet(ApiConstants.ApiMediaById, async (int id, IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiGetMediaById, async (int id, IMessageBus bus) =>
             {
                 var command = new MediaRequest { MediaId = id };
                 var response = await bus.InvokeAsync<MediaResponse>(command);
@@ -176,7 +176,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media/{id}/download - Download media file from S3
-        routes.MapGet($"{ApiConstants.ApiMediaById}/download", async (int id, IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiMediaDownload, async (int id, IMessageBus bus) =>
             {
                 try
                 {
@@ -234,7 +234,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media/{id}/url - Get presigned URL for media file
-        routes.MapGet($"{ApiConstants.ApiMediaById}/url", async (int id, [FromQuery] int? expirationHours, IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiMediaByIdUrl, async (int id, [FromQuery] int? expirationHours, IMessageBus bus) =>
             {
                 try
                 {
@@ -278,7 +278,7 @@ public static class MediaEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media/product/{productDetailId} - Get media by product detail ID
-        routes.MapGet($"{ApiConstants.ApiMedia}/product/{{productDetailId:int}}", async (int productDetailId, IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiMediaByProductDetailId, async (int productDetailId, IMessageBus bus) =>
             {
                 var command = new MediaRequest { ProductDetailId = productDetailId };
                 var response = await bus.InvokeAsync<MediaResponse>(command);

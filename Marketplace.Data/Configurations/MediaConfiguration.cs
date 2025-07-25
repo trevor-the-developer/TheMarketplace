@@ -8,6 +8,12 @@ public class MediaConfiguration : IEntityTypeConfiguration<Media>
 {
     public void Configure(EntityTypeBuilder<Media> builder)
     {
+        builder.HasKey(m => m.Id);
+        builder.Property(m => m.Title).HasMaxLength(100).IsRequired();
+        builder.Property(m => m.Description).HasMaxLength(500);
+        builder.Property(m => m.FilePath).HasMaxLength(500).IsRequired();
+        builder.Property(m => m.DirectoryPath).HasMaxLength(500).IsRequired();
+        builder.Property(m => m.MediaType).HasMaxLength(100);
         builder.HasOne(m => m.ProductDetail)
             .WithMany(pd => pd.Media)
             .HasForeignKey(m => m.ProductDetailId)

@@ -1,16 +1,8 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Media;
-using Marketplace.Core.Services;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -212,7 +204,8 @@ public class MediaHandler
     }
 
     [Transactional]
-    public async Task Handle(MediaDelete command, IMediaRepository mediaRepository, IS3MediaService s3MediaService, ILogger<MediaHandler> logger)
+    public async Task Handle(MediaDelete command, IMediaRepository mediaRepository, IS3MediaService s3MediaService, 
+        ILogger<MediaHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(command, nameof(command));
         ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));

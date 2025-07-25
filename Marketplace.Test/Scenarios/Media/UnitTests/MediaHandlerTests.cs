@@ -1,7 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Media;
-using Marketplace.Core.Models;
+using Marketplace.Core.Interfaces;
 using Marketplace.Core.Models.Media;
 using Marketplace.Data.Interfaces;
 using Marketplace.Test.Mocks;
@@ -17,6 +15,7 @@ public class MediaHandlerTests
     private readonly MediaHandler _handler;
     private readonly Mock<ILogger<MediaHandler>> _loggerMock;
     private readonly Mock<IMediaRepository> _mediaRepositoryMock;
+    private readonly Mock<IS3MediaService> _s3MediaService;
     private readonly MockValidationService _validationService;
 
     public MediaHandlerTests()
@@ -25,6 +24,7 @@ public class MediaHandlerTests
         _currentUserService = new MockCurrentUserService();
         _validationService = new MockValidationService();
         _mediaRepositoryMock = new Mock<IMediaRepository>();
+        _s3MediaService = new Mock<IS3MediaService>();
         _handler = new MediaHandler();
     }
 
@@ -161,7 +161,7 @@ public class MediaHandlerTests
             .ReturnsAsync(1);
 
         // Act
-        await _handler.Handle(deleteCommand, _mediaRepositoryMock.Object);
+        await _handler.Handle(deleteCommand, _mediaRepositoryMock.Object, _s3MediaService.Object, _loggerMock.Object);
 
         // Assert
         _mediaRepositoryMock.Verify(x => x.DeleteAsync(1), Times.Once);

@@ -28,3 +28,25 @@ services:
     environment:
       MH_STORAGE: memory
     restart: unless-stopped
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: garage
+    ports:
+      - "3900:3900"  # S3 API
+      - "3901:3901"  # RPC
+      - "3902:3902"  # S3 Web
+      - "3903:3903"  # Admin API
+      - "3904:3904"  # K2V API (optional)
+    environment:
+      - RUST_LOG=garage=info
+    command: ["/garage", "-c", "/tmp/garage.toml", "server"]
+    volumes:
+      - ./garage.toml:/tmp/garage.toml:ro
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+    
