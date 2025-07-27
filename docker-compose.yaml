@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
-  
+
   mailhog:
     container_name: marketplace-mailhog
     hostname: marketplace-mailhog
@@ -43,10 +43,13 @@ services:
     command: ["/garage", "-c", "/tmp/garage.toml", "server"]
     volumes:
       - ./garage.toml:/tmp/garage.toml:ro
+      - garage_data:/var/lib/garage
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
-    
+
+volumes:
+  garage_data:

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Marketplace.Core.Models;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Marketplace.Test.Infrastructure;
@@ -16,9 +17,18 @@ public class S3TestFixture : IAsyncLifetime
     private const string TestBucketName = "test-marketplace";
     private static readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
     private static bool _isInitialized;
-    
+    private readonly ILogger<S3TestFixture> _logger;
+
     public S3Configuration TestS3Config { get; private set; } = null!;
     private AmazonS3Client TestS3Client { get; set; } = null!;
+
+    private readonly S3Configuration _config;
+
+    public S3TestFixture(S3Configuration config, ILogger<S3TestFixture> logger)
+    {
+        _config = config ?? throw new ArgumentNullException(nameof(config));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     public async Task InitializeAsync()
     {
@@ -27,35 +37,37 @@ public class S3TestFixture : IAsyncLifetime
         {
             if (_isInitialized)
             {
-                Console.WriteLine("S3 test fixture already initialized, skipping...");
+                _logger.LogInformation("S3 test fixture already initialized, skipping...");
                 return;
             }
 
-            Console.WriteLine("Starting S3 test fixture initialization...");
+            _logger.LogInformation("Starting S3 test fixture initialization...");
             await EnsureGarageContainerIsRunningAsync();
-            
-            // Initialize S3 configuration
+
+            // Initialize S3 configuration from the actual config
             TestS3Config = new S3Configuration
             {
-                ServiceUrl = "http://localhost:3900",
-                AccessKey = "GKe47111f5fec42f2be1044b88",
-                SecretKey = "714f830382165e223dc35167bce223e3d48654903feef5297fe9cb9953e5affe",
+                ServiceUrl = _config.ServiceUrl,
+                AccessKey = _config.AccessKey,
+                SecretKey = _config.SecretKey,
+                Region = _config.Region,
                 BucketName = TestBucketName
             };
-            
+
             // Initialize S3 client
             var s3Config = new AmazonS3Config
             {
                 ServiceURL = TestS3Config.ServiceUrl,
                 ForcePathStyle = true,
                 UseHttp = true,
+                AuthenticationRegion = _config.Region
             };
-            
+
             TestS3Client = new AmazonS3Client(TestS3Config.AccessKey, TestS3Config.SecretKey, s3Config);
-            
-            Console.WriteLine("S3 client initialized, ensuring test bucket exists...");
+
+            _logger.LogInformation("S3 client initialized, ensuring test bucket exists...");
             await EnsureTestBucketExistsAsync();
-            Console.WriteLine("S3 test fixture initialization complete.");
+            _logger.LogInformation("S3 test fixture initialization complete.");
 
             _isInitialized = true;
         }
@@ -74,11 +86,11 @@ public class S3TestFixture : IAsyncLifetime
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to cleanup test bucket: {ex.Message}");
+            _logger.LogWarning(ex, "Failed to cleanup test bucket: {Message}", ex.Message);
         }
         finally
         {
-            TestS3Client.Dispose();
+            TestS3Client?.Dispose();
         }
     }
 
@@ -107,7 +119,7 @@ public class S3TestFixture : IAsyncLifetime
     public async Task<string> UploadTestFileAsync(string fileName, Stream content)
     {
         var objectKey = $"test-files/{fileName}";
-        
+
         var request = new PutObjectRequest
         {
             BucketName = TestBucketName,
@@ -118,6 +130,28 @@ public class S3TestFixture : IAsyncLifetime
 
         await TestS3Client.PutObjectAsync(request);
         return objectKey;
+    }
+
+    /// <summary>
+    /// Checks if an S3 object exists in the specified bucket
+    /// </summary>
+    public async Task<bool> DoesS3ObjectExistAsync(string bucketName, string key)
+    {
+        try
+        {
+            var request = new GetObjectMetadataRequest
+            {
+                BucketName = bucketName,
+                Key = key
+            };
+
+            await TestS3Client.GetObjectMetadataAsync(request);
+            return true;
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -134,7 +168,7 @@ public class S3TestFixture : IAsyncLifetime
             };
 
             var listResponse = await TestS3Client.ListObjectsV2Async(listRequest);
-            
+
             if (listResponse.S3Objects.Count > 0)
             {
                 var deleteRequest = new DeleteObjectsRequest
@@ -144,34 +178,12 @@ public class S3TestFixture : IAsyncLifetime
                 };
 
                 await TestS3Client.DeleteObjectsAsync(deleteRequest);
-                Console.WriteLine($"Cleaned up {listResponse.S3Objects.Count} test files from S3");
+                _logger.LogInformation("Cleaned up {Count} test files from S3", listResponse.S3Objects.Count);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to cleanup test files: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Checks if an S3 object exists in the specified bucket
-    /// </summary>
-    public async Task<bool> DoesS3ObjectExistAsync(string bucketName, string key)
-    {
-        try
-        {
-            var request = new GetObjectMetadataRequest
-            {
-                BucketName = bucketName,
-                Key = key
-            };
-            
-            await TestS3Client.GetObjectMetadataAsync(request);
-            return true;
-        }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            return false;
+            _logger.LogWarning(ex, "Failed to cleanup test files: {Message}", ex.Message);
         }
     }
 
@@ -290,18 +302,18 @@ public class S3TestFixture : IAsyncLifetime
                 BucketName = TestBucketName
             };
             await TestS3Client.HeadBucketAsync(bucketRequest);
-            Console.WriteLine($"Test bucket '{TestBucketName}' already exists.");
+            _logger.LogInformation("Test bucket '{BucketName}' already exists.", TestBucketName);
         }
         catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             // Bucket doesn't exist, create it
-            Console.WriteLine($"Creating test bucket '{TestBucketName}'...");
+            _logger.LogInformation("Creating test bucket '{BucketName}'...", TestBucketName);
             await TestS3Client.PutBucketAsync(new PutBucketRequest
             {
                 BucketName = TestBucketName,
                 UseClientRegion = true
             });
-            Console.WriteLine($"Test bucket '{TestBucketName}' created successfully.");
+            _logger.LogInformation("Test bucket '{BucketName}' created successfully.", TestBucketName);
         }
     }
 }

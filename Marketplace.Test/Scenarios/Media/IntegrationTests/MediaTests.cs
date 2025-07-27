@@ -1,26 +1,44 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Marketplace.Core.Models;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Xunit;
 
 namespace Marketplace.Test.Scenarios.Media.IntegrationTests;
 
 [Collection("scenarios")]
-public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyncLifetime
+public class MediaTests : ScenarioContext, IAsyncLifetime
 {
-    private readonly S3TestFixture _s3Fixture = new();
+    private S3TestFixture? _s3Fixture;
+
+    public MediaTests(WebAppFixture fixture) : base(fixture)
+    {
+    }
+
     public async Task InitializeAsync()
     {
         await DatabaseResetService.ResetDatabaseAsync();
+
+        // Get dependencies from the Alba host's service provider
+        var s3Configuration = Host.Services.GetRequiredService<IOptions<S3Configuration>>().Value;
+        var logger = Host.Services.GetRequiredService<ILogger<S3TestFixture>>();
+
+        _s3Fixture = new S3TestFixture(s3Configuration, logger);
         await _s3Fixture.InitializeAsync();
     }
 
     public async Task DisposeAsync()
     {
-        await _s3Fixture.DisposeAsync();
+        if (_s3Fixture != null)
+        {
+            await _s3Fixture.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -74,8 +92,8 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
 
         var createResponseText = await createResponse.ReadAsTextAsync();
         using var jsonDoc = JsonDocument.Parse(createResponseText);
-        var mediaId = jsonDoc.RootElement.TryGetProperty("id", out var idElement) 
-            ? idElement.GetInt32().ToString() 
+        var mediaId = jsonDoc.RootElement.TryGetProperty("id", out var idElement)
+            ? idElement.GetInt32().ToString()
             : "1";
 
         var response = await Host.Scenario(_ =>
@@ -125,8 +143,8 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
 
         var createResponseText = await createResponse.ReadAsTextAsync();
         using var jsonDoc = JsonDocument.Parse(createResponseText);
-        var mediaId = jsonDoc.RootElement.TryGetProperty("id", out var idElement) 
-            ? idElement.GetInt32().ToString() 
+        var mediaId = jsonDoc.RootElement.TryGetProperty("id", out var idElement)
+            ? idElement.GetInt32().ToString()
             : "2";
 
         await Host.Scenario(_ =>
@@ -144,9 +162,9 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         const string testContent = "Test file content for upload testing";
-        
+
         using var fileStream = S3TestFixture.CreateTestFileStream(testContent);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(fileStream)
         {
@@ -169,7 +187,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var responseText = await response.ReadAsTextAsync();
         Assert.NotNull(responseText);
         Assert.Contains("Uploaded Test File", responseText);
-        
+
         // Verify the response contains S3 path information
         var mediaResponse = JsonConvert.DeserializeObject<dynamic>(responseText);
         Assert.NotNull(mediaResponse?.media?.filePath);
@@ -180,9 +198,9 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     public async Task UploadMedia_WithBinaryFile_Success()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         using var binaryStream = S3TestFixture.CreateTestBinaryFileStream(2048);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(binaryStream)
         {
@@ -210,7 +228,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     public async Task UploadMedia_WithoutFile_BadRequest()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        
+
         using var formContent = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("title", "File Without Upload"),
@@ -234,10 +252,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         const string testContent = "Test file content for download testing";
-        
+
         // First upload a file
         using var uploadStream = S3TestFixture.CreateTestFileStream(testContent);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(uploadStream)
         {
@@ -260,7 +278,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var uploadResponseText = await uploadResponse.ReadAsTextAsync();
         var uploadMediaResponse = JsonConvert.DeserializeObject<dynamic>(uploadResponseText);
         var mediaId = uploadMediaResponse?.media?.id;
-        
+
         Assert.NotNull(mediaId);
 
         // Now download the file
@@ -294,10 +312,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         const string testContent = "Test file content for URL testing";
-        
+
         // First upload a file
         using var uploadStream = S3TestFixture.CreateTestFileStream(testContent);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(uploadStream)
         {
@@ -320,7 +338,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var uploadResponseText = await uploadResponse.ReadAsTextAsync();
         var uploadMediaResponse = JsonConvert.DeserializeObject<dynamic>(uploadResponseText);
         var mediaId = uploadMediaResponse?.media?.id;
-        
+
         Assert.NotNull(mediaId);
 
         // Now get presigned URL
@@ -333,10 +351,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
 
         var urlResponseText = await urlResponse.ReadAsTextAsync();
         var urlData = JsonConvert.DeserializeObject<dynamic>(urlResponseText);
-        
+
         Assert.NotNull(urlData?.url);
         Assert.NotNull(urlData?.expiresIn);
-        
+
         var presignedUrl = urlData?.url.ToString();
         Assert.StartsWith("http://localhost:3900", presignedUrl);
         Assert.Contains("the-marketplace", presignedUrl); // bucket name
@@ -347,10 +365,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         const string testContent = "Test file content for custom expiration URL testing";
-        
+
         // First upload a file
         using var uploadStream = S3TestFixture.CreateTestFileStream(testContent);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(uploadStream)
         {
@@ -373,7 +391,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var uploadResponseText = await uploadResponse.ReadAsTextAsync();
         var uploadMediaResponse = JsonConvert.DeserializeObject<dynamic>(uploadResponseText);
         var mediaId = uploadMediaResponse?.media?.id;
-        
+
         Assert.NotNull(mediaId);
 
         // Now get presigned URL with custom expiration (2 hours)
@@ -386,10 +404,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
 
         var urlResponseText = await urlResponse.ReadAsTextAsync();
         var urlData = JsonConvert.DeserializeObject<dynamic>(urlResponseText);
-        
+
         Assert.NotNull(urlData?.url);
         Assert.NotNull(urlData?.expiresIn);
-        
+
         // Verify expiration is approximately 2 hours (7200 seconds)
         var expiresIn = (double)urlData!.expiresIn;
         Assert.True(expiresIn is > 7100 and < 7300, $"Expected ~7200 seconds, got {expiresIn}");
@@ -414,10 +432,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         var testContent = "Test file content for deletion testing";
-        
+
         // First upload a file
         using var uploadStream = S3TestFixture.CreateTestFileStream(testContent);
-        
+
         using var multipartContent = new MultipartFormDataContent();
         multipartContent.Add(new StreamContent(uploadStream)
         {
@@ -441,12 +459,12 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         var uploadMediaResponse = JsonConvert.DeserializeObject<dynamic>(uploadResponseText);
         var mediaId = uploadMediaResponse?.media?.id;
         var filePath = uploadMediaResponse?.media?.filePath?.ToString();
-        
+
         Assert.NotNull(mediaId);
         Assert.NotNull(filePath);
 
         // Verify file exists in S3
-        var fileExists = await _s3Fixture.DoesS3ObjectExistAsync(_s3Fixture.TestS3Config.BucketName, filePath);
+        var fileExists = await _s3Fixture!.DoesS3ObjectExistAsync(_s3Fixture.TestS3Config.BucketName, filePath);
         Assert.True(fileExists, "File should exist in S3 before deletion");
 
         // Now delete the media
@@ -475,7 +493,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
         const int productDetailId = 123;
-        
+
         // Upload multiple files for the same product detail
         var files = new[]
         {
@@ -486,7 +504,7 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
         foreach (var (fileName, content, title) in files)
         {
             using var uploadStream = S3TestFixture.CreateTestFileStream(content);
-            
+
             using var multipartContent = new MultipartFormDataContent();
             multipartContent.Add(new StreamContent(uploadStream)
             {
@@ -517,10 +535,10 @@ public class MediaTests(WebAppFixture fixture) : ScenarioContext(fixture), IAsyn
 
         var responseText = await response.ReadAsTextAsync();
         var mediaResponse = JsonConvert.DeserializeObject<dynamic>(responseText);
-        
+
         Assert.NotNull(mediaResponse?.mediaList);
         Assert.True(mediaResponse?.mediaList.Count >= 2, "Should return at least 2 media items");
-        
+
         // Verify both files are in the response
         Assert.Contains("Document 1", responseText);
         Assert.Contains("Document 2", responseText);
