@@ -10,6 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		docker-compose.yaml = docker-compose.yaml
 		Dockerfile = Dockerfile
 		README.md = README.md
+		garage.toml = garage.toml
+		scripts\garage-setup.sh = scripts\garage-setup.sh
+		scripts\garage-setup-functions.sh = scripts\garage-setup-functions.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marketplace.Test", "Marketplace.Test\Marketplace.Test.csproj", "{612D09A6-BB5E-4DF7-9B69-7A7AF3BAD2A5}"

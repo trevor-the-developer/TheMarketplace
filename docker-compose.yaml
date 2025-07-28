@@ -1,6 +1,4 @@
-﻿# To start the container run docker-compose up (-d switch for silent mode) in a terminal console.
-
-services:
+﻿services:
   mssql:
     container_name: marketplace-db
     hostname: marketplace-db
@@ -43,7 +41,8 @@ services:
     command: ["/garage", "-c", "/tmp/garage.toml", "server"]
     volumes:
       - ./garage.toml:/tmp/garage.toml:ro
-      - garage_data:/var/lib/garage
+      - garage_meta:/data/meta
+      - garage_data:/data/data
     networks:
       - app-network
 
@@ -52,4 +51,5 @@ networks:
     driver: bridge
 
 volumes:
+  garage_meta:
   garage_data:
