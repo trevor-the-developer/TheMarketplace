@@ -60,7 +60,7 @@ public class S3TestFixture : IAsyncLifetime
                 ServiceURL = TestS3Config.ServiceUrl,
                 ForcePathStyle = true,
                 UseHttp = true,
-                AuthenticationRegion = _config.Region
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(TestS3Config.Region)
             };
 
             TestS3Client = new AmazonS3Client(TestS3Config.AccessKey, TestS3Config.SecretKey, s3Config);
