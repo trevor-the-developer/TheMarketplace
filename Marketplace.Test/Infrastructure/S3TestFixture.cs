@@ -14,13 +14,13 @@ namespace Marketplace.Test.Infrastructure;
 public class S3TestFixture : IAsyncLifetime
 {
     private const string ContainerName = "garage";
-    private const string TestBucketName = "test-marketplace";
     private static readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
     private static bool _isInitialized;
     private readonly ILogger<S3TestFixture> _logger;
 
     public S3Configuration TestS3Config { get; private set; } = null!;
     private AmazonS3Client TestS3Client { get; set; } = null!;
+    private string TestBucketName => TestS3Config.BucketName;
 
     private readonly S3Configuration _config;
 
@@ -51,7 +51,7 @@ public class S3TestFixture : IAsyncLifetime
                 AccessKey = _config.AccessKey,
                 SecretKey = _config.SecretKey,
                 Region = _config.Region,
-                BucketName = TestBucketName
+                BucketName = _config.BucketName
             };
 
             // Initialize S3 client
@@ -60,7 +60,7 @@ public class S3TestFixture : IAsyncLifetime
                 ServiceURL = TestS3Config.ServiceUrl,
                 ForcePathStyle = true,
                 UseHttp = true,
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(TestS3Config.Region)
+                AuthenticationRegion = TestS3Config.Region
             };
 
             TestS3Client = new AmazonS3Client(TestS3Config.AccessKey, TestS3Config.SecretKey, s3Config);

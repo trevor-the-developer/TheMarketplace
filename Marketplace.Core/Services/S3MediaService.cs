@@ -30,6 +30,7 @@ public class S3MediaService : IS3MediaService
             ServiceURL = _config.ServiceUrl,
             ForcePathStyle = true, // Required for GarageHQ/MinIO
             UseHttp = _config.ServiceUrl.StartsWith("http://"), // Use HTTP for local development
+            AuthenticationRegion = _config.Region
         };
 
         _s3Client = new AmazonS3Client(_config.AccessKey, _config.SecretKey, s3Config);
@@ -47,7 +48,8 @@ public class S3MediaService : IS3MediaService
                 Key = objectKey,
                 InputStream = fileStream,
                 ContentType = contentType,
-                ServerSideEncryptionMethod = ServerSideEncryptionMethod.None // Adjust based on your needs
+                ServerSideEncryptionMethod = ServerSideEncryptionMethod.None,
+                UseChunkEncoding = false
             };
 
             var response = await _s3Client.PutObjectAsync(request);
