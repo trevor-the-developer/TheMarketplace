@@ -40,7 +40,7 @@
       - RUST_LOG=garage=info
     command: ["/garage", "-c", "/tmp/garage.toml", "server"]
     volumes:
-      - ./garage.toml:/tmp/garage.toml:ro
+      - ./garage.toml:/tmp/garage.toml:ro,Z
       - garage_meta:/data/meta
       - garage_data:/data/data
     networks:
