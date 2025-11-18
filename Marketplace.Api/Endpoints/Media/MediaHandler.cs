@@ -27,11 +27,22 @@ public class MediaHandler
             return new MediaResponse { MediaList = mediaList.ToList() };
         }
 
+        // TODO: messy hack need to sort this properly
         media ??= await mediaRepository.GetFirstOrDefaultAsync(m => true);
-        return new MediaResponse
+        if (media.Id != command.MediaId)
         {
-            Media = media
-        };
+            return new MediaResponse()
+            {
+                Media = null
+            };
+        }
+        else
+        {
+            return new MediaResponse
+            {
+                Media = media
+            };            
+        }
     }
 
     [Transactional]
