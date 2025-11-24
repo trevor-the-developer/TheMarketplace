@@ -113,7 +113,7 @@ public class MediaHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1))
+        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1, false))
             .ReturnsAsync(existingMedia);
         _mediaRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Marketplace.Data.Entities.Media>()))
             .ReturnsAsync(existingMedia);
@@ -153,7 +153,7 @@ public class MediaHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1))
+        _mediaRepositoryMock.Setup(x => x.GetByIdAsync(1, false))
             .ReturnsAsync(existingMedia);
         _mediaRepositoryMock.Setup(x => x.DeleteAsync(1))
             .Returns(Task.CompletedTask);

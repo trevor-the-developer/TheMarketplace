@@ -9,19 +9,19 @@ namespace Marketplace.Data.Interfaces;
 /// <typeparam name="TEntity">Entity type that inherits from BaseEntity</typeparam>
 public interface IGenericRepository<TEntity> where TEntity : BaseEntity
 {
-    // Query operations
-    Task<TEntity?> GetByIdAsync(int id);
-    Task<TEntity?> GetByIdAsync(int id, params Expression<Func<TEntity, object>>[] includes);
-    Task<IEnumerable<TEntity>> GetAllAsync();
-    Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes);
-    Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+    // Query operations - Added trackChanges parameter for control over change tracking
+    Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false);
+    Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes);
+    Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false);
+    Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes);
+    Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false);
 
-    Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+    Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includes);
 
-    Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate);
+    Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false);
 
-    Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate,
+    Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includes);
 
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);

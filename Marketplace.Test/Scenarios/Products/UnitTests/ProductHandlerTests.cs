@@ -123,7 +123,7 @@ public class ProductHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _productRepositoryMock.Setup(r => r.GetByIdAsync(1))
+        _productRepositoryMock.Setup(r => r.GetByIdAsync(1, false))
             .ReturnsAsync(existingProduct);
         _productRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Product>()))
             .ReturnsAsync((Product p) => p);
@@ -138,7 +138,7 @@ public class ProductHandlerTests
         Assert.NotNull(response.Product);
         Assert.Equal("Updated Product", response.Product.Title);
         Assert.Equal("Updated Description", response.Product.Description);
-        _productRepositoryMock.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _productRepositoryMock.Verify(r => r.GetByIdAsync(1, false), Times.Once);
         _productRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Product>()), Times.Once);
         _productRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }

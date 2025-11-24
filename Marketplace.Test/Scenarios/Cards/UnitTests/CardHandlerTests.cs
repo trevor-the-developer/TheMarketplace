@@ -101,7 +101,7 @@ public class CardHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _cardRepositoryMock.Setup(x => x.GetByIdAsync(1))
+        _cardRepositoryMock.Setup(x => x.GetByIdAsync(1, false))
             .ReturnsAsync(existingCard);
         _cardRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Card>()))
             .ReturnsAsync(existingCard);

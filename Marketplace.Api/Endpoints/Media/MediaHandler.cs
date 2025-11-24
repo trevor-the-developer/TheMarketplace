@@ -27,22 +27,10 @@ public class MediaHandler
             return new MediaResponse { MediaList = mediaList.ToList() };
         }
 
-        // TODO: messy hack need to sort this properly
-        media ??= await mediaRepository.GetFirstOrDefaultAsync(m => true);
-        if (media.Id != command.MediaId)
-        {
-            return new MediaResponse()
-            {
-                Media = null
-            };
-        }
-        else
-        {
-            return new MediaResponse
-            {
-                Media = media
-            };            
-        }
+        // TODO: messy hack need to sort this properly (why is the database returning a value when
+        // the ID is not present in the database table dbo.Files)
+        media = await mediaRepository.GetByIdAsync(command.MediaId, trackChanges: false);
+        return new MediaResponse { Media = media }; // null if not found
     }
 
     [Transactional]

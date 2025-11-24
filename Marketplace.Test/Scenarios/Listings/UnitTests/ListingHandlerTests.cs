@@ -94,7 +94,7 @@ public class ListingHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1))
+        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1, false))
             .ReturnsAsync(existingListing);
         _listingRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Listing>()))
             .ReturnsAsync((Listing l) => l);
@@ -109,7 +109,7 @@ public class ListingHandlerTests
         Assert.NotNull(response.Listing);
         Assert.Equal("Updated Listing", response.Listing.Title);
         Assert.Equal("Updated Description", response.Listing.Description);
-        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1, false), Times.Once);
         _listingRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Listing>()), Times.Once);
         _listingRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
@@ -131,7 +131,7 @@ public class ListingHandlerTests
             ModifiedDate = DateTime.UtcNow
         };
 
-        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1))
+        _listingRepositoryMock.Setup(r => r.GetByIdAsync(1, false))
             .ReturnsAsync(existingListing);
         _listingRepositoryMock.Setup(r => r.DeleteAsync(It.IsAny<Listing>()))
             .Returns(Task.CompletedTask);
@@ -142,7 +142,7 @@ public class ListingHandlerTests
         await _handler.Handle(deleteCommand, _listingRepositoryMock.Object);
 
         // Assert
-        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _listingRepositoryMock.Verify(r => r.GetByIdAsync(1, false), Times.Once);
         _listingRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Listing>()), Times.Once);
         _listingRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
