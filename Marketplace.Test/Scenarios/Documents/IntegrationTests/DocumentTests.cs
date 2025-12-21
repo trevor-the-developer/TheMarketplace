@@ -1,5 +1,4 @@
 using System.Net;
-using System.Threading.Tasks;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
 using Xunit;

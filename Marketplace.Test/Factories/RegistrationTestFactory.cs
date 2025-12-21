@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Marketplace.Api.Endpoints.Authentication.Registration;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Registration;
 using Marketplace.Data.Entities;
 using Microsoft.AspNetCore.Identity;

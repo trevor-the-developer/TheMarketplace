@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace Marketplace.Core.Models.Media;
 
 public class MediaCreateWithFile : MediaCreate

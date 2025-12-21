@@ -1,6 +1,4 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Marketplace.Core.Interfaces;
@@ -11,14 +9,14 @@ using Microsoft.Extensions.Options;
 namespace Marketplace.Core.Services;
 
 /// <summary>
-/// Service class to interact with an AWS S3 object store
-/// AWS SDK S3 developer guide: https://docs.aws.amazon.com/sdk-for-net/
+///     Service class to interact with an AWS S3 object store
+///     AWS SDK S3 developer guide: https://docs.aws.amazon.com/sdk-for-net/
 /// </summary>
 public class S3MediaService : IS3MediaService
 {
-    private readonly AmazonS3Client _s3Client;
     private readonly S3Configuration _config;
     private readonly ILogger<S3MediaService> _logger;
+    private readonly AmazonS3Client _s3Client;
 
     public S3MediaService(IOptions<S3Configuration> config, ILogger<S3MediaService> logger)
     {
@@ -36,12 +34,18 @@ public class S3MediaService : IS3MediaService
         _s3Client = new AmazonS3Client(_config.AccessKey, _config.SecretKey, s3Config);
     }
 
-    public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? directory = null)
+    public (AmazonS3Client, S3Configuration) GetS3Client()
+    {
+        return (_s3Client, _config);
+    }
+
+    public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType,
+        string? directory = null)
     {
         try
         {
             var objectKey = directory != null ? $"{directory.TrimEnd('/')}/{fileName}" : fileName;
-            
+
             var request = new PutObjectRequest
             {
                 BucketName = _config.BucketName,
@@ -53,13 +57,13 @@ public class S3MediaService : IS3MediaService
             };
 
             var response = await _s3Client.PutObjectAsync(request);
-            
-            if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+
+            if (response.HttpStatusCode == HttpStatusCode.OK)
             {
                 _logger.LogInformation("File uploaded successfully: {ObjectKey}", objectKey);
                 return objectKey;
             }
-            
+
             throw new Exception($"Failed to upload file. Status: {response.HttpStatusCode}");
         }
         catch (Exception ex)
@@ -79,8 +83,15 @@ public class S3MediaService : IS3MediaService
                 Key = objectKey
             };
 
-            var response = await _s3Client.GetObjectAsync(request);
-            return response.ResponseStream;
+            using var response = await _s3Client.GetObjectAsync(request);
+            var memoryStream = new MemoryStream();
+            await response.ResponseStream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            _logger.LogInformation("Downloaded file {ObjectKey}, size: {Size} bytes",
+                objectKey, memoryStream.Length);
+
+            return memoryStream;
         }
         catch (Exception ex)
         {
@@ -100,7 +111,7 @@ public class S3MediaService : IS3MediaService
             };
 
             var response = await _s3Client.DeleteObjectAsync(request);
-            return response.HttpStatusCode == System.Net.HttpStatusCode.NoContent;
+            return response.HttpStatusCode == HttpStatusCode.NoContent;
         }
         catch (Exception ex)
         {
@@ -143,7 +154,7 @@ public class S3MediaService : IS3MediaService
             await _s3Client.GetObjectMetadataAsync(request);
             return true;
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return false;
         }

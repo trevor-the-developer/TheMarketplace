@@ -1,17 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Registration;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -30,8 +24,8 @@ public class RegisterHandler
         ILogger<RegisterHandler> logger, IValidationService validationService, IEmailService emailService,
         IConfiguration configuration)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         logger.LogInformation(ApiConstants.RegisterHandlerCalled);
 
@@ -128,7 +122,7 @@ public class RegisterHandler
     public async Task<ConfirmEmailResponse> Handle(ConfirmEmailRequest command,
         IAuthenticationRepository authenticationRepository, ILogger<RegisterHandler> logger)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
+        ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(command.UserId, nameof(command.UserId));
         ArgumentNullException.ThrowIfNull(command.Token, nameof(command.Token));
 

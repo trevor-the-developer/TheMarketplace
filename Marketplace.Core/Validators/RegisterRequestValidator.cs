@@ -1,6 +1,4 @@
-using System;
 using FluentValidation;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Registration;
 
 namespace Marketplace.Core.Validators;

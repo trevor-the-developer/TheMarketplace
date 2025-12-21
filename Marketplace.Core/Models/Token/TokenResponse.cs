@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Marketplace.Core.Models.Token;
+﻿namespace Marketplace.Core.Models.Token;
 
 public record TokenResponse
 {

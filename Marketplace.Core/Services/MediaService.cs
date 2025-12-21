@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Media;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Entities;
@@ -17,11 +12,11 @@ namespace Marketplace.Core.Services;
 
 public class MediaService : IMediaService
 {
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger<MediaService> _logger;
     private readonly IMediaRepository _mediaRepository;
     private readonly IS3MediaService _s3MediaService;
-    private readonly ICurrentUserService _currentUserService;
     private readonly IValidationService _validationService;
-    private readonly ILogger<MediaService> _logger;
 
     public MediaService(
         IMediaRepository mediaRepository,
@@ -40,7 +35,7 @@ public class MediaService : IMediaService
     [Transactional]
     public async Task<MediaResponse> CreateMediaAsync(MediaCreateWithFile command)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
+        ArgumentNullException.ThrowIfNull(command);
 
         // Validate input
         var validationErrors = await _validationService.ValidateAndGetErrorsAsync(command);
@@ -65,22 +60,22 @@ public class MediaService : IMediaService
             {
                 // Create directory structure based on ProductDetailId or other logic
                 directoryPath = $"products/{command.ProductDetailId}/media";
-                
+
                 // Generate unique filename to avoid conflicts
                 var fileExtension = Path.GetExtension(command.FileName);
                 var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
-                
+
                 objectKey = await _s3MediaService.UploadFileAsync(
-                    command.FileStream, 
-                    uniqueFileName, 
-                    command.ContentType ?? "application/octet-stream", 
+                    command.FileStream,
+                    uniqueFileName,
+                    command.ContentType ?? "application/octet-stream",
                     directoryPath);
 
                 _logger.LogInformation("File uploaded to S3: {ObjectKey}", objectKey);
             }
 
             var currentUser = _currentUserService.GetCurrentUserName();
-            var media = new Data.Entities.Media
+            var media = new Media
             {
                 Title = command.Title,
                 Description = command.Description,
@@ -104,24 +99,22 @@ public class MediaService : IMediaService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating media");
-            
+
             // Cleanup: Try to delete uploaded file if database operation failed
             if (!string.IsNullOrEmpty(command.FileName) && command.FileStream != null)
-            {
                 try
                 {
                     var directoryPath = $"products/{command.ProductDetailId}/media";
                     var fileExtension = Path.GetExtension(command.FileName);
                     var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
                     var objectKey = $"{directoryPath}/{uniqueFileName}";
-                    
+
                     await _s3MediaService.DeleteFileAsync(objectKey);
                 }
                 catch (Exception cleanupEx)
                 {
                     _logger.LogWarning(cleanupEx, "Failed to cleanup uploaded file during error handling");
                 }
-            }
 
             return new MediaResponse
             {
@@ -141,7 +134,6 @@ public class MediaService : IMediaService
         {
             var media = await _mediaRepository.GetByIdAsync(id);
             if (media == null)
-            {
                 return new MediaResponse
                 {
                     ApiError = new ApiError(
@@ -151,7 +143,6 @@ public class MediaService : IMediaService
                         $"Media with ID {id} was not found"
                     )
                 };
-            }
 
             return new MediaResponse { Media = media };
         }
@@ -172,11 +163,10 @@ public class MediaService : IMediaService
 
     public async Task<Stream> GetMediaFileAsync(int id)
     {
+        // TODO: fix this logic its trash should be querying the store
         var media = await _mediaRepository.GetByIdAsync(id);
         if (media == null || string.IsNullOrEmpty(media.FilePath))
-        {
             throw new FileNotFoundException($"Media file not found for ID: {id}");
-        }
 
         return await _s3MediaService.DownloadFileAsync(media.FilePath);
     }
@@ -185,9 +175,7 @@ public class MediaService : IMediaService
     {
         var media = await _mediaRepository.GetByIdAsync(id);
         if (media == null || string.IsNullOrEmpty(media.FilePath))
-        {
             throw new FileNotFoundException($"Media file not found for ID: {id}");
-        }
 
         var exp = expiration ?? TimeSpan.FromHours(1); // Default 1 hour expiration
         return await _s3MediaService.GetPresignedUrlAsync(media.FilePath, exp);
@@ -199,19 +187,13 @@ public class MediaService : IMediaService
         try
         {
             var media = await _mediaRepository.GetByIdAsync(id);
-            if (media == null)
-            {
-                return false;
-            }
+            if (media == null) return false;
 
             // Delete from S3 first
             if (!string.IsNullOrEmpty(media.FilePath))
             {
                 var deleted = await _s3MediaService.DeleteFileAsync(media.FilePath);
-                if (!deleted)
-                {
-                    _logger.LogWarning("Failed to delete file from S3: {FilePath}", media.FilePath);
-                }
+                if (!deleted) _logger.LogWarning("Failed to delete file from S3: {FilePath}", media.FilePath);
             }
 
             // Delete from database

@@ -1,17 +1,10 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Login;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -27,12 +20,12 @@ public class LoginHandler
         IConfiguration configuration, ITokenService tokenService, IValidationService validationService,
         ILogger<LoginHandler> logger)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(authenticationRepository, nameof(authenticationRepository));
-        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
-        ArgumentNullException.ThrowIfNull(tokenService, nameof(tokenService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
-        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(authenticationRepository);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(tokenService);
+        ArgumentNullException.ThrowIfNull(validationService);
+        ArgumentNullException.ThrowIfNull(logger);
 
         logger.LogInformation(LoginRequest);
 
@@ -98,10 +91,10 @@ public class LoginHandler
         }
 
         var token = await tokenService.GenerateJwtSecurityTokenAsync(authenticationRepository, user, configuration);
-        ArgumentNullException.ThrowIfNull(token, nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
-        ArgumentNullException.ThrowIfNull(refreshToken, nameof(refreshToken));
+        ArgumentNullException.ThrowIfNull(refreshToken);
         // developer note: set AddMinutes to 1 when debugging auth-authz related flows
         user.RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(30);
 

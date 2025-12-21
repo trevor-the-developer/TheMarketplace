@@ -1,5 +1,4 @@
 using FluentValidation;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Product;
 
 namespace Marketplace.Core.Validators;

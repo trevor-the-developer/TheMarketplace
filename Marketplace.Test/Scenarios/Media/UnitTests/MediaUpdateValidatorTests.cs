@@ -24,7 +24,7 @@ public class MediaUpdateValidatorTests
             Title = "Test Media",
             Description = "Test Description"
         };
-        
+
         // Act & Assert
         var result = _validator.TestValidate(request);
         result.ShouldHaveValidationErrorFor(x => x.Id)

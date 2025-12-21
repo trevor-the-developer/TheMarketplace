@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Marketplace.Core.Models.Tag;
 
 public class TagResponse

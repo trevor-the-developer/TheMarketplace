@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Marketplace.Core.Models.UserProfile;
 
 public class UserProfileResponse

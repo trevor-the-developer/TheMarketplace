@@ -1,18 +1,12 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Token;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
@@ -27,11 +21,11 @@ public class TokenHandler
         ITokenService tokenService, TokenValidationParameters tokenValidationParameters,
         IConfiguration configuration, ILogger<ITokenService> logger)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(authenticationRepository, nameof(authenticationRepository));
-        ArgumentNullException.ThrowIfNull(tokenService, nameof(tokenService));
-        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
-        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(authenticationRepository);
+        ArgumentNullException.ThrowIfNull(tokenService);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(logger);
 
         logger.LogInformation(AuthConstants.TokenRefreshRequest);
 
@@ -90,10 +84,10 @@ public class TokenHandler
         TokenValidationParameters tokenValidationParameters,
         ILogger<ITokenService> logger, IConfiguration configuration)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
-        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
-        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(userManager);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         logger.LogInformation(AuthConstants.TokenRevokeRequest);
 

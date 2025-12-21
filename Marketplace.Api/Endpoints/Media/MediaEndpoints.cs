@@ -1,13 +1,10 @@
-using System;
-using System.IO;
+using Amazon.S3;
+using Amazon.S3.Model;
 using Marketplace.Core;
 using Marketplace.Core.Constants;
-using Marketplace.Core.Models;
+using Marketplace.Core.Interfaces;
 using Marketplace.Core.Models.Media;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Media;
@@ -20,7 +17,7 @@ public static class MediaEndpoints
         routes.MapPost(ApiConstants.ApiMediaCreate, async (MediaCreate command, IMessageBus bus) =>
             {
                 var response = await bus.InvokeAsync<MediaResponse>(command);
-                return response.ApiError != null 
+                return response.ApiError != null
                     ? Results.BadRequest(response)
                     : Results.Created($"{ApiConstants.ApiMedia}/{response.Media?.Id}", response);
             })
@@ -47,7 +44,7 @@ public static class MediaEndpoints
                 };
 
                 var response = await bus.InvokeAsync<MediaResponse>(command);
-                
+
                 return response.ApiError != null
                     ? Results.BadRequest(response)
                     : Results.Created($"{ApiConstants.ApiMedia}/{response.Media!.Id}", response);
@@ -65,7 +62,7 @@ public static class MediaEndpoints
         // PUT /api/media/{id} - Update existing media
         routes.MapPut(ApiConstants.ApiMediaUpdateById, async (int id, MediaUpdate command, IMessageBus bus) =>
             {
-                if (id != command.Id) 
+                if (id != command.Id)
                 {
                     var badRequestResponse = new MediaResponse
                     {
@@ -80,9 +77,9 @@ public static class MediaEndpoints
                 }
 
                 var response = await bus.InvokeAsync<MediaResponse>(command);
-                return response.ApiError != null 
+                return response.ApiError != null
                     ? Results.BadRequest(response)
-                    : response.Media == null 
+                    : response.Media == null
                         ? Results.NotFound(new MediaResponse
                         {
                             ApiError = new ApiError(
@@ -97,7 +94,7 @@ public static class MediaEndpoints
             .RequireAuthorization()
             .WithTags("Media")
             .WithName("Update Media")
-            .Produces<MediaResponse>(StatusCodes.Status200OK)
+            .Produces<MediaResponse>()
             .Produces<ApiError>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
@@ -123,10 +120,10 @@ public static class MediaEndpoints
                 var command = new MediaRequest { AllMedia = true };
                 var response = await bus.InvokeAsync<MediaResponse>(command);
 
-                return response?.ApiError != null 
+                return response?.ApiError != null
                     ? Results.BadRequest(response)
-                    : response?.MediaList != null 
-                        ? Results.Ok(response) 
+                    : response?.MediaList != null
+                        ? Results.Ok(response)
                         : Results.NotFound(new MediaResponse
                         {
                             ApiError = new ApiError(
@@ -140,7 +137,7 @@ public static class MediaEndpoints
             .RequireAuthorization()
             .WithTags("Media")
             .WithName("Get All Media")
-            .Produces<MediaResponse>(StatusCodes.Status200OK)
+            .Produces<MediaResponse>()
             .Produces<ApiError>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
@@ -152,10 +149,10 @@ public static class MediaEndpoints
                 var command = new MediaRequest { MediaId = id };
                 var response = await bus.InvokeAsync<MediaResponse>(command);
 
-                return response?.ApiError != null 
+                return response?.ApiError != null
                     ? Results.BadRequest(response)
-                    : response?.Media != null 
-                        ? Results.Ok(response) 
+                    : response?.Media != null
+                        ? Results.Ok(response)
                         : Results.NotFound(new MediaResponse
                         {
                             ApiError = new ApiError(
@@ -169,60 +166,84 @@ public static class MediaEndpoints
             .RequireAuthorization()
             .WithTags("Media")
             .WithName("Get Media by Id")
-            .Produces<MediaResponse>(StatusCodes.Status200OK)
+            .Produces<MediaResponse>()
             .Produces<ApiError>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
         // GET /api/media/{id}/download - Download media file from S3
-        routes.MapGet(ApiConstants.ApiMediaDownload, async (int id, IMessageBus bus) =>
+        routes.MapGet(ApiConstants.ApiMediaDownload, async (int id, HttpContext httpContext,
+                IS3MediaService s3MediaService, IMessageBus bus) =>
             {
                 try
                 {
-                    var fileStream = await bus.InvokeAsync<Stream>(new MediaDownloadRequest(id));
-                    
                     // Get media info for proper content type and filename
                     var mediaResponse = await bus.InvokeAsync<MediaResponse>(new MediaRequest { MediaId = id });
                     var media = mediaResponse?.Media;
-                    
+                    if (media == null || string.IsNullOrEmpty(media.FilePath))
+                        return Results.NotFound(new MediaResponse
+                        {
+                            ApiError = new ApiError(
+                                StatusCodes.Status404NotFound.ToString(),
+                                StatusCodes.Status404NotFound,
+                                "File Not Found",
+                                $"Media file not found for ID: {id}"
+                            )
+                        });
+
+                    var s3ClientAndConfig = s3MediaService.GetS3Client();
+
+                    // create the S3 Object request
+                    var s3ObjectRequest = new GetObjectRequest
+                    {
+                        BucketName = s3ClientAndConfig.Item2.BucketName,
+                        Key = media?.FilePath
+                    };
+
                     var fileName = media?.Title ?? "download";
                     var contentType = media?.MediaType switch
                     {
                         "Video" => "video/mp4",
-                        "Image" => "image/jpeg", 
+                        "Image" => "image/jpeg",
                         "Audio" => "audio/mpeg",
                         _ => "application/octet-stream"
                     };
 
-                    return Results.File(fileStream, contentType, fileName);
+                    var response = await s3MediaService.GetS3Client().Item1.GetObjectAsync(s3ObjectRequest);
+                    httpContext.Response.RegisterForDispose(response);
+
+                    return Results.File(response.ResponseStream, contentType, fileName);
                 }
-                catch (FileNotFoundException)
+                catch (AmazonS3Exception ex)
                 {
-                    var notFoundResponse = new MediaResponse
-                    {
-                        ApiError = new ApiError(
-                            StatusCodes.Status404NotFound.ToString(),
-                            StatusCodes.Status404NotFound,
-                            "File Not Found",
-                            $"File for media ID {id} not found"
-                        )
-                    };
-                    return Results.NotFound(notFoundResponse);
-                }
-                catch (Exception ex)
-                {
+                    // Handle S3-specific errors
                     var errorResponse = new MediaResponse
                     {
                         ApiError = new ApiError(
                             StatusCodes.Status500InternalServerError.ToString(),
                             StatusCodes.Status500InternalServerError,
-                            "Download Error",
-                            $"Error downloading file: {ex.Message}"
+                            $"S3 Error: {ex.Message}",
+                            ex.StackTrace
                         )
                     };
-                    return Results.Problem(detail: errorResponse.ApiError.ErrorMessage, 
-                                         statusCode: errorResponse.ApiError.StatusCode);
+                    return Results.Problem(errorResponse.ApiError.ErrorMessage,
+                        statusCode: errorResponse.ApiError.StatusCode);
+                }
+                catch (Exception ex)
+                {
+                    // Handle any other unexpected errors
+                    var errorResponse = new MediaResponse
+                    {
+                        ApiError = new ApiError(
+                            StatusCodes.Status500InternalServerError.ToString(),
+                            StatusCodes.Status500InternalServerError,
+                            $"Download Error: {ex.Message}",
+                            ex.StackTrace
+                        )
+                    };
+                    return Results.Problem(errorResponse.ApiError.ErrorMessage,
+                        statusCode: errorResponse.ApiError.StatusCode);
                 }
             })
             .RequireAuthorization()
@@ -265,14 +286,14 @@ public static class MediaEndpoints
                             $"Error generating URL: {ex.Message}"
                         )
                     };
-                    return Results.Problem(detail: errorResponse.ApiError.ErrorMessage, 
-                                         statusCode: errorResponse.ApiError.StatusCode);
+                    return Results.Problem(errorResponse.ApiError.ErrorMessage,
+                        statusCode: errorResponse.ApiError.StatusCode);
                 }
             })
             .RequireAuthorization()
             .WithTags("Media")
             .WithName("Get Media Presigned URL")
-            .Produces<MediaUrlResponse>(StatusCodes.Status200OK)
+            .Produces<MediaUrlResponse>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -283,10 +304,10 @@ public static class MediaEndpoints
                 var command = new MediaRequest { ProductDetailId = productDetailId };
                 var response = await bus.InvokeAsync<MediaResponse>(command);
 
-                return response?.ApiError != null 
+                return response?.ApiError != null
                     ? Results.BadRequest(response)
-                    : response?.MediaList != null 
-                        ? Results.Ok(response) 
+                    : response?.MediaList != null
+                        ? Results.Ok(response)
                         : Results.NotFound(new MediaResponse
                         {
                             ApiError = new ApiError(
@@ -300,7 +321,7 @@ public static class MediaEndpoints
             .RequireAuthorization()
             .WithTags("Media")
             .WithName("Get Media by Product Detail")
-            .Produces<MediaResponse>(StatusCodes.Status200OK)
+            .Produces<MediaResponse>()
             .Produces<ApiError>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)

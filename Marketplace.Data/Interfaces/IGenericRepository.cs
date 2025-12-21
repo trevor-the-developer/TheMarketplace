@@ -13,7 +13,10 @@ public interface IGenericRepository<TEntity> where TEntity : BaseEntity
     Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false);
     Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes);
     Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false);
-    Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes);
+
+    Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false,
+        params Expression<Func<TEntity, object>>[] includes);
+
     Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false);
 
     Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false,

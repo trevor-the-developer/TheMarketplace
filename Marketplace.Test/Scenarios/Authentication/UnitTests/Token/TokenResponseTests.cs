@@ -1,8 +1,5 @@
-using System;
 using System.Net;
-using Marketplace.Api.Endpoints.Authentication.Token;
 using Marketplace.Core;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Token;
 using Marketplace.Test.Data;
 using Xunit;

@@ -1,13 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Product;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -19,8 +14,8 @@ public class ProductHandler
     [Transactional]
     public async Task<ProductResponse> Handle(ProductRequest command, IProductRepository productRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(productRepository);
 
         Data.Entities.Product? product = null;
 
@@ -60,10 +55,10 @@ public class ProductHandler
     public async Task<ProductResponse> Handle(ProductCreate command, IProductRepository productRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(productRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -105,10 +100,10 @@ public class ProductHandler
     public async Task<ProductResponse> Handle(ProductUpdate command, IProductRepository productRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(productRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -147,9 +142,9 @@ public class ProductHandler
     public async Task Handle(ProductDelete command, IProductRepository productRepository,
         IProductDetailRepository productDetailRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(productRepository, nameof(productRepository));
-        ArgumentNullException.ThrowIfNull(productDetailRepository, nameof(productDetailRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(productRepository);
+        ArgumentNullException.ThrowIfNull(productDetailRepository);
 
         var product = await productRepository.GetProductWithDetailsAsync(command.Id);
 

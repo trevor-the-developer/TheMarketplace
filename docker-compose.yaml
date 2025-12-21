@@ -38,7 +38,7 @@
       - "3904:3904"  # K2V API (optional)
     environment:
       - RUST_LOG=garage=info
-    command: ["/garage", "-c", "/tmp/garage.toml", "server"]
+    command: [ "/garage", "-c", "/tmp/garage.toml", "server" ]
     volumes:
       - ./garage.toml:/tmp/garage.toml:ro,Z
       - garage_meta:/data/meta

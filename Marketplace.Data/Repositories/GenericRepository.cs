@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Marketplace.Data.Repositories;
 
 /// <summary>
-/// Generic repository implementation providing common CRUD operations
+///     Generic repository implementation providing common CRUD operations
 /// </summary>
 /// <typeparam name="TEntity">Entity type that inherits from BaseEntity</typeparam>
 public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
@@ -22,24 +22,19 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
 
     public async Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false)
     {
-        if (trackChanges)
-        {
-            return await _dbSet.FindAsync(id);
-        }
-        
+        if (trackChanges) return await _dbSet.FindAsync(id);
+
         // Use AsNoTracking to avoid change tracker cache issues
         return await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
     }
 
-    public async Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes)
+    public async Task<TEntity?> GetByIdAsync(int id, bool trackChanges = false,
+        params Expression<Func<TEntity, object>>[] includes)
     {
         var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-        
+
+        foreach (var include in includes) query = query.Include(include);
+
         return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -49,53 +44,49 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return await query.ToListAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false, params Expression<Func<TEntity, object>>[] includes)
-    {
-        var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-        
-        return await query.ToListAsync();
-    }
-
-    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false)
-    {
-        var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-        return await query.FirstOrDefaultAsync(predicate);
-    }
-
-    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false,
+    public async Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includes)
     {
         var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-        
+
+        foreach (var include in includes) query = query.Include(include);
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+        bool trackChanges = false)
+    {
+        var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
         return await query.FirstOrDefaultAsync(predicate);
     }
 
-    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false)
+    public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+        bool trackChanges = false,
+        params Expression<Func<TEntity, object>>[] includes)
+    {
+        var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+
+        foreach (var include in includes) query = query.Include(include);
+
+        return await query.FirstOrDefaultAsync(predicate);
+    }
+
+    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate,
+        bool trackChanges = false)
     {
         var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
         return await query.Where(predicate).ToListAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false,
+    public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate,
+        bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includes)
     {
         var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-        
+
+        foreach (var include in includes) query = query.Include(include);
+
         return await query.Where(predicate).ToListAsync();
     }
 
@@ -136,11 +127,8 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public Task<IEnumerable<TEntity>> UpdateRangeAsync(IEnumerable<TEntity> entities)
     {
         var entitiesArray = entities as TEntity[] ?? entities.ToArray();
-        
-        foreach (var entity in entitiesArray)
-        {
-            _context.Entry(entity).State = EntityState.Modified;
-        }
+
+        foreach (var entity in entitiesArray) _context.Entry(entity).State = EntityState.Modified;
 
         return Task.FromResult<IEnumerable<TEntity>>(entitiesArray);
     }
@@ -148,11 +136,8 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public async Task DeleteAsync(int id)
     {
         // Use trackChanges = true here since we're immediately deleting
-        var entity = await GetByIdAsync(id, trackChanges: true);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-        }
+        var entity = await GetByIdAsync(id, true);
+        if (entity != null) _dbSet.Remove(entity);
     }
 
     public Task DeleteAsync(TEntity entity)

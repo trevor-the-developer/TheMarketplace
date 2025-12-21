@@ -1,4 +1,3 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
@@ -25,16 +24,11 @@ using Marketplace.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Oakton;
@@ -54,6 +48,7 @@ var connectionString = builder.Configuration.GetConnectionString("MarketplaceDbC
 // Configure S3
 builder.Services.Configure<S3Configuration>(
     builder.Configuration.GetSection("S3Configuration"));
+
 #endregion
 
 #region Wolverine
@@ -91,7 +86,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<MarketplaceDbContext>();
 
-var jwtSecret = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
+var jwtSecret = builder.Configuration["JwtSettings:Key"] ??
+                throw new InvalidOperationException("Secret not configured.");
 
 // clear JWT mapping prior to adding authentication
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -238,7 +234,8 @@ builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddSingleton<TokenValidationParameters>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
-    var tokenValidationJwtSecret = configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Secret not configured.");
+    var tokenValidationJwtSecret = configuration["JwtSettings:Key"] ??
+                                   throw new InvalidOperationException("Secret not configured.");
 
     return new TokenValidationParameters
     {

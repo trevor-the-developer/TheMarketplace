@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Media;
 using Marketplace.Data.Entities;
 

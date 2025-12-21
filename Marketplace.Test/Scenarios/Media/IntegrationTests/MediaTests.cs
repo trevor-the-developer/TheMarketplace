@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Alba;
 using Marketplace.Core.Models;
 using Marketplace.Test.Helpers;
 using Marketplace.Test.Infrastructure;
@@ -35,10 +36,7 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        if (_s3Fixture != null)
-        {
-            await _s3Fixture.DisposeAsync();
-        }
+        if (_s3Fixture != null) await _s3Fixture.DisposeAsync();
     }
 
     [Fact]
@@ -266,27 +264,34 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
         multipartContent.Add(new StringContent("Document"), "mediaType");
         multipartContent.Add(new StringContent("1"), "productDetailId");
 
-        var uploadResponse = await Host.Scenario(_ =>
+        var uploadResponse = await Host.Scenario(configure =>
         {
-            _.WithBearerToken(token);
-            _.Post
+            configure.WithBearerToken(token);
+            configure.Post
                 .MultipartFormData(multipartContent)
                 .ToUrl("/api/media/upload");
-            _.StatusCodeShouldBe(HttpStatusCode.Created);
+            configure.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var uploadResponseText = await uploadResponse.ReadAsTextAsync();
         var uploadMediaResponse = JsonConvert.DeserializeObject<dynamic>(uploadResponseText);
         var mediaId = uploadMediaResponse?.media?.id;
+        var filePath = uploadMediaResponse?.media?.filePath?.ToString();
 
         Assert.NotNull(mediaId);
+        Assert.NotNull(filePath);
+
+        // Verify file exists in S3
+        var fileExists = await _s3Fixture!.DoesS3ObjectExistAsync(S3TestFixture.TestS3Config.BucketName, filePath);
+        Assert.True(fileExists, "File should exist in S3 before deletion");
 
         // Now download the file
         var downloadResponse = await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
-            _.Get.Url($"/api/media/{mediaId}/download");
+            _.Get.Url($"/api/media/download?id={mediaId}");
             _.StatusCodeShouldBe(HttpStatusCode.OK);
+            _.ContentTypeShouldBe("application/octet-stream");
         });
 
         var downloadedContent = await downloadResponse.ReadAsTextAsync();
@@ -356,7 +361,7 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
         Assert.NotNull(urlData?.expiresIn);
 
         var presignedUrl = urlData?.url.ToString();
-        Assert.StartsWith("http://localhost:3900", presignedUrl);
+        Assert.StartsWith("https://localhost:3900", presignedUrl);
         Assert.Contains("the-marketplace", presignedUrl); // bucket name
     }
 
@@ -464,7 +469,7 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
         Assert.NotNull(filePath);
 
         // Verify file exists in S3
-        var fileExists = await _s3Fixture!.DoesS3ObjectExistAsync(_s3Fixture.TestS3Config.BucketName, filePath);
+        var fileExists = await _s3Fixture!.DoesS3ObjectExistAsync(S3TestFixture.TestS3Config.BucketName, filePath);
         Assert.True(fileExists, "File should exist in S3 before deletion");
 
         // Now delete the media
@@ -476,7 +481,8 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
         });
 
         // Verify file is deleted from S3
-        var fileExistsAfterDelete = await _s3Fixture.DoesS3ObjectExistAsync(_s3Fixture.TestS3Config.BucketName, filePath);
+        var fileExistsAfterDelete =
+            await _s3Fixture.DoesS3ObjectExistAsync(S3TestFixture.TestS3Config.BucketName, filePath);
         Assert.False(fileExistsAfterDelete, "File should be deleted from S3");
 
         // Verify record is deleted from database

@@ -1,5 +1,4 @@
-﻿using System;
-using Marketplace.Data.Enums;
+﻿using Marketplace.Data.Enums;
 
 namespace Marketplace.Core.Models.Registration;
 

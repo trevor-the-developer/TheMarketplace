@@ -21,11 +21,11 @@ public class MediaUpdateValidator : AbstractValidator<MediaUpdate>
         RuleFor(x => x.FilePath)
             .NotEmpty().WithMessage("FilePath is required")
             .MaximumLength(500).WithMessage("FilePath must not exceed 500 characters");
-        
+
         RuleFor(x => x.DirectoryPath)
             .NotEmpty().WithMessage("DirectoryPath is required")
             .MaximumLength(500).WithMessage("DirectoryPath must not exceed 500 characters");
-        
+
         RuleFor(x => x.MediaType).MaximumLength(100)
             .WithMessage("MediaType must not exceed 100 characters");
     }

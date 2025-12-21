@@ -1,6 +1,5 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Amazon.S3;
+using Marketplace.Core.Models;
 
 namespace Marketplace.Core.Interfaces;
 
@@ -11,4 +10,5 @@ public interface IS3MediaService
     Task<bool> DeleteFileAsync(string objectKey);
     Task<string> GetPresignedUrlAsync(string objectKey, TimeSpan expiration);
     Task<bool> FileExistsAsync(string objectKey);
+    (AmazonS3Client, S3Configuration) GetS3Client();
 }

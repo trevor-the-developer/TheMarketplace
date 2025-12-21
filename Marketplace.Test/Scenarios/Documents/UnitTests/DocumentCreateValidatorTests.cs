@@ -1,6 +1,4 @@
 using FluentValidation.TestHelper;
-using Marketplace.Api.Endpoints.Document;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Document;
 using Marketplace.Core.Validators;
 using Xunit;

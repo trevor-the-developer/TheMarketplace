@@ -1,13 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Card;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -19,8 +14,8 @@ public class CardHandler
     [Transactional]
     public async Task<CardResponse> Handle(CardRequest command, ICardRepository cardRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(cardRepository);
 
         Data.Entities.Card? card = null;
         if (command.CardId > 0) card = await cardRepository.GetByIdAsync(command.CardId);
@@ -42,10 +37,10 @@ public class CardHandler
     public async Task<CardResponse> Handle(CardCreate command, ICardRepository cardRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(cardRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -82,10 +77,10 @@ public class CardHandler
     public async Task<CardResponse> Handle(CardUpdate command, ICardRepository cardRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(cardRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -117,8 +112,8 @@ public class CardHandler
     [Transactional]
     public async Task Handle(CardDelete command, ICardRepository cardRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(cardRepository, nameof(cardRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(cardRepository);
 
         var card = await cardRepository.GetCardWithProductsAsync(command.Id);
 

@@ -14,8 +14,8 @@ public class MediaHandler
     [Transactional]
     public async Task<MediaResponse> Handle(MediaRequest command, IMediaRepository mediaRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
 
         Data.Entities.Media? media = null;
 
@@ -27,9 +27,7 @@ public class MediaHandler
             return new MediaResponse { MediaList = mediaList.ToList() };
         }
 
-        // TODO: messy hack need to sort this properly (why is the database returning a value when
-        // the ID is not present in the database table dbo.Files)
-        media = await mediaRepository.GetByIdAsync(command.MediaId, trackChanges: false);
+        media = await mediaRepository.GetByIdAsync(command.MediaId);
         return new MediaResponse { Media = media }; // null if not found
     }
 
@@ -37,10 +35,10 @@ public class MediaHandler
     public async Task<MediaResponse> Handle(MediaCreate command, IMediaRepository mediaRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -81,11 +79,11 @@ public class MediaHandler
         ICurrentUserService currentUserService, IValidationService validationService,
         IS3MediaService s3MediaService, ILogger<MediaHandler> logger)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
-        ArgumentNullException.ThrowIfNull(s3MediaService, nameof(s3MediaService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
+        ArgumentNullException.ThrowIfNull(s3MediaService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -110,15 +108,15 @@ public class MediaHandler
             {
                 // Create directory structure based on ProductDetailId
                 directoryPath = $"products/{command.ProductDetailId}/media";
-                
+
                 // Generate unique filename to avoid conflicts
                 var fileExtension = Path.GetExtension(command.FileName);
                 var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
-                
+
                 objectKey = await s3MediaService.UploadFileAsync(
-                    command.FileStream, 
-                    uniqueFileName, 
-                    command.ContentType ?? "application/octet-stream", 
+                    command.FileStream,
+                    uniqueFileName,
+                    command.ContentType ?? "application/octet-stream",
                     directoryPath);
 
                 logger.LogInformation("File uploaded to S3: {ObjectKey}", objectKey);
@@ -149,7 +147,7 @@ public class MediaHandler
         catch (Exception ex)
         {
             logger.LogError(ex, "Error creating media with file upload");
-            
+
             return new MediaResponse
             {
                 ApiError = new ApiError(
@@ -166,10 +164,10 @@ public class MediaHandler
     public async Task<MediaResponse> Handle(MediaUpdate command, IMediaRepository mediaRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -203,65 +201,58 @@ public class MediaHandler
     }
 
     [Transactional]
-    public async Task Handle(MediaDelete command, IMediaRepository mediaRepository, IS3MediaService s3MediaService, 
+    public async Task Handle(MediaDelete command, IMediaRepository mediaRepository, IS3MediaService s3MediaService,
         ILogger<MediaHandler> logger)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(s3MediaService, nameof(s3MediaService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(s3MediaService);
 
         var media = await mediaRepository.GetByIdAsync(command.Id);
         if (media != null)
         {
             // Delete from S3 first if file exists
             if (!string.IsNullOrEmpty(media.FilePath))
-            {
                 try
                 {
                     var deleted = await s3MediaService.DeleteFileAsync(media.FilePath);
-                    if (!deleted)
-                    {
-                        logger.LogWarning("Failed to delete file from S3: {FilePath}", media.FilePath);
-                    }
+                    if (!deleted) logger.LogWarning("Failed to delete file from S3: {FilePath}", media.FilePath);
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error deleting file from S3: {FilePath}", media.FilePath);
                 }
-            }
 
             await mediaRepository.DeleteAsync(media.Id);
             await mediaRepository.SaveChangesAsync();
         }
     }
 
-    public async Task<Stream> Handle(MediaDownloadRequest command, IMediaRepository mediaRepository, IS3MediaService s3MediaService)
+    public async Task<Stream> Handle(MediaDownloadRequest command, IMediaRepository mediaRepository,
+        IS3MediaService s3MediaService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(s3MediaService, nameof(s3MediaService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(s3MediaService);
 
         var media = await mediaRepository.GetByIdAsync(command.MediaId);
         if (media == null || string.IsNullOrEmpty(media.FilePath))
-        {
             throw new FileNotFoundException($"Media file not found for ID: {command.MediaId}");
-        }
 
         return await s3MediaService.DownloadFileAsync(media.FilePath);
     }
 
     // NEW: Handler for presigned URLs
-    public async Task<MediaUrlResponse> Handle(MediaUrlRequest command, IMediaRepository mediaRepository, IS3MediaService s3MediaService)
+    public async Task<MediaUrlResponse> Handle(MediaUrlRequest command, IMediaRepository mediaRepository,
+        IS3MediaService s3MediaService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(mediaRepository, nameof(mediaRepository));
-        ArgumentNullException.ThrowIfNull(s3MediaService, nameof(s3MediaService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(mediaRepository);
+        ArgumentNullException.ThrowIfNull(s3MediaService);
 
         var media = await mediaRepository.GetByIdAsync(command.MediaId);
         if (media == null || string.IsNullOrEmpty(media.FilePath))
-        {
             throw new FileNotFoundException($"Media file not found for ID: {command.MediaId}");
-        }
 
         var expiration = TimeSpan.FromHours(command.ExpirationHours ?? 1);
         var url = await s3MediaService.GetPresignedUrlAsync(media.FilePath, expiration);

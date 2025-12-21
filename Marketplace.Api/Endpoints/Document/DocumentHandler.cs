@@ -1,13 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Document;
 using Marketplace.Core.Validation;
 using Marketplace.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
@@ -20,8 +15,8 @@ public class DocumentHandler
     [Transactional]
     public async Task<DocumentResponse> Handle(DocumentRequest command, MarketplaceDbContext dbContext)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(dbContext);
 
         Data.Entities.Document? document = null;
 
@@ -58,10 +53,10 @@ public class DocumentHandler
     public async Task<DocumentResponse> Handle(DocumentCreate command, MarketplaceDbContext dbContext,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -101,10 +96,10 @@ public class DocumentHandler
     public async Task<DocumentResponse> Handle(DocumentUpdate command, MarketplaceDbContext dbContext,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -139,8 +134,8 @@ public class DocumentHandler
     [Transactional]
     public async Task Handle(DocumentDelete command, MarketplaceDbContext dbContext)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(dbContext);
 
         var document = await dbContext.Documents.FindAsync(command.Id);
         if (document != null)

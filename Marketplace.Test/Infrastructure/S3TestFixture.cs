@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using System.Text;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Marketplace.Core.Models;
@@ -8,27 +10,27 @@ using Xunit;
 namespace Marketplace.Test.Infrastructure;
 
 /// <summary>
-/// Test fixture for S3 integration testing with Garage S3 service
-/// Manages test bucket lifecycle and provides test file utilities
+///     Test fixture for S3 integration testing with Garage S3 service
+///     Manages test bucket lifecycle and provides test file utilities
 /// </summary>
 public class S3TestFixture : IAsyncLifetime
 {
     private const string ContainerName = "garage";
     private static readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
     private static bool _isInitialized;
-    private readonly ILogger<S3TestFixture> _logger;
-
-    public S3Configuration TestS3Config { get; private set; } = null!;
-    private AmazonS3Client TestS3Client { get; set; } = null!;
-    private string TestBucketName => TestS3Config.BucketName;
 
     private readonly S3Configuration _config;
+    private readonly ILogger<S3TestFixture> _logger;
 
     public S3TestFixture(S3Configuration config, ILogger<S3TestFixture> logger)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
+
+    public static S3Configuration TestS3Config { get; private set; } = null!;
+    private static AmazonS3Client? TestS3Client { get; set; }
+    private static string TestBucketName => TestS3Config.BucketName;
 
     public async Task InitializeAsync()
     {
@@ -37,7 +39,13 @@ public class S3TestFixture : IAsyncLifetime
         {
             if (_isInitialized)
             {
-                _logger.LogInformation("S3 test fixture already initialized, skipping...");
+                _logger.LogInformation("S3 test fixture already initialized, re-using existing client...");
+
+                // Even if already initialized, we MUST clean the bucket for test isolation
+                // This ensures each test class instance starts with a clean S3 state
+                _logger.LogInformation("Cleaning S3 bucket for test isolation...");
+                await CleanupTestBucketAsync();
+
                 return;
             }
 
@@ -67,6 +75,11 @@ public class S3TestFixture : IAsyncLifetime
 
             _logger.LogInformation("S3 client initialized, ensuring test bucket exists...");
             await EnsureTestBucketExistsAsync();
+
+            // Clean bucket after initial creation to ensure clean state
+            _logger.LogInformation("Cleaning S3 bucket after initialization...");
+            await CleanupTestBucketAsync();
+
             _logger.LogInformation("S3 test fixture initialization complete.");
 
             _isInitialized = true;
@@ -81,30 +94,30 @@ public class S3TestFixture : IAsyncLifetime
     {
         try
         {
-            // Clean up test files
+            // Clean up test files after each test class completes
+            // The static S3 client remains alive for the next test class to use
             await CleanupTestBucketAsync();
+            _logger.LogInformation("S3TestFixture disposed, bucket cleaned for next test");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to cleanup test bucket: {Message}", ex.Message);
+            _logger.LogWarning(ex, "Failed to cleanup test bucket during dispose: {Message}", ex.Message);
         }
-        finally
-        {
-            TestS3Client?.Dispose();
-        }
+        // Note: We don't dispose TestS3Client since it's static and shared across test instances
+        // It will be disposed when the test process terminates
     }
 
     /// <summary>
-    /// Creates a test file stream with specified content
+    ///     Creates a test file stream with specified content
     /// </summary>
     public static MemoryStream CreateTestFileStream(string content = "Test file content for integration testing")
     {
-        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var bytes = Encoding.UTF8.GetBytes(content);
         return new MemoryStream(bytes);
     }
 
     /// <summary>
-    /// Creates a test file stream with binary content (simulates image/video)
+    ///     Creates a test file stream with binary content (simulates image/video)
     /// </summary>
     public static MemoryStream CreateTestBinaryFileStream(int sizeInBytes = 1024)
     {
@@ -114,10 +127,14 @@ public class S3TestFixture : IAsyncLifetime
     }
 
     /// <summary>
-    /// Uploads a test file directly to S3 for testing download scenarios
+    ///     Uploads a test file directly to S3 for testing download scenarios
     /// </summary>
     public async Task<string> UploadTestFileAsync(string fileName, Stream content)
     {
+        if (TestS3Client == null)
+            throw new InvalidOperationException(
+                "TestS3Client is not initialized. Ensure InitializeAsync has been called.");
+
         var objectKey = $"test-files/{fileName}";
 
         var request = new PutObjectRequest
@@ -133,10 +150,14 @@ public class S3TestFixture : IAsyncLifetime
     }
 
     /// <summary>
-    /// Checks if an S3 object exists in the specified bucket
+    ///     Checks if an S3 object exists in the specified bucket
     /// </summary>
     public async Task<bool> DoesS3ObjectExistAsync(string bucketName, string key)
     {
+        if (TestS3Client == null)
+            throw new InvalidOperationException(
+                "TestS3Client is not initialized. Ensure InitializeAsync has been called.");
+
         try
         {
             var request = new GetObjectMetadataRequest
@@ -148,23 +169,30 @@ public class S3TestFixture : IAsyncLifetime
             await TestS3Client.GetObjectMetadataAsync(request);
             return true;
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return false;
         }
     }
 
     /// <summary>
-    /// Cleans up all test files from the bucket
+    ///     Cleans up all test files from the bucket
     /// </summary>
     private async Task CleanupTestBucketAsync()
     {
+        if (TestS3Client == null)
+        {
+            _logger.LogWarning("TestS3Client is null, skipping cleanup");
+            return;
+        }
+
         try
         {
+            // Clean up all objects in the test bucket (both test-files/ and products/)
             var listRequest = new ListObjectsV2Request
             {
-                BucketName = TestBucketName,
-                Prefix = "test-files/"
+                BucketName = TestBucketName
+                // No prefix - delete ALL objects in bucket for complete cleanup
             };
 
             var listResponse = await TestS3Client.ListObjectsV2Async(listRequest);
@@ -178,7 +206,12 @@ public class S3TestFixture : IAsyncLifetime
                 };
 
                 await TestS3Client.DeleteObjectsAsync(deleteRequest);
-                _logger.LogInformation("Cleaned up {Count} test files from S3", listResponse.S3Objects.Count);
+                _logger.LogInformation("Cleaned up {Count} test files from S3 (including products/* and test-files/*)",
+                    listResponse.S3Objects.Count);
+            }
+            else
+            {
+                _logger.LogInformation("No files to clean up from S3 bucket");
             }
         }
         catch (Exception ex)
@@ -194,7 +227,7 @@ public class S3TestFixture : IAsyncLifetime
             using var httpClient = new HttpClient();
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var response = await httpClient.GetAsync("http://localhost:3900", cts.Token);
-            return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Forbidden;
+            return response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.Forbidden;
         }
         catch
         {
@@ -267,7 +300,8 @@ public class S3TestFixture : IAsyncLifetime
         {
             Console.WriteLine($"Docker compose output: {output}");
             Console.WriteLine($"Docker compose error: {error}");
-            throw new InvalidOperationException($"Failed to start Garage container. Exit code: {composeProcess.ExitCode}");
+            throw new InvalidOperationException(
+                $"Failed to start Garage container. Exit code: {composeProcess.ExitCode}");
         }
     }
 
@@ -301,14 +335,14 @@ public class S3TestFixture : IAsyncLifetime
             {
                 BucketName = TestBucketName
             };
-            await TestS3Client.HeadBucketAsync(bucketRequest);
+            await TestS3Client!.HeadBucketAsync(bucketRequest);
             _logger.LogInformation("Test bucket '{BucketName}' already exists.", TestBucketName);
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             // Bucket doesn't exist, create it
             _logger.LogInformation("Creating test bucket '{BucketName}'...", TestBucketName);
-            await TestS3Client.PutBucketAsync(new PutBucketRequest
+            await TestS3Client!.PutBucketAsync(new PutBucketRequest
             {
                 BucketName = TestBucketName,
                 UseClientRegion = true

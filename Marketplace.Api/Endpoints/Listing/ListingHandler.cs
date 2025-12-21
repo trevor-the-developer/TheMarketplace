@@ -1,13 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Marketplace.Core;
 using Marketplace.Core.Interfaces;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Listing;
 using Marketplace.Core.Validation;
 using Marketplace.Data.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Wolverine.Attributes;
 
@@ -19,8 +14,8 @@ public class ListingHandler
     [Transactional]
     public async Task<ListingResponse> Handle(ListingRequest command, IListingRepository listingRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(listingRepository);
 
         Data.Entities.Listing? listing = null;
         if (command.ListingId > 0) listing = await listingRepository.GetByIdAsync(command.ListingId);
@@ -42,10 +37,10 @@ public class ListingHandler
     public async Task<ListingResponse> Handle(ListingCreate command, IListingRepository listingRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(listingRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -81,10 +76,10 @@ public class ListingHandler
     public async Task<ListingResponse> Handle(ListingUpdate command, IListingRepository listingRepository,
         ICurrentUserService currentUserService, IValidationService validationService)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
-        ArgumentNullException.ThrowIfNull(currentUserService, nameof(currentUserService));
-        ArgumentNullException.ThrowIfNull(validationService, nameof(validationService));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(listingRepository);
+        ArgumentNullException.ThrowIfNull(currentUserService);
+        ArgumentNullException.ThrowIfNull(validationService);
 
         // Validate input
         var validationErrors = await validationService.ValidateAndGetErrorsAsync(command);
@@ -116,8 +111,8 @@ public class ListingHandler
     [Transactional]
     public async Task Handle(ListingDelete command, IListingRepository listingRepository)
     {
-        ArgumentNullException.ThrowIfNull(command, nameof(command));
-        ArgumentNullException.ThrowIfNull(listingRepository, nameof(listingRepository));
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(listingRepository);
 
         var listing = await listingRepository.GetByIdAsync(command.Id);
         if (listing != null)

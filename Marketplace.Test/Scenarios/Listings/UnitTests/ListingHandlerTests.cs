@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using Marketplace.Api.Endpoints.Listing;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Listing;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Interfaces;

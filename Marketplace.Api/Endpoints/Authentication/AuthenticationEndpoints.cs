@@ -1,15 +1,7 @@
-﻿using System.Linq;
-using Marketplace.Api.Endpoints.Authentication.Login;
-using Marketplace.Api.Endpoints.Authentication.Registration;
-using Marketplace.Api.Endpoints.Authentication.Token;
-using Marketplace.Core.Constants;
-using Marketplace.Core.Models;
+﻿using Marketplace.Core.Constants;
 using Marketplace.Core.Models.Login;
 using Marketplace.Core.Models.Registration;
 using Marketplace.Core.Models.Token;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Wolverine;
 
 namespace Marketplace.Api.Endpoints.Authentication;

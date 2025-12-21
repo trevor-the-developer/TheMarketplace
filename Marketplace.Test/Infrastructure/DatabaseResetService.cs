@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Marketplace.Data;
 using Marketplace.Data.Entities;
 using Marketplace.Data.Enums;
+using Marketplace.Test.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,17 +11,17 @@ namespace Marketplace.Test.Infrastructure;
 
 public static class DatabaseResetService
 {
-    private const string ConnectionString =
-        "Server=127.0.0.1,1433;Database=Marketplace;User Id=sa;Password=P@ssw0rd!;Trust Server Certificate=True";
+    private const string DatabaseName = "Marketplace";
 
     public static async Task ResetDatabaseAsync()
     {
+        await using var connection = DatabaseConnectionHelper.CreateConnection(DatabaseName);
         try
         {
             // Create a temporary service provider to reset the database
             var services = new ServiceCollection();
             services.AddDbContext<MarketplaceDbContext>(options =>
-                options.UseSqlServer(ConnectionString));
+                options.UseSqlServer(connection.ConnectionString));
             services.AddLogging(builder => builder.AddConsole());
 
             await using var serviceProvider = services.BuildServiceProvider();
@@ -230,40 +228,67 @@ public static class DatabaseResetService
 
         await context.SaveChangesAsync();
 
-        // Add sample products for testing
-        context.Products.AddRange(new List<Product>
+        var product1 = new Product
         {
-            new()
-            {
-                Title = "Sample Product",
-                Description = "Sample product for testing",
-                ProductType = "Sample Type",
-                Category = "Sample Category",
-                IsEnabled = true,
-                IsDeleted = false,
-                CardId = 1,
-                CreatedBy = "admin@localhost",
-                CreatedDate = DateTime.UtcNow,
-                ModifiedBy = "admin@localhost",
-                ModifiedDate = DateTime.UtcNow
-            },
-            new()
-            {
-                Title = "Sample Product 2",
-                Description = "Second sample product for testing",
-                ProductType = "Sample Type 2",
-                Category = "Sample Category 2",
-                IsEnabled = true,
-                IsDeleted = false,
-                CardId = 2,
-                CreatedBy = "admin@localhost",
-                CreatedDate = DateTime.UtcNow,
-                ModifiedBy = "admin@localhost",
-                ModifiedDate = DateTime.UtcNow
-            }
-        });
+            Title = "Sample Product",
+            Description = "Sample product for testing",
+            ProductType = "Sample Type",
+            Category = "Sample Category",
+            IsEnabled = true,
+            IsDeleted = false,
+            CardId = 1,
+            CreatedBy = "admin@localhost",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "admin@localhost",
+            ModifiedDate = DateTime.UtcNow
+        };
 
-        await context.SaveChangesAsync();
+        var product2 = new Product
+        {
+            Title = "Sample Product 2",
+            Description = "Second sample product for testing",
+            ProductType = "Sample Type 2",
+            Category = "Sample Category 2",
+            IsEnabled = true,
+            IsDeleted = false,
+            CardId = 2,
+            CreatedBy = "admin@localhost",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "admin@localhost",
+            ModifiedDate = DateTime.UtcNow
+        };
+
+        context.Products.AddRange(product1, product2);
+        await context.SaveChangesAsync(); // Products now have IDs
+
+        var productDetail1 = new ProductDetail
+        {
+            Title = "Sample Product Detail",
+            Description = "Sample product detail for testing",
+            ProductId = product1.Id, // Use the assigned ID
+            CreatedBy = "admin@localhost",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "admin@localhost",
+            ModifiedDate = DateTime.UtcNow
+        };
+
+        var productDetail2 = new ProductDetail
+        {
+            Title = "Sample Product Detail 2",
+            Description = "Second sample product detail for testing",
+            ProductId = product2.Id, // Use the assigned ID
+            CreatedBy = "admin@localhost",
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = "admin@localhost",
+            ModifiedDate = DateTime.UtcNow
+        };
+
+        context.ProductDetails.AddRange(productDetail1, productDetail2);
+        await context.SaveChangesAsync(); // ProductDetails now have IDs
+
+        product1.ProductDetailId = productDetail1.Id;
+        product2.ProductDetailId = productDetail2.Id;
+        await context.SaveChangesAsync(); // Update the FK reference        
 
         // Add sample tags for testing
         context.Tags.AddRange(new List<Tag>
@@ -283,33 +308,6 @@ public static class DatabaseResetService
                 Name = "Sample Tag 2",
                 Description = "Second sample tag for testing",
                 IsEnabled = true,
-                CreatedBy = "admin@localhost",
-                CreatedDate = DateTime.UtcNow,
-                ModifiedBy = "admin@localhost",
-                ModifiedDate = DateTime.UtcNow
-            }
-        });
-
-        await context.SaveChangesAsync();
-
-        // Add sample product details for testing
-        context.ProductDetails.AddRange(new List<ProductDetail>
-        {
-            new()
-            {
-                Title = "Sample Product Detail",
-                Description = "Sample product detail for testing",
-                ProductId = 1,
-                CreatedBy = "admin@localhost",
-                CreatedDate = DateTime.UtcNow,
-                ModifiedBy = "admin@localhost",
-                ModifiedDate = DateTime.UtcNow
-            },
-            new()
-            {
-                Title = "Sample Product Detail 2",
-                Description = "Second sample product detail for testing",
-                ProductId = 2,
                 CreatedBy = "admin@localhost",
                 CreatedDate = DateTime.UtcNow,
                 ModifiedBy = "admin@localhost",

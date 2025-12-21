@@ -1,7 +1,4 @@
-using System;
 using FluentValidation.TestHelper;
-using Marketplace.Api.Endpoints.Authentication.Registration;
-using Marketplace.Core.Models;
 using Marketplace.Core.Models.Registration;
 using Marketplace.Core.Validators;
 using Marketplace.Data.Enums;
