@@ -11,6 +11,7 @@ using Marketplace.Api.Endpoints.Product;
 using Marketplace.Api.Endpoints.ProductDetail;
 using Marketplace.Api.Endpoints.Tag;
 using Marketplace.Api.Endpoints.UserProfile;
+using Marketplace.Core.Extensions;
 using Marketplace.Core.Helpers;
 using Marketplace.Core.Interfaces;
 using Marketplace.Core.Models;
@@ -207,8 +208,8 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
-// Register FluentValidation services
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+// Register FluentValidation services from both API and Core assemblies
+builder.Services.AddCoreValidators();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 
 // Add IUrlHelper support

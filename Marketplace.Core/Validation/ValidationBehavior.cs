@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Marketplace.Core.Validation;
 
 /// <summary>
-///     Service to handle FluentValidation in handlers
+/// Service to handle FluentValidation in handlers
 /// </summary>
 public interface IValidationService
 {

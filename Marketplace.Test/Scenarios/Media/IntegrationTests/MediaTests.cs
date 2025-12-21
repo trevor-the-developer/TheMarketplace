@@ -227,19 +227,19 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
 
-        using var formContent = new FormUrlEncodedContent(new[]
-        {
-            new KeyValuePair<string, string>("title", "File Without Upload"),
-            new KeyValuePair<string, string>("description", "This should fail"),
-            new KeyValuePair<string, string>("mediaType", "Document"),
-            new KeyValuePair<string, string>("productDetailId", "1")
-        });
+        // Use MultipartFormDataContent without adding a file to test validation
+        using var multipartContent = new MultipartFormDataContent();
+        multipartContent.Add(new StringContent("File Without Upload"), "title");
+        multipartContent.Add(new StringContent("This should fail"), "description");
+        multipartContent.Add(new StringContent("Document"), "mediaType");
+        multipartContent.Add(new StringContent("1"), "productDetailId");
+        // Intentionally NOT adding a file - this should trigger BadRequest
 
         await Host.Scenario(_ =>
         {
             _.WithBearerToken(token);
             _.Post
-                .FormData(formContent)
+                .MultipartFormData(multipartContent)
                 .ToUrl("/api/media/upload");
             _.StatusCodeShouldBe(HttpStatusCode.BadRequest);
         });
