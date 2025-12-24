@@ -498,7 +498,7 @@ public class MediaTests : ScenarioContext, IAsyncLifetime
     public async Task GetMediaByProductDetail_WithUploadedFiles_ReturnsMediaList()
     {
         var token = await AuthenticationHelper.GetAdminTokenAsync(Host);
-        const int productDetailId = 123;
+        const int productDetailId = 1;
 
         // Upload multiple files for the same product detail
         var files = new[]

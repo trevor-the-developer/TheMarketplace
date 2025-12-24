@@ -49,7 +49,7 @@ public static class ApiConstants
     public const string ApiGetMediaById = "/api/media/{id}";
     public const string ApiMediaDeleteById = "/api/media/{id}";
     public const string ApiMediaByIdUrl = "/api/media/{id}/url";
-    public const string ApiMediaByProductDetailId = "/api/media/product/{ApiMediaByProductDetailId}";
+    public const string ApiMediaByProductDetailId = "/api/media/product/{productDetailId}";
 
     // endpoints - products
     public const string ApiProducts = "/api/products";

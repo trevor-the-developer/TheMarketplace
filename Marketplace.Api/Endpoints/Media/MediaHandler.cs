@@ -17,18 +17,29 @@ public class MediaHandler
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(mediaRepository);
 
-        Data.Entities.Media? media = null;
-
-        if (command.MediaId > 0) media = await mediaRepository.GetByIdAsync(command.MediaId);
-
+        // Case 1: Get all media
         if (command.AllMedia)
         {
             var mediaList = await mediaRepository.GetAllAsync();
             return new MediaResponse { MediaList = mediaList.ToList() };
         }
 
-        media = await mediaRepository.GetByIdAsync(command.MediaId);
-        return new MediaResponse { Media = media }; // null if not found
+        // Case 2: Get media by ProductDetailId
+        if (command.ProductDetailId.HasValue && command.ProductDetailId.Value > 0)
+        {
+            var mediaList = await mediaRepository.GetMediaByProductDetailIdAsync(command.ProductDetailId.Value);
+            return new MediaResponse { MediaList = mediaList.ToList() };
+        }
+
+        // Case 3: Get single media by MediaId
+        if (command.MediaId > 0)
+        {
+            var media = await mediaRepository.GetByIdAsync(command.MediaId);
+            return new MediaResponse { Media = media }; // null if not found
+        }
+
+        // No valid query parameters provided
+        return new MediaResponse { Media = null };
     }
 
     [Transactional]
